@@ -5,9 +5,54 @@ Imixs-ML is a microservice project with the goal to provide a NPL Named Entity R
 The projekt is at the moment experimental only.
 
 
+# Docker
+
+To build the image from the Dockerfile run: 
+
+    $ docker build --tag=imixs/imixs-ml .
+
+To test the image run the container in an interactive mode:
+    
+	$ docker run --rm --name="imixs-ml" -it \
+			-p 8000:8000 \
+			imixs/imixs-ml
 
 
-  
+Open the api documentation via:
+
+	http://localhost:8000/docs
+	
+You can test the service with curl:
+
+
+	$ curl -X POST "http://localhost:8000/text/?lang=en" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"text\":\"M. Melman is a team member of the open source project Imixs-Workflow.\"}"
+
+
+You your can test from the swagger UI http://localhost:8000/docs
+
+	{
+	  "text": "M. Melman is a team member of the open source project Imixs-Workflow."
+	}
+
+which will result in an output like this:
+
+	{
+	  "message": "M. Melman is a team member of the open source project Imixs-Workflow.",
+	  "lang": "en",
+	  "ents": [
+	    {
+	      "text": "M. Melman",
+	      "label_": "PERSON"
+	    },
+	    {
+	      "text": "Imixs-Workflow",
+	      "label_": "ORG"
+	    }
+	  ]
+	}
+
+
+
 # Contribute
 
 _Imixs-ML_ is open source and your are sincerely invited to participate in it. 

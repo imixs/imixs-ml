@@ -13,3 +13,4 @@ target/
 .project
 .classpath
 .htpasswd
+.pydevproject
