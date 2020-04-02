@@ -30,11 +30,15 @@ You can test the service with curl:
 
 You your can test from the swagger UI http://localhost:8000/docs
 
+<img src="images/swaggerui.png" />
+
+The following example for a POST request...
+
 	{
 	  "text": "M. Melman is a team member of the open source project Imixs-Workflow."
 	}
 
-which will result in an output like this:
+...will result in an output like this:
 
 	{
 	  "message": "M. Melman is a team member of the open source project Imixs-Workflow.",
