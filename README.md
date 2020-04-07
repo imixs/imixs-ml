@@ -7,7 +7,10 @@ The projekt is at the moment experimental only.
 
 # Docker
 
+In this project we provide a Docker image which is based on [tiangolo/uvicorn-gunicorn-fastapi-docker](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker). This image comes with Uvicorn managed by Gunicorn for high-performance FastAPI web applications in Python 3.7. The image has an "auto-tuning" mechanism included, so that it is very easy to add custom Rest-API resources. 
+
 To build the image from the Dockerfile run: 
+
 
     $ docker build --tag=imixs/imixs-ml .
 
