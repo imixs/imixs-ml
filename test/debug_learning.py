@@ -14,6 +14,10 @@ import spacy
 class Data(BaseModel):
     text: str 
 
+# New entity labels
+# Specify the new entity labels which you want to add here
+LABEL = ['iban', 'bic', 'invoiceno']
+
 
 TRAIN_DATA = [
     (
@@ -34,20 +38,38 @@ TRAIN_DATA = [
 #         https://medium.com/@manivannan_data/how-to-train-ner-with-custom-training-data-using-spacy-188e0e508c6
 #
 #
-def lerne(data: Data):
+def train(data: Data):
+    
+    
     
     # 1.) create blank Language class
     nlp = spacy.blank('en')  
-    print("1Created blank 'en' model")
+    print("Created blank 'en' model")
     
     
     # 2.) set up the pipeline and entity recognizer.
     if 'ner' not in nlp.pipe_names:
+        print("we have no ner so we create an empty one...")
         ner = nlp.create_pipe('ner')
         nlp.add_pipe(ner)
     else:
+        pring("we have a ner so we fetch it...")
         ner = nlp.get_pipe('ner')
    
+   
+   
+   
+    for i in LABEL:
+        print("...adding new label '" + i + "'...")
+        ner.add_label(i)   # Add new entity labels to entity recognizer
+
+    if model is None:
+        print("model is none - set begin_traing...")
+        optimizer = nlp.begin_training()
+    else:
+        print("model exists - create optimizer")
+        optimizer = nlp.entity.create_optimizer()
+
    
    
     # 3.) The training data.....
@@ -80,5 +102,5 @@ def lerne(data: Data):
 
 # Startup method
 if __name__ == "__main__":
-    lerne(TRAIN_DATA)
+    train(TRAIN_DATA)
 
