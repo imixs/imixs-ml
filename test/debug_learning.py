@@ -1,9 +1,14 @@
-from fastapi import FastAPI
 from pydantic import BaseModel
 import spacy
 
-nlp_en = spacy.load("en_core_web_sm")
-app = FastAPI()
+#
+# The goal of this test program is to figure out 
+# how we can provide learning data to an empty 
+# spaCy model
+#
+#
+#
+#
 
 
 class Data(BaseModel):
@@ -23,27 +28,17 @@ TRAIN_DATA = [
 ] 
  
 
-@app.post("/text/")
-def extract_entities(data: Data, lang: str):
-    doc_en = nlp_en(data.text)
-    ents = []
-    for ent in doc_en.ents:
-        ents.append({"text": ent.text, "label_": ent.label_})
-    return {"message": data.text, "lang": lang, "ents": ents}
-
-
-# Ein Versuch
+# The learn method should initialize an empty model and add training data.
 #
-# Quelle: https://towardsdatascience.com/custom-named-entity-recognition-using-spacy-7140ebbb3718
+# See: https://towardsdatascience.com/custom-named-entity-recognition-using-spacy-7140ebbb3718
 #         https://medium.com/@manivannan_data/how-to-train-ner-with-custom-training-data-using-spacy-188e0e508c6
 #
 #
-@app.post("/ralpus/")
 def lerne(data: Data):
     
     # 1.) create blank Language class
     nlp = spacy.blank('en')  
-    print("Created blank 'en' model")
+    print("1Created blank 'en' model")
     
     
     # 2.) set up the pipeline and entity recognizer.
@@ -61,7 +56,7 @@ def lerne(data: Data):
     
     
     print("Traning Data:")
-    print(data.text)
+    print(data)
      
     #training_data = []
     #entities = []
@@ -78,4 +73,12 @@ def lerne(data: Data):
     return {"message": data.text, "lang": lang, "ents": ents}
 
 # https://spacy.io/usage/training#example-new-entity-type
+
+
+
+
+
+# Startup method
+if __name__ == "__main__":
+    lerne(TRAIN_DATA)
 

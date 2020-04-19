@@ -3,7 +3,6 @@ from pydantic import BaseModel
 import spacy
 
 
-
 nlp_en = spacy.load("en_core_web_sm")
 app = FastAPI()
 

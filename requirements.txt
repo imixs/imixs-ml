@@ -1,2 +1,2 @@
 spacy>=2.2.0,<3.0.0
-fastapi
+fastapi>=0.53.0,<1.0.0
