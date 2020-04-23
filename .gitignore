@@ -14,3 +14,4 @@ target/
 .classpath
 .htpasswd
 .pydevproject
+/build/
