@@ -25,20 +25,12 @@
  *  	Ralph Soika - Software Developer
  *******************************************************************************/
 
-package org.imixs.jwt;
+package org.imixs.ml;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
 import java.util.logging.Logger;
-
-import javax.crypto.SecretKey;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Test JWTParser class. Verify a token

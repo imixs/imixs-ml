@@ -13,7 +13,7 @@ package org.imixs.ml;
  *
  */
 public class ModelGenerator {
-	public static void main(String[] args) throws JWTException {
+	public static void main(String[] args)  {
 		
 		
 		if (args==null || args.length<2){

@@ -15,3 +15,4 @@ target/
 .htpasswd
 .pydevproject
 /build/
+training_model/

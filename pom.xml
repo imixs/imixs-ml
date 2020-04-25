@@ -109,14 +109,7 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<!-- Microprofile -->
-		<dependency>
-			<groupId>org.eclipse.microprofile</groupId>
-			<artifactId>microprofile</artifactId>
-			<version>${microprofile.version}</version>
-			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
+		
 		<!-- Testing -->
 		<dependency>
 			<groupId>junit</groupId>
