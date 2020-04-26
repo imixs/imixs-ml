@@ -21,7 +21,7 @@ class Entity(BaseModel):
     
 
 # The Data class defines an object containing a text and a list of entities within the text
-class Data(BaseModel):
+class TrainingData(BaseModel):
     text: str 
     entities: List[Entity] 
 

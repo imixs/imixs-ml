@@ -124,7 +124,7 @@ if __name__ == "__main__":
     l=[]
      
     e=datamodel.Entity(label='part',start=0,stop=2)
-    d=datamodel.Data(text='what is the price of polo?',entities=[])
+    d=datamodel.TrainingData(text='what is the price of polo?',entities=[])
     d.entities.append(e)
     d.entities.append(datamodel.Entity(label='orderid',start=10,stop=12))
     l.append(d)

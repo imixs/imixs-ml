@@ -31,7 +31,7 @@ if __name__ == "__main__":
     l=[]
      
     e=datamodel.Entity(label='part',start=0,stop=2)
-    d=datamodel.Data(text='Some text',entities=[])
+    d=datamodel.TrainingData(text='Some text',entities=[])
     d.entities.append(e)
     d.entities.append(datamodel.Entity(label='orderid',start=0,stop=2))
     l.append(d)

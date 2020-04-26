@@ -16,7 +16,7 @@ app = FastAPI()
 
 
 @app.post("/text/")
-def extract_entities(data: datamodel.Data):
+def extract_entities(data: datamodel.TrainingData):
     
     print("ich versuche den text zu lesen")
     print(data.text)
@@ -46,7 +46,7 @@ def extract_entities(data: datamodel.Data):
 #
 #
 @app.post("/ralpus/")
-def train(data: datamodel.Data, iterations: int):
+def train(data: datamodel.TrainingData, iterations: int):
   
     model=None
     
