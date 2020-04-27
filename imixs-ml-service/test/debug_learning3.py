@@ -73,6 +73,9 @@ TRAIN_DATA = [('what is the price of 11,00', {'entities': [(21, 25, 'iban')]}),
 
 
 
+
+
+
 # The learn method should initialize an empty model and add training data.
 #
 # See: https://towardsdatascience.com/custom-named-entity-recognition-using-spacy-7140ebbb3718
