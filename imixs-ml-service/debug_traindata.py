@@ -3,6 +3,9 @@ import spacy
 import random
 from spacy.util import minibatch, compounding
 import datamodel 
+import time
+from builtins import str
+import os
 """
 The goal of this test program is to demonstrate the usage of the data class 
 to train a list of entity definitions. 
@@ -39,7 +42,7 @@ TRAIN_DATA = [('what is the price of polo?', {'entities': [(21, 25, 'iban')]}),
 #         https://medium.com/@manivannan_data/how-to-train-ner-with-custom-training-data-using-spacy-188e0e508c6
 #
 #
-def train(dataList, iterations):
+def train(dataList, iterations, modelPath):
     
     
     print("start analyze the data object...")
@@ -49,19 +52,21 @@ def train(dataList, iterations):
         
     
     
-    model=None
     
-    
+    # Test if the model exists
+    modelExists=os.path.isdir(modelPath)
      
      # 1.) load model or create blank Language class
     """Load the model, set up the pipeline and train the entity recognizer."""
-    if model is not None:
-        nlp = spacy.load(model)  # load existing spaCy model
-        print("Loaded model '%s'" % model)
+    if modelExists:
+        nlp = spacy.load(modelPath)  # load existing spaCy model
+        print("Loaded model '%s'" % modelPath)
     else:
         nlp = spacy.blank("en")  # create blank Language class
         print("Created blank 'en' model")
     
+    
+  
     
     # 2.) set up the pipeline and entity recognizer.
     if 'ner' not in nlp.pipe_names:
@@ -69,7 +74,7 @@ def train(dataList, iterations):
         ner = nlp.create_pipe('ner')
         nlp.add_pipe(ner)
     else:
-        pring("we have a ner so we fetch it...")
+        print("we have a ner so we fetch it...")
         ner = nlp.get_pipe('ner')
         
     # 3.) add the labels contained in the training model...
@@ -91,16 +96,19 @@ def train(dataList, iterations):
     # Convert the data list to the Spacy Training Data format
     trainingData=datamodel.convertToTrainingData(dataList)
    
-    
+   
+    lMilis = int(round(time.time() * 1000))
+    #datetime.now().microsecond
     with nlp.disable_pipes(*other_pipes):  # only train NER
         # reset and initialize the weights randomly – but only if we're
         # training a new model
-        if model is None:
+        if not modelExists:
             nlp.begin_training()
         for itn in range(iterations):
             random.shuffle(trainingData)
             losses = {}
             # batch up the examples using spaCy's minibatch
+            """
             batches = minibatch(trainingData, size=compounding(4.0, 32.0, 1.001))
             for batch in batches:
                 texts, annotations = zip(*batch)
@@ -110,7 +118,19 @@ def train(dataList, iterations):
                     drop=0.5,  # dropout - make it harder to memorise data
                     losses=losses,
                 )
+            """
+            
+            
+            for text, annotations in trainingData:
+                nlp.update([text], [annotations], drop=0.5,losses=losses)
+            
+            
             print("Losses", losses)
+            
+            
+    print("total time = "+str(int(round(time.time() * 1000))-lMilis) + "ms  ")        
+  
+  
     return nlp
 
 # https://spacy.io/usage/training#example-new-entity-type
@@ -119,7 +139,7 @@ def train(dataList, iterations):
 # Startup method
 if __name__ == "__main__":
     
-    
+    modelfile = "training_model"
     # create training objects
     l=[]
      
@@ -132,12 +152,19 @@ if __name__ == "__main__":
     
     
     
-    # lerne(TRAIN_DATA)
-    prdnlp = train(l, 20)
+    # create a new model
+    prdnlp = train(l, 20,modelfile)
     # Save the trained Model
-    modelfile = "training_model"
+   
     prdnlp.to_disk(modelfile)
     
+    
+    #print("---------------------------------")
+    #spacy.info("./"+modelfile)
+    #print("---------------------------------")
+                
+                
+                
     # Test your text
     test_text = input("Enter your testing text: ")
     doc = prdnlp(test_text)

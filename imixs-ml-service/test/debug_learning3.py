@@ -20,12 +20,58 @@ class Data(BaseModel):
 # Specify the new entity labels which you want to add here
 # LABEL = ['iban', 'bic', 'invoiceno']
 
-
+"""
 TRAIN_DATA = [('what is the price of polo?', {'entities': [(21, 25, 'iban')]}),
-              ('what is the price of ball?', {'entities': [(21, 25, 'po-number'),(1, 5, 'special-iban')]}),
+              ('what is the price of ball?', {'entities': [(21, 25, 'iban')]}),
               ('what is the price of jegging?', {'entities': [(21, 28, 'iban')]}),
-              ('what is the price of t-shirt?', {'entities': [(21, 28, 'bic')]})]
- 
+              ('what is the price of t-shirt?', {'entities': [(21, 28, 'iban')]})]
+
+
+
+TRAIN_DATA = [('what is the price of polo?', {'entities': [(21, 25, 'iban')]}), 
+              ('what is the price of ball?', {'entities': [(21, 25, 'iban')]}), 
+              ('what is the price of jegging?', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of t-shirt?', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of jeans?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of bat?', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of shirt?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of bag?', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of cup?', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of jug?', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of plate?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of glass?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of moniter?', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of desktop?', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of bottle?', {'entities': [(21, 27, 'iban')]}), 
+              ('what is the price of mouse?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of keyboad?', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of chair?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of table?', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of watch?', {'entities': [(21, 26, 'iban')]})] 
+"""
+
+TRAIN_DATA = [('what is the price of 11,00', {'entities': [(21, 25, 'iban')]}), 
+              ('what is the price of 12,50', {'entities': [(21, 25, 'iban')]}), 
+              ('what is the price of 20000,00', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of 10120,00', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of 333,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 0,50', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of 10,40', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 0,49', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of 0,10', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of 9,99', {'entities': [(21, 24, 'iban')]}), 
+              ('what is the price of 155,55', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 200,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 90120,00', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of 50000,00', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of 1600,00', {'entities': [(21, 27, 'iban')]}), 
+              ('what is the price of 1500,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 70000,00', {'entities': [(21, 28, 'iban')]}), 
+              ('what is the price of 30,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 20,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 11,50', {'entities': [(21, 26, 'iban')]})] 
+
+
 
 # The learn method should initialize an empty model and add training data.
 #

@@ -6,7 +6,7 @@ import datamodel
 """
 The goal of this test program is to demonstrate the usage of the data class. 
 
-In addition we convert the data object into the typical  Spacy Training Data format
+In addition we convert the data object into the typical Spacy Training Data format
 
 """
 
