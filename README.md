@@ -87,3 +87,8 @@ In the properties for your pydev project, there's a pane called "PyDev - PYTHONP
 _Imixs-ML_ is open source and your are sincerely invited to participate in it. 
 If you want to contribute to this project please [report any issues here](https://github.com/imixs/imixs-ml/issues). 
 All source are available on [Github](https://github.com/imixs/imixs-ml). 
+
+
+## License
+
+Imixs-ML is free software, because we believe that an open exchange of experiences is fundamental for the development of valuable software. All results of this project are provided under the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.en.html). 
