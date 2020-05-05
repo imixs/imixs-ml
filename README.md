@@ -2,7 +2,16 @@
 
 Imixs-ML is a microservice project with the goal to provide a NPL Named Entity Recognition Service for Business Process Management.
 
-The projekt is at the moment experimental only.
+The project is at the moment experimental only.
+
+# Imixs-ML Service
+
+The subproject Imixs-ML Service provides a ML Service based on the spaCy ML library. The service can be run in a Docker container. 
+
+
+# Imixs-ML Learning
+
+The subproject Imixs-ML Learning provides Java based components to be integrated into a Imixs-Workflow project to update or create a SpaCy Model.
 
 
 # Docker

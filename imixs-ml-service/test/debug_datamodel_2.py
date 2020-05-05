@@ -1,8 +1,11 @@
+import sys 
+sys.path.append('..')
+
 from pydantic import BaseModel
 import spacy
 import random
 from spacy.util import minibatch, compounding
-import datamodel 
+from imixs.core import datamodel 
 """
 The goal of this test program is to demonstrate the usage of the data class. 
 

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 import spacy
 from spacy.util import minibatch, compounding
 
-import datamodel 
+from imixs.core import datamodel, datatrain
 
 from pydantic import BaseModel
 import random

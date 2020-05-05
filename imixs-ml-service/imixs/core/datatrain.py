@@ -1,9 +1,10 @@
 import spacy
-from spacy.util import minibatch, compounding
 import random
-import datamodel 
 import time
 import os
+
+from spacy.util import minibatch, compounding
+from imixs.core import datamodel
 
 """
 This module provides a training method to create or update a model.
@@ -21,13 +22,13 @@ The method train() verifies if a model already exists and loads it in this case.
 def updateModel(trainingDataSet, iterations, modelPath):
     
     
-    #print("start analyze the data object...")
     # Analyze the data object ......
-    #for _data in trainingDataSet:
-    #    print("text="+_data.text)
+    for _data in trainingDataSet:
+        entity=_data.entities[0]
+        ausschnitt=_data.text[entity.start:entity.stop]
+        print(_data.text + "  ==>>  "+entity.label + "=" + ausschnitt)
         
-    
-    
+        
     
     # Test if the model exists
     modelExists=os.path.isdir(modelPath)
@@ -53,39 +54,40 @@ def updateModel(trainingDataSet, iterations, modelPath):
         print("we have a ner so we fetch it...")
         ner = nlp.get_pipe('ner')
         
-    # 3.) add the labels contained in the training model...
+        
+        
+    # 3.) add the labels contained in the trainingDataSet...
     for _data in trainingDataSet:
         for ent in _data.entities:
-            
             _label = ent.label
             _labelList = ner.labels
             # We only need to add the label if it is not already part of the entityRecognizer
             if _label not in _labelList:
                 print("...adding new label '" + _label + "'...")
                 ner.add_label(_label)
-      
+
       
     # get names of other pipes to disable them during training
     pipe_exceptions = ["ner", "trf_wordpiecer", "trf_tok2vec"]
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe not in pipe_exceptions]
-    
-    # Convert the data list to the Spacy Training Data format
-    trainingData=datamodel.convertToTrainingData(trainingDataSet)
-   
-   
+        
+        
+
     lMilis = int(round(time.time() * 1000))
-    #datetime.now().microsecond
     with nlp.disable_pipes(*other_pipes):  # only train NER
         # reset and initialize the weights randomly – but only if we're
         # training a new model
         if not modelExists:
             nlp.begin_training()
+
+        # Convert the data list to the Spacy Training Data format
+        trainingData=datamodel.convertToTrainingData(trainingDataSet)
+
         for itn in range(iterations):
             random.shuffle(trainingData)
             losses = {}
             
-            
-            # batch up the examples using spaCy's minibatch
+            # batch up the examples using spaCy's minibatch which is much faster than 
             batches = minibatch(trainingData, size=compounding(4.0, 32.0, 1.001))
             for batch in batches:
                 texts, annotations = zip(*batch)
