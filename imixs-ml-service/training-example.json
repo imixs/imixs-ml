@@ -1,0 +1,173 @@
+[
+	{
+		"text": "what is the price of polo?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 25
+			}
+		]
+	},
+	{
+		"text": "what is the price of ball?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 25
+			}
+		]
+	},
+	{
+		"text": "what is the price of jegging?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 28
+			}
+		]
+	},
+	{
+		"text": "what is the price of t-shirt?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 28
+			}
+		]
+	},
+	{
+		"text": "what is the price of cup?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 24
+			}
+		]
+	},
+	{
+		"text": "what is the price of bag?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 24
+			}
+		]
+	},
+	{
+		"text": "what is the price of jug?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 24
+			}
+		]
+	},
+	{
+		"text": "what is the price of plate?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	},
+	{
+		"text": "what is the price of glass?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	},
+	{
+		"text": "what is the price of monitor?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 28
+			}
+		]
+	},
+	{
+		"text": "what is the price of desktop?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 28
+			}
+		]
+	},
+	{
+		"text": "what is the price of bottle?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 27
+			}
+		]
+	},
+	{
+		"text": "what is the price of mouse?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	},
+	{
+		"text": "what is the price of keyboad?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 28
+			}
+		]
+	},
+	{
+		"text": "what is the price of chair?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	},
+	{
+		"text": "what is the price of table?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	},
+	{
+		"text": "what is the price of watch?",
+		"entities": [
+			{
+				"label": "part",
+				"start": 21,
+				"stop": 26
+			}
+		]
+	}
+]
+

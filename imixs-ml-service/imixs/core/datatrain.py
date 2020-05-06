@@ -32,7 +32,7 @@ def updateModel(trainingDataSet, iterations, modelPath):
     
     # Test if the model exists
     modelExists=os.path.isdir(modelPath)
-    modelExists=False 
+    
      # 1.) load model or create blank Language class
     """Load the model, set up the pipeline and train the entity recognizer."""
     if modelExists:
@@ -113,3 +113,27 @@ def updateModel(trainingDataSet, iterations, modelPath):
     nlp.to_disk(modelPath)
   
     return nlp
+
+ 
+def analyzeText(text, modelPath):
+    
+    nlp = spacy.load(modelPath)  # load existing spaCy model
+    
+    doc = nlp(text)
+    
+    result = []
+    for ent in doc.ents:
+        print(ent.text, ent.start_char, ent.end_char, ent.label_)
+        result.append({"label": ent.label_,"text": ent.text})
+        
+        
+    #doc_en = nlp(TRAIN_DATA)
+    #ents = []
+    #for ent in doc_en.ents:
+    #    ents.append({"text": ent.text, "label_": ent.label_})
+    #return {"message": data.text, "lang": lang, "ents": ents}
+        
+    return result
+
+
+

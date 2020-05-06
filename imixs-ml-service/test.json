@@ -1,8 +1,0 @@
-[
-	"text":
-'Horses are too tall and they pretend to care about your feelings'
-, {'entities': [(0, 6, 'MY_ANIMAL')]}), 
-('Do they bite or bark?', {'entities': []}), 
-('horses are too tall and they pretend to care about your feelings', 
-{'entities': [(0, 6, 'MY_ANIMAL')]})
-]

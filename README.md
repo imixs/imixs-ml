@@ -1,4 +1,13 @@
-# Imixs-ML
+[
+  {
+    "label": "part",
+    "text": "watch"
+  },
+  {
+    "label": "part",
+    "text": "Klavier"
+  }
+]# Imixs-ML
 
 Imixs-ML is a microservice project with the goal to provide a NPL Named Entity Recognition Service for Business Process Management.
 
@@ -52,20 +61,16 @@ The following example for a POST request...
 
 ...will result in an output like this:
 
-	{
-	  "message": "M. Melman is a team member of the open source project Imixs-Workflow.",
-	  "lang": "en",
-	  "ents": [
-	    {
-	      "text": "M. Melman",
-	      "label_": "PERSON"
-	    },
-	    {
-	      "text": "Imixs-Workflow",
-	      "label_": "ORG"
-	    }
-	  ]
-	}
+	[
+	  {
+	    "label": "person",
+	    "text": "Melman"
+	  },
+	  {
+	    "label": "project",
+	    "text": "Imixs-Workflow"
+	  }
+	]
 
 
 # Development
