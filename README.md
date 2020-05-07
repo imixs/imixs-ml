@@ -35,10 +35,31 @@ To build the image from the Dockerfile run:
 To test the image run the container in an interactive mode:
     
 	$ docker run --rm --name="imixs-ml" -it \
-			-p 8000:8000 \
-			imixs/imixs-ml
+	  -p 8000:8000 \
+	  imixs/imixs-ml
 
 
+## The Model
+
+The default model for the service is set to *imixs-model*. You can of course overwrite the path to provide you own one:
+
+	$ docker run --rm --name="imixs-ml" -it \
+	  -e MODEL_PATH="my-model" \
+	  -p 8000:8000 \
+	  imixs/imixs-ml
+
+### Language
+
+The model language is set by ISO code of the language class to load. The default value is *en*
+
+	$ docker run --rm --name="imixs-ml" -it \
+	  -e MODEL_LANGUAGE="de" \
+	  -p 8000:8000 \
+	  imixs/imixs-ml
+	  
+**Note:** The language is only relevant for creating a new model. You should not change the language for an existing model.	  
+
+## Testing
 Open the api documentation via:
 
 	http://localhost:8000/docs

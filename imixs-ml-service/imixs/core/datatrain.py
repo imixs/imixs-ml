@@ -7,20 +7,22 @@ from spacy.util import minibatch, compounding
 from imixs.core import datamodel
 
 """
-This module provides a training method to create or update a model.
-
-The method train() verifies if a model already exists and loads it in this case. 
+This module provides methods to train a model or to analyze text on an 
+existing model. 
 
 
 @author: ralph.soika@imixs.com
 @version:  1.0
 """
 
-
+#
 # This method expects a training data set and updates the given model.
+# If no model exists the method will create a new one
 #     
 def updateModel(trainingDataSet, iterations, modelPath):
     
+    # Read language
+    language=os.getenv('MODEL_LANGUAGE', 'en')
     
     # Analyze the data object ......
     for _data in trainingDataSet:
@@ -39,8 +41,8 @@ def updateModel(trainingDataSet, iterations, modelPath):
         nlp = spacy.load(modelPath)  # load existing spaCy model
         print("Loaded model '%s'" % modelPath)
     else:
-        nlp = spacy.blank("en")  # create blank Language class
-        print("Created blank 'en' model")
+        nlp = spacy.blank(language)  # create blank Language class
+        print("Created blank '" +language + "' model")
     
     
   
@@ -114,9 +116,10 @@ def updateModel(trainingDataSet, iterations, modelPath):
   
     return nlp
 
- 
+
+# Analyzing entities for a given text
+# The method assumes that a model exists  
 def analyzeText(text, modelPath):
-    
     nlp = spacy.load(modelPath)  # load existing spaCy model
     
     doc = nlp(text)
@@ -125,13 +128,6 @@ def analyzeText(text, modelPath):
     for ent in doc.ents:
         print(ent.text, ent.start_char, ent.end_char, ent.label_)
         result.append({"label": ent.label_,"text": ent.text})
-        
-        
-    #doc_en = nlp(TRAIN_DATA)
-    #ents = []
-    #for ent in doc_en.ents:
-    #    ents.append({"text": ent.text, "label_": ent.label_})
-    #return {"message": data.text, "lang": lang, "ents": ents}
         
     return result
 

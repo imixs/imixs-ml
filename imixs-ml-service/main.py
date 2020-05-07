@@ -11,24 +11,29 @@ from pydantic import BaseModel
 from builtins import str
 
 
-nlp_en = spacy.load("en_core_web_sm")
 app = FastAPI()
 
+modelpath=os.getenv('MODEL_PATH', 'imixs-model')
+language=os.getenv('MODEL_LANGUAGE', 'en')
 
 
 
+print("   ____      _          ") 
+print("  /  _/_ _  (_)_ __ ___  ") 
+print(" _/ //  ' \/ /\ \ /(_-<  Machine-Learning"  )
+print("/___/_/_/_/_//_\_\/___/  V0.1")
+print("")                                           
+                                           
+print("ENGINE          : https://spacy.io")                                           
+print("MODEL_PATH      : " + modelpath)
+print("MODEL_LANGUAGE  : " + language)
+print("")                                           
 
 
-@app.post("/textlist/")
+@app.post("/trainingdata/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
-    print("training data length=" + str(len(trainngdata)))
-    prdnlp = datatrain.updateModel(trainngdata, 10,"some-other-model")
-    print("------------finished--------------------")
-    return {"fertig"}
-
-
-
-
+    prdnlp = datatrain.updateModel(trainngdata, 10,modelpath)
+    return {"finished"}
 
 
 
@@ -36,25 +41,20 @@ def extract_entities(trainngdata: List[datamodel.TrainingData]):
 #
 @app.post("/analyze/")
 def train(text: str):
-  
-    result=datatrain.analyzeText(text,"some-other-model")
-
-    #return {"result": result}
-    
+    result=datatrain.analyzeText(text,modelpath)
     return result
-
-
 
 
 # Clean the model 
 #
 @app.delete("/model/")
 def clean():
-  
     try:
-        shutil.rmtree("some-other-model")
+        shutil.rmtree(modelpath)
     except OSError as e:
-        print("Error: %s : %s" % ("some-other-model", e.strerror))
+        print("Error: %s : %s" % (modelpath, e.strerror))
+    return {"model '" + modelpath + "' deleted"}
 
-    return {"model deleted"}
+
+
 
