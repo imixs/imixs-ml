@@ -1,10 +1,13 @@
 package org.imixs.ml.api;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -19,12 +22,13 @@ import org.imixs.ml.service.AnalyzService;
 import org.imixs.ml.xml.XMLConfig;
 import org.imixs.workflow.ItemCollection;
 
+@Named
 @Path("training")
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 public class TrainingResource {
 
-	@Inject
-	AnalyzService analyzService;
+//	@Inject
+//	AnalyzService analyzService;
 
 	private static Logger logger = Logger.getLogger(TrainingResource.class.getName());
 
@@ -36,12 +40,15 @@ public class TrainingResource {
 	 * <pre>
 	 * {@code
 	   <?xml version="1.0" encoding="UTF-8"?>
-		<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xmlns:xs="http://www.w3.org/2001/XMLSchema">
-		  <item name="modeltype">
-			  <value xsi:type="xs:string">M5</value>
-		  </item>
-		</document>
+<XMLConfig>
+	<serialVersionUID>0</serialVersionUID>
+	<target>string</target>
+	<user>string</user>
+	<password>string</password>
+	<query>string</query>
+	<pagesize>0</pagesize>
+	<entities>string</entities>
+</XMLConfig>
 	 * }
 	 * </pre>
 	 * 
@@ -62,14 +69,12 @@ public class TrainingResource {
 
 		// properties.get("target.url");
 		logger.info("target.url=" + config.getTarget());
-
+		try {
 		WorkflowClient worklowClient = new WorkflowClient(config.getTarget());
 		// register the authenticator
 		FormAuthenticator formAuth = new FormAuthenticator(config.getTarget(), config.getUser(), config.getPassword());
 		worklowClient.registerClientRequestFilter(formAuth);
-
-		try {
-
+		
 			String items = config.getEntities();
 			if (items.contains("$file") || items.contains("$snapshotid")) {
 				logger.severe("$file and $snapshot must not be included in the target.entities!");
@@ -77,10 +82,13 @@ public class TrainingResource {
 			}
 
 			// select result
-			String queryURL = "documents/search/" + config.getQuery() + "?pagesize=" + config.getPagesize() + "&items="
+			String encodedQuery=URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
+			
+			String queryURL = "documents/search/" + encodedQuery + "?pagesize=" + config.getPagesize() + "&items="
 					+ config.getEntities() + ",$file,$snapshotid";
 			logger.info("...select test data: " + queryURL);
 
+			
 			List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
 					//.searchDocuments(config.getQuery());
 
@@ -91,7 +99,7 @@ public class TrainingResource {
 			}
 
 			
-		} catch (RestAPIException  e) {
+		} catch (RestAPIException | UnsupportedEncodingException  e) {
 
 			logger.warning("Failed to query documents: " + e.getMessage());
 			e.printStackTrace();

@@ -6,7 +6,9 @@ services:
     image: imixs/imixs-ml-training-service
     environment:
       TZ: "Europe/Berlin"
+      MP_OPENAPI_SERVERS: "http://localhost:8080"
     ports:
-      - "9080:9080"
+      #- "9080:9080"
+      - "8080:8080"
 
 
