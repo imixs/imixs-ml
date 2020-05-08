@@ -15,4 +15,7 @@ target/
 .htpasswd
 .pydevproject
 /build/
+
+# Training files
+training.properties
 training_model/
