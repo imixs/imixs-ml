@@ -11,5 +11,5 @@ COPY --chown=1001:0 ./src/docker/configuration/server.xml /config/
 #COPY --chown=1001:0 ./src/docker/configuration/openliberty/jvm.options /config/
 
 # Copy sample application
-COPY ./src/docker/apps/*.war /config/dropins/
+COPY ./target/*.war /config/dropins/
 

@@ -1,86 +1,12 @@
 version: "3.3"
 services:
 
-  db-service:
-    image: postgres:9.6.1
-    environment:
-      POSTGRES_PASSWORD: adminadmin
-      POSTGRES_DB: workflow-db
-  
-  
-  fueling-adapter:
-    image: bmw/fueling-adapter
+ 
+  training-service:
+    image: imixs/imixs-ml-training-service
     environment:
       TZ: "Europe/Berlin"
     ports:
       - "9080:9080"
 
 
-# Fuelling Experience  
-  fueling-experience:
-    image: bmw/partner-gateway-experience
-    environment:
-      TZ: "Europe/Berlin"
-      PAYARA_ARGS: "--debug"  
-      POSTGRES_HOST: "db-service"
-      POSTGRES_DATABASE: "workflow-db"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "adminadmin"
-      SOLR_CORE: "fueling"
-      
-      IMIXS_API: "http://fueling-experience:8080/api"
-      #IMIXS_REGISTRY_API: "http://experience-registry:8080/api/"
-      IMIXS_AUTH_METHOD: "JWT"
-      IMIXS_AUTH_USERID: "admin"
-      IMIXS_AUTH_SECRET: "secret"
-      
-      #IMIXS_REGISTRY_AUTOREGISTER_INTERVAL: 2000
-      #IMIXS_REGISTRY_INDEX_ENABLED: "true"
-      #IMIXS_REGISTRY_INDEX_FIELDS: "oap.screen"
-      #IMIXS_REGISTRY_INDEX_TYPEFILTER: "(workitem|workitemarchive|profile|profileactive|profilearchive)"
-      
-      BATCH_PROCESSOR_ENABLED: "true"
-      BATCH_PROCESSOR_INTERVAL: "500"
-      BATCH_PROCESSOR_INITIALDELAY: "20000"
-      METRICS_ENABLED: "false"
-    ports:
-      - "8080:8080"
-      - "9009:9009"
-
-    depends_on:
-      - db-service
-      - solr
-      #- experience-registry     
-
-
-
-
-
-
-
-  solr:
-    image: solr:8.2
-    ports:
-      - "8983:8983"      
-    volumes:
-      - solrdata:/opt/solr/server/solr/imixs-workflow
-    # Create two different cores!
-    entrypoint:
-      - bash
-      - "-c"
-      - "precreate-core fueling;precreate-core registry; exec solr -f"
- 
-
-#  admin-client:
-#    image: imixs/imixs-admin:5.1.3
-#    ports: 
-#      - "8888:8080"
-
-
-
-volumes:
-  solrdata: 
- 
-
-     
-      

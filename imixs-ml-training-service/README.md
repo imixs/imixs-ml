@@ -17,3 +17,28 @@ The file provides the following data:
 	target.query.maxcount=100
 
 
+
+## Build the ML Training Service
+
+To build the training service just build the corresponding Docker containers:
+
+	$ mvn clean install -Pdocker
+
+
+## Run and Test
+
+To start the dev environment run docker-compose:
+
+	$ docker-compose up
+ 
+	
+You can access the adapter service at:
+
+	http://localhost:9080/
+	
+Run the OpenAPI UI:	
+
+	http://localhost:9080/openapi/ui/
+	
+	
+

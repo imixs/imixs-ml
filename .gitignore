@@ -17,5 +17,5 @@ target/
 /build/
 
 # Training files
-training.properties
+.config/
 training_model/
