@@ -6,6 +6,11 @@ services:
     image: imixs/imixs-ml-training-service
     environment:
       TZ: "Europe/Berlin"
+
+      # OpenLiberty ENV
+      #SEC_TLS_TRUSTDEFAULTCERTS: "true"
+      
+      # Payara-Micor ENV
       MP_OPENAPI_SERVERS: "http://localhost:8080"
     ports:
       #- "9080:9080"
