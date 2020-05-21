@@ -6,6 +6,7 @@ services:
     image: imixs/imixs-ml-training-service
     environment:
       TZ: "Europe/Berlin"
+      TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
 
       # OpenLiberty ENV
       #SEC_TLS_TRUSTDEFAULTCERTS: "true"
@@ -15,5 +16,21 @@ services:
     ports:
       #- "9080:9080"
       - "8080:8080"
+
+
+# OCR Service
+  tika: 
+    image: imixs/tika
+    ports:
+      - "9998:9998"  
+
+
+
+
+# Imixs-mL Service
+  imixs-ml: 
+    image: imixs/imixs-ml
+    ports:
+      - "8000:8000"  
 
 

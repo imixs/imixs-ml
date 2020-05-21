@@ -1,20 +1,34 @@
 # Imixs-ML - Training Service
 
+The Imixs-ML Training Service is a microservice to train a ML Model based on the workflow content of an Imixs-Office-Workflow instance. The service provides an OpenAPI-UI to interact with the service from your web browser:
 
-The Imixs-ML Trainging Service is a microservice to train a ML Model based on the workflow content of an Imixs-Office-Workflow instance. 
+	http://localhost:8080/api/openapi-ui/
 
-To train a new model you can use the ModelGenarator. This class expects a properties file named 'training.properties' placed in the context root directory (src/test/resources/training.properties).
+To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with the following XML payload:
 
-The file provides the following data:
+	<?xml version="1.0" encoding="UTF-8"?>
+	<XMLConfig>
+		<target>string</target>
+		<user>string</user>
+		<password>string</password>
+		<query>string</query>
+		<pagesize>0</pagesize>
+		<entities>string</entities>
+	</XMLConfig>
+
+This is an example how to use the training service:
 
 
+	<?xml version="1.0" encoding="UTF-8"?>
+	<config>
+		<target>http://localhost:8080/api/</target>
+		<user>admin</user>
+		<password>adminadmin</password>
+		<query>($workflowgroup:"Invoice") AND ($taskid:5900)</query>
+		<pagesize>100</pagesize>
+		<entities>_iban,_bic,_name,_capacity,_invoicenumber</entities>
+	</config>
 
-	target.url=http://localhost:8080/
-	target.user=admin
-	target.password=adminadmin
-	
-	target.query=($workflowgroup:"Rechnungseingang") AND ($taskid=5900)
-	target.query.maxcount=100
 
 
 
@@ -34,11 +48,11 @@ To start the dev environment run docker-compose:
 	
 You can access the adapter service at:
 
-	http://localhost:9080/
+	http://localhost:8080/
 	
 Run the OpenAPI UI:	
 
-	http://localhost:9080/openapi/ui/
+	http://localhost:8080/api/openapi-ui/
 	
 	
 

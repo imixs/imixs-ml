@@ -26,12 +26,12 @@
  *      Ralph Soika - Software Developer
  */
 
-package org.imixs.ml.xml;
+package org.imixs.ml.data.xml;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * The XMLConfig is a basic serializable representation of a pojo config bean
@@ -43,65 +43,68 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "config")
 public class XMLConfig implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	private String target;
-	private String user;
-	private String password;
-	private String query;
-	private int pagesize;
-	private String entities;
+    @XmlTransient
+    private static final long serialVersionUID = 1L;
 
-	public String getUser() {
-		return user;
-	}
+    private String target;
+    private String user;
+    private String password;
+    private String query;
+    private int pagesize;
+    private String entities;
 
-	public void setUser(String user) {
-		this.user = user;
-	}
+    public String getUser() {
+        return user;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getQuery() {
-		return query;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setQuery(String query) {
-		this.query = query;
-	}
+    public String getQuery() {
+        return query;
+    }
 
-	public int getPagesize() {
-		return pagesize;
-	}
+    public void setQuery(String query) {
+        this.query = query;
+    }
 
-	public void setPagesize(int pagesize) {
-		this.pagesize = pagesize;
-	}
+    public int getPagesize() {
+        return pagesize;
+    }
 
-	public String getEntities() {
-		return entities;
-	}
+    public void setPagesize(int pagesize) {
+        this.pagesize = pagesize;
+    }
 
-	public void setEntities(String entities) {
-		this.entities = entities;
-	}
+    public String getEntities() {
+        return entities;
+    }
 
-	public XMLConfig() {
+    public void setEntities(String entities) {
+        this.entities = entities;
+    }
 
-	}
+    public XMLConfig() {
 
-	//@XmlAttribute
-	public java.lang.String getTarget() {
-		return target;
-	}
+    }
 
-	public void setTarget(String target) {
-		this.target = target;
-	}
-	
+    // @XmlAttribute
+    // @XmlElement(name="target-url")
+    public java.lang.String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
 }

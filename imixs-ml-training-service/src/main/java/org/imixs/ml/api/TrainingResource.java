@@ -18,8 +18,8 @@ import javax.ws.rs.core.Response;
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
-import org.imixs.ml.service.AnalyzService;
-import org.imixs.ml.xml.XMLConfig;
+import org.imixs.ml.data.xml.XMLConfig;
+import org.imixs.ml.service.TrainingService;
 import org.imixs.workflow.ItemCollection;
 
 @Named
@@ -27,86 +27,87 @@ import org.imixs.workflow.ItemCollection;
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 public class TrainingResource {
 
-//	@Inject
-//	AnalyzService analyzService;
+    @Inject 
+    TrainingService documentExtractorService;
 
-	private static Logger logger = Logger.getLogger(TrainingResource.class.getName());
+    private static Logger logger = Logger.getLogger(TrainingResource.class.getName());
 
-	/**
-	 * POST Request with a valid training configuration
-	 * <p>
-	 * A valid xml document structure is expected:
-	 * 
-	 * <pre>
-	 * {@code
-	   <?xml version="1.0" encoding="UTF-8"?>
-<XMLConfig>
-	<serialVersionUID>0</serialVersionUID>
-	<target>string</target>
-	<user>string</user>
-	<password>string</password>
-	<query>string</query>
-	<pagesize>0</pagesize>
-	<entities>string</entities>
-</XMLConfig>
-	 * }
-	 * </pre>
-	 * 
-	 * 
-	 * </p>
-	 * The method returns a XMLDocument with an option list included.
-	 * 
-	 * 
-	 * @param requestXML - workitem data
-	 * @return - XMLDocument with option list
-	 */
-	@POST
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Response getOptionList(XMLConfig config) {
+    /**
+     * POST Request with a valid training configuration
+     * <p>
+     * A valid xml document structure is expected:
+     * 
+     * <pre>
+     * {@code
+       <?xml version="1.0" encoding="UTF-8"?>
+    <XMLConfig>
+    <serialVersionUID>0</serialVersionUID>
+    <target>string</target>
+    <user>string</user>
+    <password>string</password>
+    <query>string</query>
+    <pagesize>0</pagesize>
+    <entities>string</entities>
+    </XMLConfig>
+     * }
+     * </pre>
+     * 
+     * 
+     * </p>
+     * The method returns a XMLDocument with an option list included.
+     * 
+     * 
+     * @param requestXML - workitem data
+     * @return - XMLDocument with option list
+     */
+    @POST
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response trainData(XMLConfig config) {
 
-		// validate Input Data....
-		logger.info("...starting training....");
+        // validate Input Data....
+        logger.info("...starting training....");
 
-		// properties.get("target.url");
-		logger.info("target.url=" + config.getTarget());
-		try {
-		WorkflowClient worklowClient = new WorkflowClient(config.getTarget());
-		// register the authenticator
-		FormAuthenticator formAuth = new FormAuthenticator(config.getTarget(), config.getUser(), config.getPassword());
-		worklowClient.registerClientRequestFilter(formAuth);
-		
-			String items = config.getEntities();
-			if (items.contains("$file") || items.contains("$snapshotid")) {
-				logger.severe("$file and $snapshot must not be included in the target.entities!");
-				System.exit(0);
-			}
+        // properties.get("target.url");
+        logger.info("target.url=" + config.getTarget());
+        try {
+            WorkflowClient worklowClient = new WorkflowClient(config.getTarget());
+            // register the authenticator
+            FormAuthenticator formAuth = new FormAuthenticator(config.getTarget(), config.getUser(),
+                    config.getPassword());
+            worklowClient.registerClientRequestFilter(formAuth);
 
-			// select result
-			String encodedQuery=URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
-			
-			String queryURL = "documents/search/" + encodedQuery + "?pagesize=" + config.getPagesize() + "&items="
-					+ config.getEntities() + ",$file,$snapshotid";
-			logger.info("...select test data: " + queryURL);
+            String items = config.getEntities();
+            if (items.contains("$file") || items.contains("$snapshotid")) {
+                logger.severe("$file and $snapshot must not be included in the target.entities!");
+                System.exit(0);
+            }
+            // now lets see if we find some of our intem values....
+            String[] itemNames = items.split(",");
 
-			
-			List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-					//.searchDocuments(config.getQuery());
+            // select result 
+            String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
 
-			logger.info("...found " + documents.size() + " documents");
-			// now iterate over all documents and start the training algorithm
-			for (ItemCollection doc : documents) {
+            String queryURL = "documents/search/" + encodedQuery + "?pageSize=" + config.getPagesize() + "&items="
+                    + config.getEntities() + ",$file,$snapshotid,$uniqueid";
+            logger.info("...select test data: " + queryURL);
 
-			}
+            List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
+            // .searchDocuments(config.getQuery());
 
-			
-		} catch (RestAPIException | UnsupportedEncodingException  e) {
+            logger.info("...found " + documents.size() + " documents");
+            // now iterate over all documents and start the training algorithm
+            for (ItemCollection doc : documents) {
+                documentExtractorService.trainWorkitemData(doc, worklowClient, itemNames);
+            }
 
-			logger.warning("Failed to query documents: " + e.getMessage());
-			e.printStackTrace();
-		}
+        } catch (RestAPIException | UnsupportedEncodingException e) {
 
-		// return response
-		return Response.ok().build();
-	}
+            logger.warning("Failed to query documents: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // return response
+        return Response.ok().build();
+    }
 
 }

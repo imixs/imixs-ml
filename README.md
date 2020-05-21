@@ -1,13 +1,4 @@
-[
-  {
-    "label": "part",
-    "text": "watch"
-  },
-  {
-    "label": "part",
-    "text": "Klavier"
-  }
-]# Imixs-ML
+# Imixs-ML
 
 Imixs-ML is a microservice project with the goal to provide a NPL Named Entity Recognition Service for Business Process Management.
 
