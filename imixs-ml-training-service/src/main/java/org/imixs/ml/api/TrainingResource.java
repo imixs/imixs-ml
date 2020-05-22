@@ -1,5 +1,6 @@
 package org.imixs.ml.api;
 
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +15,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
@@ -22,6 +26,8 @@ import org.imixs.ml.data.xml.XMLConfig;
 import org.imixs.ml.service.TrainingService;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.xml.XMLDataCollectionAdapter;
+import org.imixs.workflow.xml.XMLDocument;
+import org.imixs.workflow.xml.XMLDocumentAdapter;
 
 @Named
 @Path("training")
@@ -89,17 +95,17 @@ public class TrainingResource {
             // select result
             String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
 
-            String queryURL = "documents/search/" + encodedQuery + "?pageSize=" + config.getPagesize() ;
+            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true&pageSize=" + config.getPagesize() ;
 
             queryURL = appendItenNames(queryURL, itemNames);
 
-            logger.info("...select test data: " + queryURL);
+            logger.info("......select workitems: " + queryURL);
 
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
 
             stats.setItemValue("doc.count", documents.size());
 
-            logger.info("...found " + documents.size() + " documents");
+            logger.info("...... " + documents.size() + " documents found");
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
                 documentExtractorService.trainWorkitemData(doc, worklowClient, itemNames, stats);
@@ -118,11 +124,32 @@ public class TrainingResource {
             for (String item : names) {
                 if (item.startsWith("item.count.")) {
                     float rate = stats.getItemValueFloat(item) / count;
-                    logger.info("......" + item + " count=" + stats.getItemValueInteger(item) + " rate=" + rate);
+                    logger.finest("......" + item + " count=" + stats.getItemValueInteger(item) + " rate=" + rate);
                     stats.replaceItemValue("item.rate." + item.substring(11), rate);
                 }
             }
         }
+        
+        
+        logger.info("**************** FINISHED ***********************");
+        // log the stats XMLDocument object....
+        try {
+            JAXBContext context;
+            context = JAXBContext.newInstance(XMLDocument.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            StringWriter out = new StringWriter();
+            marshaller.marshal(XMLDocumentAdapter.getDocument(stats), out);
+            String xml = out.toString();
+            logger.info(xml);
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        logger.info("**************** FINISHED ***********************");
+
+        
+        
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
     }

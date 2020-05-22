@@ -150,7 +150,7 @@ public class TrainingService {
                         }
 
                         if (trainingData.getEntities().size() == 0) {
-                            logger.warning("No entities found in " + doc.getUniqueID() + " '" + file.getName() + "'");
+                            logger.severe("......no entities found in '" + file.getName() + "' (" + doc.getUniqueID()+")");
                             logger.finest("<CONTENT>" + content + "</CONTENT>");
 
                             stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
@@ -175,14 +175,14 @@ public class TrainingService {
                         }
 
                     } else {
-                        logger.fine("...no content found in '" + file.getName() + "'.....");
+                        logger.severe("......no content found in '" + file.getName() + "' (" + doc.getUniqueID()+")");
                         stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
                     }
 
                 }
 
             } else {
-                logger.fine("...no files found for " + doc.getUniqueID());
+                logger.severe("......no files found for " + doc.getUniqueID());
                 stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
             }
         } catch (PluginException | RestAPIException e1) {
