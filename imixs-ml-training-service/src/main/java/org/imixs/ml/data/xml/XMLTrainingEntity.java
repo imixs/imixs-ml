@@ -30,6 +30,7 @@ package org.imixs.ml.data.xml;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -43,33 +44,47 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement(name = "entity")
 public class XMLTrainingEntity implements Serializable {
 
-    
-    
     @XmlTransient
     private static final long serialVersionUID = 1L;
 
-    
-    
+   
+    private String value;
+
     private String label;
+    
     private int start;
+    
     private int stop;
+    
+    
+    @XmlElement
     public String getLabel() {
         return label;
     }
     public void setLabel(String label) {
         this.label = label;
     }
+    @XmlElement
     public int getStart() {
         return start;
     }
     public void setStart(int start) {
         this.start = start;
     }
+    @XmlElement
     public int getStop() {
         return stop;
     }
     public void setStop(int stop) {
         this.stop = stop;
+    }
+    
+    @XmlTransient
+    public String getValue() {
+        return value;
+    }
+    public void setValue(String value) {
+        this.value = value;
     }
     
  

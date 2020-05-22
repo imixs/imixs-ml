@@ -21,13 +21,14 @@ import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.data.xml.XMLConfig;
 import org.imixs.ml.service.TrainingService;
 import org.imixs.workflow.ItemCollection;
+import org.imixs.workflow.xml.XMLDataCollectionAdapter;
 
 @Named
 @Path("training")
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 public class TrainingResource {
 
-    @Inject 
+    @Inject
     TrainingService documentExtractorService;
 
     private static Logger logger = Logger.getLogger(TrainingResource.class.getName());
@@ -66,6 +67,7 @@ public class TrainingResource {
 
         // validate Input Data....
         logger.info("...starting training....");
+        ItemCollection stats = new ItemCollection();
 
         // properties.get("target.url");
         logger.info("target.url=" + config.getTarget());
@@ -84,20 +86,23 @@ public class TrainingResource {
             // now lets see if we find some of our intem values....
             String[] itemNames = items.split(",");
 
-            // select result 
+            // select result
             String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
 
-            String queryURL = "documents/search/" + encodedQuery + "?pageSize=" + config.getPagesize() + "&items="
-                    + config.getEntities() + ",$file,$snapshotid,$uniqueid";
+            String queryURL = "documents/search/" + encodedQuery + "?pageSize=" + config.getPagesize() ;
+
+            queryURL = appendItenNames(queryURL, itemNames);
+
             logger.info("...select test data: " + queryURL);
 
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-            // .searchDocuments(config.getQuery());
+
+            stats.setItemValue("doc.count", documents.size());
 
             logger.info("...found " + documents.size() + " documents");
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(doc, worklowClient, itemNames);
+                documentExtractorService.trainWorkitemData(doc, worklowClient, itemNames, stats);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
@@ -106,8 +111,48 @@ public class TrainingResource {
             e.printStackTrace();
         }
 
+        // compute item.rate statistik
+        int count = stats.getItemValueInteger("doc.count");
+        if (count > 0) {
+            List<String> names = stats.getItemNames();
+            for (String item : names) {
+                if (item.startsWith("item.count.")) {
+                    float rate = stats.getItemValueFloat(item) / count;
+                    logger.info("......" + item + " count=" + stats.getItemValueInteger(item) + " rate=" + rate);
+                    stats.replaceItemValue("item.rate." + item.substring(11), rate);
+                }
+            }
+        }
         // return response
-        return Response.ok().build();
+        return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
+    }
+
+    /**
+     * THis method appends the item query param to an url based on a config list of
+     * itemnames.
+     * <p>
+     * The method tests for | character. If found only the first part is taken as
+     * the item name
+     * 
+     * @param url
+     * @param entities
+     * @return
+     */
+    private String appendItenNames(String url, String[] itemNames) {
+
+        String queryParam = "&items=$file,$snapshotid,$uniqueid";
+        for (String itemName : itemNames) {
+            itemName = itemName.toLowerCase().trim();
+            // if the itemName contains a | character than we do a mapping here.....
+            if (itemName.contains("|")) {
+                itemName = itemName.substring(0, itemName.indexOf('|')).trim();
+
+            }
+            queryParam = queryParam + "," + itemName;
+
+        }
+        url=url+queryParam;
+        return url;
     }
 
 }

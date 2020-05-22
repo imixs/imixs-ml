@@ -30,6 +30,15 @@ This is an example how to use the training service:
 	</config>
 
 
+### The Entity List
+
+The property 'entities' contains a list of item names to be taken form the workitems to be analzed.
+The itemname is equal to the name identifying the entity within a spaCy model. In case the itemname provided in a workitem does not match the entity name used in a model you can adapt the name with a | character.
+
+	 
+	<entities>_capacity|_invoicetotal,_invoicenumber</entities>
+
+This example maps the item '_capacity' to the entity '_invoicetotal'.
 
 
 ## Build the ML Training Service
@@ -54,5 +63,21 @@ Run the OpenAPI UI:
 
 	http://localhost:8080/api/openapi-ui/
 	
+
+
+# EntityAdapter
+
+The EntityAdapter can be used to  adapt an entity with alternative fromating values.  This adapter is useful if a string constant can ocure in different formats like a currency. For example the float value 1500.00 can have different presentations in a textfragment:
+
+
+	1500.00
+	1500,00
+	1.500,00
+	1,500.00
 	
+The TrainingService implements an Observer Pattern based on CDI Events to call registered EntityAdapters
+The Event is defined by the class:
+
+	org.imixs.ml.service.AnalyzeEntityEvent
+
 
