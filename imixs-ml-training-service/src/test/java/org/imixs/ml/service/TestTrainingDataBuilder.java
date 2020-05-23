@@ -3,7 +3,6 @@ package org.imixs.ml.service;
 import java.util.List;
 
 import org.imixs.ml.data.xml.XMLTrainingEntity;
-import org.imixs.workflow.exceptions.PluginException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,12 +13,12 @@ import junit.framework.Assert;
  * 
  * @author rsoika
  */
-public class TestTrainingService {
-    protected TrainingService trainingService = null;
+public class TestTrainingDataBuilder {
+    protected TrainingDataBuilder trainingDataBuilder = null;
 
     @Before
-    public void setup() throws PluginException {
-        trainingService = new TrainingService();
+    public void setup() {
+        trainingDataBuilder = new TrainingDataBuilder(null);
 
     }
 
@@ -47,34 +46,33 @@ public class TestTrainingService {
     public void testCreateXMLTrainingEntity() {
         List<XMLTrainingEntity> trainingEntities = null;
 
-        trainingEntities = trainingService.createTraingEntities("Uber blew through $1 million a week", "Uber", "ORG");
+        trainingEntities = trainingDataBuilder.createTraingEntities("Uber blew through $1 million a week", "Uber",
+                "ORG");
         Assert.assertEquals(0, trainingEntities.get(0).getStart());
         Assert.assertEquals(4, trainingEntities.get(0).getStop());
         Assert.assertEquals("ORG", trainingEntities.get(0).getLabel());
-        
-        
-        trainingEntities = trainingService.createTraingEntities("Android Pay expands to Canada", "Android Pay", "PRODUCT");
+
+        trainingEntities = trainingDataBuilder.createTraingEntities("Android Pay expands to Canada", "Android Pay",
+                "PRODUCT");
         Assert.assertEquals(0, trainingEntities.get(0).getStart());
         Assert.assertEquals(11, trainingEntities.get(0).getStop());
-        
-        
-        trainingEntities = trainingService.createTraingEntities("Spotify steps up Asia expansion", "Asia", "LOC");
+
+        trainingEntities = trainingDataBuilder.createTraingEntities("Spotify steps up Asia expansion", "Asia", "LOC");
         Assert.assertEquals(17, trainingEntities.get(0).getStart());
         Assert.assertEquals(21, trainingEntities.get(0).getStop());
-        
-        
-        trainingEntities = trainingService.createTraingEntities("Android Pay expands to Canada", "Canada", "GPE");
+
+        trainingEntities = trainingDataBuilder.createTraingEntities("Android Pay expands to Canada", "Canada", "GPE");
         Assert.assertEquals(23, trainingEntities.get(0).getStart());
         Assert.assertEquals(29, trainingEntities.get(0).getStop());
-        
-        
-        trainingEntities = trainingService.createTraingEntities("they pretend to care about your feelings, those horses", "horses", "LABEL");
+
+        trainingEntities = trainingDataBuilder
+                .createTraingEntities("they pretend to care about your feelings, those horses", "horses", "LABEL");
         Assert.assertEquals(48, trainingEntities.get(0).getStart());
         Assert.assertEquals(54, trainingEntities.get(0).getStop());
-        
-        
-        // test with more than one match 
-        trainingEntities = trainingService.createTraingEntities("horses pretend to care about your feelings, those horses", "horses", "LABEL");
+
+        // test with more than one match
+        trainingEntities = trainingDataBuilder
+                .createTraingEntities("horses pretend to care about your feelings, those horses", "horses", "LABEL");
         Assert.assertEquals(2, trainingEntities.size());
 
         Assert.assertEquals(0, trainingEntities.get(0).getStart());
@@ -82,8 +80,7 @@ public class TestTrainingService {
 
         Assert.assertEquals(50, trainingEntities.get(1).getStart());
         Assert.assertEquals(56, trainingEntities.get(1).getStop());
-        
-        
+
     }
 
 }

@@ -95,7 +95,8 @@ public class TrainingResource {
             // select result
             String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
 
-            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true&pageSize=" + config.getPagesize() ;
+            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true&pageSize="
+                    + config.getPagesize();
 
             queryURL = appendItenNames(queryURL, itemNames);
 
@@ -108,7 +109,7 @@ public class TrainingResource {
             logger.info("...... " + documents.size() + " documents found");
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(doc, worklowClient, itemNames, stats);
+                documentExtractorService.trainWorkitemData(doc, itemNames, stats, worklowClient);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
@@ -129,8 +130,7 @@ public class TrainingResource {
                 }
             }
         }
-        
-        
+
         logger.info("**************** FINISHED ***********************");
         // log the stats XMLDocument object....
         try {
@@ -148,8 +148,6 @@ public class TrainingResource {
         }
         logger.info("**************** FINISHED ***********************");
 
-        
-        
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
     }
@@ -178,7 +176,7 @@ public class TrainingResource {
             queryParam = queryParam + "," + itemName;
 
         }
-        url=url+queryParam;
+        url = url + queryParam;
         return url;
     }
 
