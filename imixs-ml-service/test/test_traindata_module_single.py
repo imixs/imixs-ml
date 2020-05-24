@@ -123,7 +123,7 @@ if __name__ == "__main__":
    
     
     # update model
-    prdnlp = datatrain.updateModel(l, 20,modelfile)
+    prdnlp = datatrain.updateModelSingle(l,modelfile)
    
     
     print("------------finished--------------------")
