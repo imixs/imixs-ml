@@ -1,16 +1,13 @@
 version: "3.3"
 services:
 
- 
+# Imixs-ML training sevice
   training-service:
     image: imixs/imixs-ml-training-service
     environment:
       TZ: "Europe/Berlin"
       TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
-
-      # OpenLiberty ENV
-      #SEC_TLS_TRUSTDEFAULTCERTS: "true"
-      
+      TIKA_OCR_MODE: "PDF_ONLY"
       # Payara-Micor ENV
       MP_OPENAPI_SERVERS: "http://localhost:8080"
     ports:
@@ -22,8 +19,13 @@ services:
 # OCR Service
   tika: 
     image: imixs/tika
+    environment:
+      TZ: "Europe/Berlin"
+      TIKA_CONFIG: "/tika-config.xml"
     ports:
       - "9998:9998"  
+    volumes:
+      - ~/git/imixs-ml/imixs-ml-training-service/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
 
 
 
@@ -31,7 +33,11 @@ services:
 # Imixs-mL Service
   imixs-ml: 
     image: imixs/imixs-ml
+    environment:
+      PYTHONUNBUFFERED: 1
+      TZ: "Europe/Berlin"
+      MODEL_LANGUAGE: "de"
+
     ports:
       - "8000:8000"  
-
 

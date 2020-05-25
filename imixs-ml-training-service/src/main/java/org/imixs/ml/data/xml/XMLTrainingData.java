@@ -31,12 +31,17 @@ package org.imixs.ml.data.xml;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * The XMLEntity defines the core Data class used for training data.
+ * <p>
+ * The setter methods prettify the text and entities provided to the
+ * XMLTrainingData. This is important to ensure the JSON result string is
+ * parseable by SpaCy!.
  * 
  * 
  * @author: ralph.soika@imixs.com
@@ -51,20 +56,23 @@ public class XMLTrainingData implements Serializable {
     private String text;
 
     private List<XMLTrainingEntity> entities;
-    
+
     public XMLTrainingData() {
         super();
         // init entities
-        entities=new ArrayList<XMLTrainingEntity>();
+        entities = new ArrayList<XMLTrainingEntity>();
     }
-
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setText(String _text) {
+        if (_text != null) {
+            this.text = cleanTextdata(_text);
+        } else {
+            this.text = null;
+        }
     }
 
     public List<XMLTrainingEntity> getEntities() {
@@ -74,10 +82,40 @@ public class XMLTrainingData implements Serializable {
     public void setEntities(List<XMLTrainingEntity> entities) {
         this.entities = entities;
     }
-    
+
     public void addTrainingEntity(XMLTrainingEntity trainingEntity) {
         entities.add(trainingEntity);
     }
 
-   
+    /**
+     * This method strip control codes and the characters '{', '}' and '"' from a
+     * text string.
+     * <p>
+     * The method also strips multiple space characters. 'A   B' -> 'A B'
+     * 
+     * @param text
+     * @return
+     */
+    public static String cleanTextdata(String text) {
+
+        // replace newline with a space
+        String result = text.replaceAll("\n", " ");
+
+        // strip control codes
+        result = stripChars(result, c -> c > '\u001F' && c != '\u007F');
+
+        // replace '{', '}' and '"' with a space
+        result = result.replaceAll("[{}\"]", " ");
+        
+        // strip more than one space.
+        result = result.replaceAll("[ ]{2,}", " ");
+
+        return result;
+
+    }
+
+    private static String stripChars(String s, IntPredicate include) {
+        return s.codePoints().filter(include::test)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+    }
 }

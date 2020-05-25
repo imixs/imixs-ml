@@ -2,8 +2,9 @@ package org.imixs.ml.service;
 
 import java.util.List;
 
+import org.imixs.ml.data.xml.XMLTrainingData;
 import org.imixs.ml.data.xml.XMLTrainingEntity;
-import org.junit.Before;
+import org.imixs.workflow.ItemCollection;
 import org.junit.Test;
 
 import junit.framework.Assert;
@@ -14,13 +15,6 @@ import junit.framework.Assert;
  * @author rsoika
  */
 public class TestTrainingDataBuilder {
-    protected TrainingDataBuilder trainingDataBuilder = null;
-
-    @Before
-    public void setup() {
-        trainingDataBuilder = new TrainingDataBuilder(null);
-
-    }
 
     /**
      * This test verifies the creation of a training entity.
@@ -44,6 +38,9 @@ public class TestTrainingDataBuilder {
      */
     @Test
     public void testCreateXMLTrainingEntity() {
+
+        TrainingDataBuilder trainingDataBuilder = new TrainingDataBuilder(null, null, null);
+
         List<XMLTrainingEntity> trainingEntities = null;
 
         trainingEntities = trainingDataBuilder.createTraingEntities("Uber blew through $1 million a week", "Uber",
@@ -80,6 +77,104 @@ public class TestTrainingDataBuilder {
 
         Assert.assertEquals(50, trainingEntities.get(1).getStart());
         Assert.assertEquals(56, trainingEntities.get(1).getStop());
+
+    }
+
+    /**
+     * This test verifies the creation of a TraingDat object with a content containg
+     * special characters.
+     * 
+     */
+    @Test
+    public void testBuilder() {
+
+        ItemCollection doc = new ItemCollection();
+        doc.replaceItemValue("test", "{some text}");
+
+        String[] items = { "test" };
+
+        String text = "some text in a special textblock.\nWith line\nAnd with some text{END}";
+
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
+
+        Assert.assertEquals("some text in a special textblock. With line And with some text END ",
+                trainingData.getText());
+
+        List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
+        Assert.assertEquals(2, trainingEntities.size());
+
+        Assert.assertEquals(0, trainingEntities.get(0).getStart());
+        Assert.assertEquals(9, trainingEntities.get(0).getStop());
+
+        Assert.assertEquals(53, trainingEntities.get(1).getStart());
+        Assert.assertEquals(62, trainingEntities.get(1).getStop());
+
+    }
+
+    /**
+     * This test verifies the computes of start stop positions in a text. This test
+     * is based on the example provided by spacy Named Entity Recognition 101:
+     * https://spacy.io/usage/linguistic-features#named-entities-101
+     * 
+     * <p>
+     * The test expects the following results
+     * 
+     * <pre>
+     *     "Apple is looking at buying U.K. startup for $1 billion"
+     *     
+     *     Apple        0   5  
+     *     U.K.        27  31  
+     *     $1 billion  44  54
+     * 
+     * </pre>
+     */
+    @Test
+    public void testBuilderStartStop() {
+
+        ItemCollection doc = new ItemCollection();
+        doc.replaceItemValue("org", "Apple");
+        doc.replaceItemValue("gpe", "U.K.");
+        doc.replaceItemValue("money", "$1 billion");
+
+        String[] items = { "org","gpe","money" };
+
+        String text = "Apple is looking at buying U.K. startup for $1 billion";
+
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
+
+       
+
+        List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
+        Assert.assertEquals(3, trainingEntities.size());
+
+        Assert.assertEquals(0, trainingEntities.get(0).getStart());
+        Assert.assertEquals(5, trainingEntities.get(0).getStop());
+
+        Assert.assertEquals(27, trainingEntities.get(1).getStart());
+        Assert.assertEquals(31, trainingEntities.get(1).getStop());
+
+        Assert.assertEquals(44, trainingEntities.get(2).getStart());
+        Assert.assertEquals(54, trainingEntities.get(2).getStop());
+    }
+    
+    
+   
+
+    @Test
+    public void testCleanTextdata() {
+
+        String result = null;
+
+        result = XMLTrainingData.cleanTextdata("some {special} \"text\"!");
+        Assert.assertEquals("some special text !", result);
+
+        // test new lines
+        result = XMLTrainingData.cleanTextdata("some\n{special} \"text\"!");
+        Assert.assertEquals("some special text !", result);
+        
+        // test strip of multiple spaces
+        result = XMLTrainingData.cleanTextdata("hello     there");
+        Assert.assertEquals("hello there", result);
 
     }
 

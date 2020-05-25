@@ -22,7 +22,14 @@
  *******************************************************************************/
 package org.imixs.ml.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -108,43 +115,54 @@ public class TrainingService {
                     logger.info("...analyzing content of '" + file.getName() + "'.....");
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
                     String content = metadata.getItemValueString("content");
+                    // clean content string....
+                    // content=TrainingDataBuilder.cleanTextdata(content);
+
                     if (!content.isEmpty()) {
 
                         // build training data set...
-                        XMLTrainingData trainingData = new TrainingDataBuilder(items)
-                                .setAnalyzerEntityEvents(analyzerEntityEvents).setContent(content).setDoc(doc).build();
+                        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, items)
+                                .setAnalyzerEntityEvents(analyzerEntityEvents).build();
 
                         // update entity stats...
                         for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
                             if (stats != null) {
                                 stats.replaceItemValue("item.count." + trainingEntity.getLabel(),
                                         stats.getItemValueInteger("item.count." + trainingEntity.getLabel()) + 1);
+
+                            }
+                        }
+                        // compute stats rate for found entites
+                        List<String> entitysFound = new ArrayList<String>();
+                        for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
+                            if (!entitysFound.contains(trainingEntity.getLabel())) {
+                                entitysFound.add(trainingEntity.getLabel());
                             }
                         }
 
                         if (trainingData.getEntities().size() == 0) {
                             logger.severe("......no entities found (" + doc.getUniqueID() + ")");
-                            logger.finest("<CONTENT>" + content + "</CONTENT>");
+                            logger.finest("<CONTENT>" + trainingData.getText() + "</CONTENT>");
                             if (stats != null) {
                                 stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
                             }
                         } else {
-                            // log the XMLTrainingData object....
-                            try {
-                                JAXBContext context;
-                                context = JAXBContext.newInstance(XMLTrainingData.class);
-                                Marshaller marshaller = context.createMarshaller();
-                                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                                StringWriter out = new StringWriter();
-                                marshaller.marshal(trainingData, out);
-                                String xml = out.toString();
+                            // we only send the training data in case of all entities types are found
+                            // This means we train optimal training data only
+                            if (entitysFound.size()==items.length) {
+                                // log the XMLTrainingData object....
+                                printXML(trainingData);
 
-                                logger.info(xml);
-
-                            } catch (JAXBException e) {
-                                e.printStackTrace();
+                                String serviceEndpoint = "http://imixs-ml:8000/trainingdata/";
+                                // String serviceEndpoint="http://imixs-ml:8000/trainingdatasingle/";
+                                postTrainingData(trainingData, serviceEndpoint);
+                            } else {
+                                double rate=entitysFound.size()/items.length*100;
+                                logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: " +(Math.round(rate * 100.0) / 100.0)+ "% - will be ignored!");
+                                stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
                             }
 
+                          
                         }
 
                     } else {
@@ -162,6 +180,112 @@ public class TrainingService {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
 
+    }
+
+    /**
+     * This method converts a XMLTrainingData object into the spaCy JSON Format
+     * <p>
+     * 
+     * <pre>
+     * [
+          {
+            "text": "string",
+            "entities": [
+              {
+                "label": "string",
+                "start": 0,
+                "stop": 0
+              }
+            ]
+          }
+        ]
+     * </pre>
+     * <p>
+     * 
+     * @param trainingData
+     */
+    private String convertToSpacyFormat(XMLTrainingData trainingData) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("[{\"text\": \"");
+
+        String text = trainingData.getText();
+
+        stringBuilder.append(text).append("\",");
+
+        stringBuilder.append("\"entities\": [");
+
+        for (int i = 0; i < trainingData.getEntities().size(); i++) {
+
+            XMLTrainingEntity trainingEnity = trainingData.getEntities().get(i);
+
+            stringBuilder.append("{\"label\": \"" + trainingEnity.getLabel() + "\",");
+            stringBuilder.append("\"start\": \"" + trainingEnity.getStart() + "\",");
+            stringBuilder.append("\"stop\": \"" + trainingEnity.getStop() + "\"}");
+
+            if (i < trainingData.getEntities().size() - 1) {
+                stringBuilder.append(",");
+            }
+        }
+
+        stringBuilder.append("]}]");
+
+        return stringBuilder.toString();
+    }
+
+    public void printXML(XMLTrainingData trainingData) {
+
+        JAXBContext context;
+        try {
+            context = JAXBContext.newInstance(XMLTrainingData.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            StringWriter out = new StringWriter();
+            marshaller.marshal(trainingData, out);
+            String xml = out.toString();
+            logger.info(xml);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * This method posts a spacy json training string to the spacy service endpoint
+     * 
+     * @param trainingData
+     */
+    public void postTrainingData(XMLTrainingData trainingData, String serviceEndpoint) {
+
+        String json = convertToSpacyFormat(trainingData);
+        logger.info("...JSON=" + json);
+        logger.info("...send json to spacy...");
+        try {
+            URL url = new URL(serviceEndpoint);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = json.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                logger.info("spacy result=" + response.toString());
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
     }
 
 }

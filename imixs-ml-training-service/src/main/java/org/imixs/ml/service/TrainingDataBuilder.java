@@ -32,24 +32,18 @@ public class TrainingDataBuilder {
     private static Logger logger = Logger.getLogger(TrainingDataBuilder.class.getName());
 
     private String[] itemNames = null;
-    private String content = null;
     private ItemCollection doc = null;
     private Event<AnalyzeEntityEvent> analyzerEntityEvents = null;
+    private XMLTrainingData trainingData=null;
 
-    public TrainingDataBuilder(String[] itemNames) {
+    public TrainingDataBuilder(String text,ItemCollection doc,String[] itemNames) {
         super();
         this.itemNames = itemNames;
+        this.doc=doc;
+        trainingData = new XMLTrainingData();
+        trainingData.setText(text);
     }
 
-    public TrainingDataBuilder setContent(String content) {
-        this.content = content;
-        return this;
-    }
-
-    public TrainingDataBuilder setDoc(ItemCollection doc) {
-        this.doc = doc;
-        return this;
-    }
 
     public TrainingDataBuilder setAnalyzerEntityEvents(Event<AnalyzeEntityEvent> analyzerEntityEvents) {
         this.analyzerEntityEvents = analyzerEntityEvents;
@@ -59,8 +53,7 @@ public class TrainingDataBuilder {
     public XMLTrainingData build() {
         boolean debug = logger.isLoggable(Level.FINE);
 
-        XMLTrainingData trainingData = new XMLTrainingData();
-        trainingData.setText(content);
+        debug = true;
 
         // now lets see if we find some of our item values....
         for (String itemName : itemNames) {
@@ -76,13 +69,13 @@ public class TrainingDataBuilder {
             @SuppressWarnings("unchecked")
             List<Object> values = doc.getItemValue(itemName);
             if (values != null && values.size() > 0) {
-                List<XMLTrainingEntity> trainingEntities = createTraingEntities(content, values.get(0), itemName);
+                List<XMLTrainingEntity> trainingEntities = createTraingEntities(trainingData.getText(), values.get(0), itemName);
 
                 if (trainingEntities != null) {
                     for (XMLTrainingEntity trainingEntity : trainingEntities) {
                         trainingData.addTrainingEntity(trainingEntity);
                         if (debug) {
-                            logger.finest("......found entity " + trainingEntity.getLabel() + " = '"
+                            logger.info("......found entity " + trainingEntity.getLabel() + " = '"
                                     + trainingEntity.getValue() + "' at " + " " + trainingEntity.getStart() + ","
                                     + trainingEntity.getStop());
                         }
@@ -156,6 +149,9 @@ public class TrainingDataBuilder {
         // test all variants...
         for (String entityVariant : enityVariants) {
 
+            // clean the entityVariant text....
+            entityVariant = XMLTrainingData.cleanTextdata(entityVariant).trim();
+
             // find all matches....
             int indexPos = 0;
             while (true) {
@@ -178,5 +174,7 @@ public class TrainingDataBuilder {
         return result;
 
     }
+
+  
 
 }
