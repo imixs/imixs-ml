@@ -15,10 +15,13 @@ if __name__ == "__main__":
     
     modelfile = "training_model"
     
-    text = "what is the price of 30,99"
-  
-    result=datatrain.analyzeText(text,modelfile)
+    #text = "what is the price of 30,99"
+    
+    dinges=datamodel.AnalyzeData
+    dinges.text="what is the price of 30,99"
+    
+    result=datatrain.analyzeText(dinges,modelfile)
 
 
-    print("result=" + result)
+    print("result=" , result)
    

@@ -30,6 +30,16 @@ To test the image run the container in an interactive mode:
 	  imixs/imixs-ml
 
 
+**Note:** When running imixs-ml in docker-compose you should set the environment variable *PYTHONUNBUFFERED* to 1. This forces python flushing its stdout. 
+
+	imixs-ml: 
+	  image: imixs/imixs-ml
+	  environment:
+	    PYTHONUNBUFFERED: 1
+	    ports:
+	    - "8000:8000" 
+      
+
 ## The Model
 
 The default model for the service is set to *imixs-model*. You can of course overwrite the path to provide you own one:

@@ -21,7 +21,7 @@ language=os.getenv('MODEL_LANGUAGE', 'en')
 print("   ____      _          ") 
 print("  /  _/_ _  (_)_ __ ___  ") 
 print(" _/ //  ' \/ /\ \ /(_-<  Machine-Learning"  )
-print("/___/_/_/_/_//_\_\/___/  V0.1")
+print("/___/_/_/_/_//_\_\/___/  V0.1a")
 print("")                                           
                                            
 print("ENGINE          : https://spacy.io")                                           
@@ -32,16 +32,26 @@ print("")
 
 @app.post("/trainingdata/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
+    print(">>START trainingdata/")
     prdnlp = datatrain.updateModel(trainngdata, 10,modelpath)
+    print(">>STOP trainingdata/")
     return {"finished"}
+
+
+@app.post("/trainingdatasingle/")
+def extract_entities(trainngdata: List[datamodel.TrainingData]):
+    print(">>START trainingdatasingle/")
+    prdnlp = datatrain.updateModelSingle(trainngdata, modelpath)
+    print(">>STOP trainingdatasingle/")
+    return {"finished single model"}
 
 
 
 # Analyze a text 
 #
 @app.post("/analyze/")
-def train(text: str):
-    result=datatrain.analyzeText(text,modelpath)
+def train(analyzeData: datamodel.AnalyzeData):
+    result=datatrain.analyzeText(analyzeData,modelpath)
     return result
 
 
