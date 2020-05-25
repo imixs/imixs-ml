@@ -7,7 +7,8 @@ services:
     environment:
       TZ: "Europe/Berlin"
       TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
-      TIKA_OCR_MODE: "PDF_ONLY"
+      #TIKA_OCR_MODE: "PDF_ONLY"
+      TIKA_OCR_MODE: "MIXED"
       # Payara-Micor ENV
       MP_OPENAPI_SERVERS: "http://localhost:8080"
     ports:

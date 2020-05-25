@@ -149,7 +149,7 @@ public class TrainingService {
                         } else {
                             // we only send the training data in case of all entities types are found
                             // This means we train optimal training data only
-                            if (entitysFound.size()==items.length) {
+                            if (entitysFound.size() == items.length) {
                                 // log the XMLTrainingData object....
                                 printXML(trainingData);
 
@@ -157,12 +157,12 @@ public class TrainingService {
                                 // String serviceEndpoint="http://imixs-ml:8000/trainingdatasingle/";
                                 postTrainingData(trainingData, serviceEndpoint);
                             } else {
-                                double rate=entitysFound.size()/items.length*100;
-                                logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: " +(Math.round(rate * 100.0) / 100.0)+ "% - will be ignored!");
+                                double rate = entitysFound.size() / items.length * 100;
+                                logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: "
+                                        + (Math.round(rate * 100.0) / 100.0) + "% - will be ignored!");
                                 stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
                             }
 
-                          
                         }
 
                     } else {
@@ -175,6 +175,61 @@ public class TrainingService {
             } else {
                 logger.severe("......no files found for " + doc.getUniqueID());
                 stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
+            }
+        } catch (PluginException | RestAPIException e1) {
+            logger.severe("Error parsing documents: " + e1.getMessage());
+        }
+
+    }
+
+    /**
+     * This method is used to test an existing model. The method extracts the text
+     * contained in a snapshot document and sends the text to the Imixs-ML service
+     * to be analyzed. The resuls are printed out.
+     * 
+     * @param doc            - a workitem providing the attachments and the entity
+     *                       data
+     * @param items          - String list with items
+     * @param workflowClient - a rest client instance
+     */
+    public void testWorkitemData(ItemCollection doc, String[] items, WorkflowClient workflowClient) {
+
+        logger.info("......testing: " + doc.getUniqueID());
+
+        ItemCollection snapshot = null;
+        try {
+            // first load the snapshot
+            String snapshotID = doc.getItemValueString("$snapshotid");
+            if (!snapshotID.isEmpty()) {
+                snapshot = workflowClient.getDocument(snapshotID);
+            }
+
+            if (snapshot == null) {
+                logger.warning("Unable to load snapshot for document " + doc.getUniqueID());
+                return;
+            }
+
+            tikaDocumentService.extractText(snapshot);
+
+            // now we load the attachments...
+            List<FileData> files = snapshot.getFileData();
+            if (files != null && files.size() > 0) {
+                for (FileData file : files) {
+
+                    logger.info("...analyzing content of '" + file.getName() + "'.....");
+                    ItemCollection metadata = new ItemCollection(file.getAttributes());
+                    String content = metadata.getItemValueString("content");
+
+                    // clean content string....
+                    content = XMLTrainingData.cleanTextdata(content);
+                    String serviceEndpoint = "http://imixs-ml:8000/analyze/";
+                    postAnalyzeData(content, serviceEndpoint);
+
+                }
+
+            } else {
+                logger.severe("......no files found for " + doc.getUniqueID());
+
             }
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
@@ -207,30 +262,22 @@ public class TrainingService {
     private String convertToSpacyFormat(XMLTrainingData trainingData) {
 
         StringBuilder stringBuilder = new StringBuilder();
-
         stringBuilder.append("[{\"text\": \"");
-
         String text = trainingData.getText();
-
         stringBuilder.append(text).append("\",");
-
         stringBuilder.append("\"entities\": [");
 
         for (int i = 0; i < trainingData.getEntities().size(); i++) {
-
             XMLTrainingEntity trainingEnity = trainingData.getEntities().get(i);
-
             stringBuilder.append("{\"label\": \"" + trainingEnity.getLabel() + "\",");
             stringBuilder.append("\"start\": \"" + trainingEnity.getStart() + "\",");
             stringBuilder.append("\"stop\": \"" + trainingEnity.getStop() + "\"}");
-
             if (i < trainingData.getEntities().size() - 1) {
                 stringBuilder.append(",");
             }
         }
 
         stringBuilder.append("]}]");
-
         return stringBuilder.toString();
     }
 
@@ -258,6 +305,49 @@ public class TrainingService {
     public void postTrainingData(XMLTrainingData trainingData, String serviceEndpoint) {
 
         String json = convertToSpacyFormat(trainingData);
+        logger.info("...JSON=" + json);
+        logger.info("...send json to spacy...");
+        try {
+            URL url = new URL(serviceEndpoint);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+
+            try (OutputStream os = con.getOutputStream()) {
+                byte[] input = json.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                logger.info("spacy result=" + response.toString());
+            }
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * This method posts a spacy json training string to the spacy service endpoint
+     * 
+     * @param trainingData
+     */
+    public void postAnalyzeData(String text, String serviceEndpoint) {
+
+        // build the spacy format.....
+        // {"text": "..."}
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("{\"text\": \"").append(text).append("\"}");
+
+        String json = stringBuilder.toString();
         logger.info("...JSON=" + json);
         logger.info("...send json to spacy...");
         try {

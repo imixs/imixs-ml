@@ -214,12 +214,16 @@ def analyzeText(analyzeData, modelPath):
     nlp = spacy.load(modelPath)  # load existing spaCy model
     
     doc = nlp(analyzeData.text)
-    
+    print("===============> analyze Text....")
     result = []
     for ent in doc.ents:
-        print(ent.text, ent.start_char, ent.end_char, ent.label_)
+        #print(ent.label_, ent.start_char, ent.end_char,ent.text )
+        print("    ", ent.label_," = ", ent.text)
         result.append({"label": ent.label_,"text": ent.text})
         
+    print("===============")
+    print(" ")
+    print(" ")
     return result
 
 

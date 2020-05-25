@@ -4,6 +4,9 @@ The Imixs-ML Training Service is a microservice to train a ML Model based on the
 
 	http://localhost:8080/api/openapi-ui/
 
+
+## The Training Mode
+
 To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with the following XML payload:
 
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -41,9 +44,48 @@ The itemname is equal to the name identifying the entity within a spaCy model. I
 This example maps the item '_capacity' to the entity '_invoicetotal'.
 
 
-## Build the ML Training Service
 
-To build the training service just build the corresponding Docker containers:
+## The Testing Mode
+
+You can also test an existing model. The Imixs-ML Training service provides the Rest Resource */testing/*. This resource expects a POST request with the following XML payload:
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<XMLConfig>
+		<target>string</target>
+		<user>string</user>
+		<password>string</password>
+		<query>string</query>
+		<pagesize>0</pagesize>
+		<entities>string</entities>
+	</XMLConfig>
+
+
+In this mode, the service reads documents stored in a workflow instance and performs a OCR Scan. The extracted text is than send for analyzing to the Imixs-ML Service. The results are printed into the log file. 
+You can use this mode to verify your current model.
+
+
+# The EntityAdapter
+
+The EntityAdapter can be used to  adapt an entity with alternative fromating values.  This adapter is useful if a string constant can ocure in different formats like a currency. For example the float value 1500.00 can have different presentations in a textfragment:
+
+
+	1500.00
+	1500,00
+	1.500,00
+	1,500.00
+	
+The TrainingService implements an Observer Pattern based on CDI Events to call registered EntityAdapters
+The Event is defined by the class:
+
+	org.imixs.ml.service.AnalyzeEntityEvent
+
+
+
+
+# Build and Run
+
+
+To build the Imixs-ML Training service just build the corresponding Docker containers:
 
 	$ mvn clean install -Pdocker
 
@@ -63,21 +105,5 @@ Run the OpenAPI UI:
 
 	http://localhost:8080/api/openapi-ui/
 	
-
-
-# EntityAdapter
-
-The EntityAdapter can be used to  adapt an entity with alternative fromating values.  This adapter is useful if a string constant can ocure in different formats like a currency. For example the float value 1500.00 can have different presentations in a textfragment:
-
-
-	1500.00
-	1500,00
-	1.500,00
-	1,500.00
-	
-The TrainingService implements an Observer Pattern based on CDI Events to call registered EntityAdapters
-The Event is defined by the class:
-
-	org.imixs.ml.service.AnalyzeEntityEvent
 
 
