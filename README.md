@@ -1,121 +1,32 @@
-https://github.com/imixs/imixs-cloud/blob/master/doc/CEPH.md# Imixs-ML
+# Imixs-ML
 
-Imixs-ML is a microservice project with the goal to provide a NPL Named Entity Recognition Service for Business Process Management.
+Imixs-ML is a machine learning framework for [Imixs-Workflow](https://www.imixs.org). The project provides several microservices and APIs which integrate into an Imixs-Workflow environment. This project provides a generic machine learning API to adapt different ML frameworks like the [spaCy API](https://spacy.io/). In this way the Imixs-ML project combines the concepts of machine learning with the concepts of business process management. This is a powerful and very flexible solution to digitize business processes.
 
-The project is at the moment experimental only.
+The project consists of the following modules:
 
-# Imixs-ML Service
+ * [Imixs-ML API](./imixs-ml-api/README.md) - a microservice to be integrated into a Imixs-Workflow environment
+ * [Imixs-ML Core](./imixs-ml-core/README.md) - java core libraries to be used to access different machine learning frameworks
+ * [Imixs-ML spaCy](./imixs-ml-spacy/README.md) - a wrapper service for [spacy.io](https://spacy.io/)
+ 
+ 
 
-The subproject Imixs-ML Service provides a ML Service based on the spaCy ML library. The service can be run in a Docker container. 
+# Imixs-ML API
 
+The Imixs-ML API defines a generic API to exchange business data with a machine learning framework. This api defines an object class to train a ml-model as also an obejct class to analyse business data.
 
-# Imixs-ML Learning
+Learn more in the section [Imixs-ML API](./imixs-ml-api/README.md).  
 
-The subproject Imixs-ML Learning provides Java based components to be integrated into a Imixs-Workflow project to update or create a SpaCy Model.
+# Imixs-ML Core
 
+The module Imixs-ML Core provides a java api to be integrated into the Imixs-Workflow engine. 
 
-# Docker
-
-In this project we provide a Docker image which is based on [tiangolo/uvicorn-gunicorn-fastapi-docker](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker). This image comes with Uvicorn managed by Gunicorn for high-performance FastAPI web applications in Python 3.7. The image has an "auto-tuning" mechanism included, so that it is very easy to add custom Rest-API resources. 
-
-To build the image from the Dockerfile run: 
-
-
-    $ docker build --tag=imixs/imixs-ml .
-
-To test the image run the container in an interactive mode:
-    
-	$ docker run --rm --name="imixs-ml" -it \
-	  -p 8000:8000 \
-	  imixs/imixs-ml
+Learn more in the section [Imixs-ML Core](./imixs-ml-core/README.md).  
 
 
-**Note:** When running imixs-ml in docker-compose you should set the environment variable *PYTHONUNBUFFERED* to 1. This forces python flushing its stdout. 
+# Imixs-ML spaCy
 
-	imixs-ml: 
-	  image: imixs/imixs-ml
-	  environment:
-	    PYTHONUNBUFFERED: 1
-	    ports:
-	    - "8000:8000" 
-      
+Imixs-ML-spaCy is a wrapper service to adapt the [spaCy API](https://spacy.io/) for the Imixs-ML framework. 
 
-## The Model
-
-The default model for the service is set to *imixs-model*. You can of course overwrite the path to provide you own one:
-
-	$ docker run --rm --name="imixs-ml" -it \
-	  -e MODEL_PATH="my-model" \
-	  -p 8000:8000 \
-	  imixs/imixs-ml
-
-### Language
-
-The model language is set by ISO code of the language class to load. The default value is *en*
-
-	$ docker run --rm --name="imixs-ml" -it \
-	  -e MODEL_LANGUAGE="de" \
-	  -p 8000:8000 \
-	  imixs/imixs-ml
-	  
-**Note:** The language is only relevant for creating a new model. You should not change the language for an existing model.	  
-
-## Testing
-Open the api documentation via:
-
-	http://localhost:8000/docs
-	
-You can test the service with curl:
-
-
-	$ curl -X POST "http://localhost:8000/text/?lang=en" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{\"text\":\"M. Melman is a team member of the open source project Imixs-Workflow.\"}"
-
-
-You your can test from the swagger UI http://localhost:8000/docs
-
-<img src="images/swaggerui.png" />
-
-The following example for a POST request...
-
-	{
-	  "text": "M. Melman is a team member of the open source project Imixs-Workflow."
-	}
-
-...will result in an output like this:
-
-	[
-	  {
-	    "label": "person",
-	    "text": "Melman"
-	  },
-	  {
-	    "label": "project",
-	    "text": "Imixs-Workflow"
-	  }
-	]
-
-
-# Development
-
-You can use the Eclipse IDE with the Pydev plugin for development.
-To prepare you environment make sure that pyhton 3.7 and pip3 is installed correcty.
-
-To install pip3 on debian run:
-
-
-	$ sudo apt install python3-pip
-	
-Next you can import the spacy and fastapi dependencys
-
-	$ pip3 install -r requirements.txt
-
-
-
-
-## Eclipse Setup
-
-If you use the Eclipse Plugin Pydev make sure you added the spacy lib folder.
-In the properties for your pydev project, there's a pane called "PyDev - PYTHONPATH", with a sub-pane called "External Libraries". You can add source folders to the path using that pane. Your project code will then be able to import modules from those source folders. For spacy this may be the folder _~/.local/lib/python3.7/site-packages/spacy_
 
 
 # Contribute

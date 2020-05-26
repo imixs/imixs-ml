@@ -1,9 +1,22 @@
 version: "3.3"
 services:
 
-# Imixs-ML training sevice
-  training-service:
-    image: imixs/imixs-ml-training-service
+
+# Imixs-ML-spaCy Service
+  imixs-ml-spacy: 
+    image: imixs/imixs-ml-spacy
+    environment:
+      PYTHONUNBUFFERED: 1
+      TZ: "Europe/Berlin"
+      MODEL_LANGUAGE: "de"
+
+    ports:
+      - "8000:8000"  
+
+
+# Imixs-ML API sevice
+  imixs-ml-api:
+    image: imixs/imixs-ml-api
     environment:
       TZ: "Europe/Berlin"
       TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
@@ -29,16 +42,4 @@ services:
       - ~/git/imixs-ml/imixs-ml-training-service/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
 
 
-
-
-# Imixs-mL Service
-  imixs-ml: 
-    image: imixs/imixs-ml
-    environment:
-      PYTHONUNBUFFERED: 1
-      TZ: "Europe/Berlin"
-      MODEL_LANGUAGE: "de"
-
-    ports:
-      - "8000:8000"  
 

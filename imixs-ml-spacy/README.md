@@ -22,8 +22,8 @@ To test the image run the container in an interactive mode:
 
 **Note:** When running imixs-ml-spacy in docker-compose you should set the environment variable *PYTHONUNBUFFERED* to 1. This forces python flushing its stdout. 
 
-	imixs-ml: 
-	  image: imixs/imixs-ml
+	imixs-ml-spacy: 
+	  image: imixs/imixs-ml-spacy
 	  environment:
 	    PYTHONUNBUFFERED: 1
 	    ports:
@@ -34,19 +34,19 @@ To test the image run the container in an interactive mode:
 
 The default model for the service is set to *imixs-model*. You can of course overwrite the path to provide you own one:
 
-	$ docker run --rm --name="imixs-ml" -it \
+	$ docker run --rm --name="imixs-ml-spacy" -it \
 	  -e MODEL_PATH="my-model" \
 	  -p 8000:8000 \
-	  imixs/imixs-ml
+	  imixs/imixs-ml-spacy
 
 ### Language Support
 
 The spaCy API provides different language models. The model language is set by ISO code of the language class to load. The default value is *en*. You can overwrite the model by setting the environment variable *MODEL_LANGUAGE*
 
-	$ docker run --rm --name="imixs-ml" -it \
+	$ docker run --rm --name="imixs-ml-spacy" -it \
 	  -e MODEL_LANGUAGE="de" \
 	  -p 8000:8000 \
-	  imixs/imixs-ml
+	  imixs/imixs-ml-spacy
 	  
 **Note:** The language is only relevant for creating a new model. You should not change the language for an existing model.	  
 
