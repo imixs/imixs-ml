@@ -26,7 +26,7 @@
  *      Ralph Soika - Software Developer
  */
 
-package org.imixs.ml.data.xml;
+package org.imixs.ml.xml;
 
 import java.io.Serializable;
 import java.util.ArrayList;

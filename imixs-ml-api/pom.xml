@@ -51,7 +51,7 @@
 		<plugins>
 
 			<!-- use JDK settings for compiling -->
-			<!--  -->
+			<!-- -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -89,6 +89,13 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.imixs.workflow</groupId>
+			<artifactId>imixs-ml-core</artifactId>
+			<version>${project.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- Imixs Workflow -->
 		<dependency>
 			<groupId>org.imixs.workflow</groupId>
@@ -100,9 +107,9 @@
 			<artifactId>imixs-melman</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		
-		
-		
+
+
+
 		<dependency>
 			<groupId>org.imixs.workflow</groupId>
 			<artifactId>imixs-archive-documents</artifactId>
@@ -124,8 +131,19 @@
 			<scope>test</scope>
 		</dependency>
 
-
-
+		<!-- Jersey JAX-RS client -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.25.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Jackson 2.x as JSON provider -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.25.1</version>
+		</dependency>
 
 	</dependencies>
 </project>
