@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Event;
 
-import org.imixs.ml.data.xml.XMLTrainingData;
-import org.imixs.ml.data.xml.XMLTrainingEntity;
+import org.imixs.ml.xml.XMLTrainingData;
+import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
 
 /**
@@ -38,7 +38,7 @@ public class TrainingDataBuilder {
 
     public TrainingDataBuilder(String text,ItemCollection doc,String[] itemNames) {
         super();
-        this.itemNames = itemNames;
+        this.itemNames = itemNames; 
         this.doc=doc;
         trainingData = new XMLTrainingData();
         trainingData.setText(text);

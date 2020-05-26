@@ -18,8 +18,8 @@ import javax.ws.rs.core.Response;
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
-import org.imixs.ml.data.xml.XMLConfig;
 import org.imixs.ml.service.TrainingService;
+import org.imixs.ml.xml.XMLConfig;
 import org.imixs.workflow.ItemCollection;
 
 @Named

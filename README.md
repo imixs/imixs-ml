@@ -27,7 +27,7 @@ Learn more in the section [Imixs-ML Core](./imixs-ml-core/README.md).
 
 Imixs-ML-spaCy is a wrapper service to adapt the [spaCy API](https://spacy.io/) for the Imixs-ML framework. 
 
-
+Learn more in the section [Imixs-ML spaCy](./imixs-ml-spacy/README.md). 
 
 # Contribute
 

@@ -2,8 +2,8 @@ package org.imixs.ml.service;
 
 import java.util.List;
 
-import org.imixs.ml.data.xml.XMLTrainingData;
-import org.imixs.ml.data.xml.XMLTrainingEntity;
+import org.imixs.ml.xml.XMLTrainingData;
+import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
 import org.junit.Test;
 

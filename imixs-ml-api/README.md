@@ -5,6 +5,59 @@ The Imixs-ML Training Service is a microservice to train a ML Model based on the
 	http://localhost:8080/api/openapi-ui/
 
 
+## The TrainingData Object
+
+To train a ml-model an array of TraingData objects can be sent to the API resource /trainingdata/
+
+A training data object array is defined by the following JSON structure:
+
+	[
+	  {
+	    "text": "String",
+	    "entities": [
+	      {
+	        "label": "string",
+	        "start": 0,
+	        "stop": 0
+	      }
+	    ]
+	  }
+	]
+	
+Each Training Data object contains a *text* and a list of *entity* objects. A single entity object is defined by its label and the start/stop position within the training text. So it is possible to define multiple entity objects for one training text. See the following example:
+
+
+	[
+	  {
+	    "text": "Imixs Workflow in an open source project organized from Munich.",
+	    "entities": [
+	      {
+	        "label": "project",
+	        "start": 0,
+	        "stop": 14
+	      },
+	      {
+	        "label": "city",
+	        "start": 56,
+	        "stop": 62
+	      }
+	    ]
+	  }
+	]
+  
+
+
+## The AnalyseData Object
+
+To analyse a text based on a ml-model a AnalyseData object can be send to the API resource /analyse/
+
+An AnaylseData object has the following JSON structure:
+
+	{
+	  "text": "string"
+	}
+
+
 ## The Training Mode
 
 To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with the following XML payload:
