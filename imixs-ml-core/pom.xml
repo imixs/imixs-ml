@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.imixs.workflow</groupId>
     <artifactId>imixs-ml</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>imixs-ml-training-core</artifactId>
+  <artifactId>imixs-ml-core</artifactId>
 </project>

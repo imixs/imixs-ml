@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.imixs.workflow</groupId>
 	<artifactId>imixs-ml</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Imxis ML</name>
 	<modules>
-		<module>imixs-ml-learning</module>
-		<module>imixs-ml-training-core</module>
-		<module>imixs-ml-training-service</module>
+		<module>imixs-ml-spacy</module>
+		<module>imixs-ml-core</module>
+		<module>imixs-ml-api</module>
 	</modules>
 
 	<url>https://github.com/imixs/imixs-ml</url>
