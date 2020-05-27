@@ -2,6 +2,8 @@
 
 Imixs-ML is a machine learning framework for [Imixs-Workflow](https://www.imixs.org). The project provides several microservices and APIs which integrate into an Imixs-Workflow environment. This project provides a generic machine learning API to adapt different ML frameworks like the [spaCy API](https://spacy.io/). In this way the Imixs-ML project combines the concepts of machine learning with the concepts of business process management. This is a powerful and very flexible solution to digitize business processes.
 
+<p align="center"><img src="images/imixs-ml-architecture-001.png" /></p>
+
 The project consists of the following modules:
 
  * [Imixs-ML API](./imixs-ml-api/README.md) - a microservice to be integrated into a Imixs-Workflow environment
