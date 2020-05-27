@@ -1,11 +1,15 @@
 # Imixs-ML-spaCy
 
-Imixs-ML-spaCy is a wrapper service to adapt the [spaCy API](https://spacy.io/) for the Imixs-ML framework. The Imixs-ML-spaCy service runs in a Docker container and can be deployed in a container environment like Kubernetes or Docker Swarm.  
+Imixs-ML-spaCy is a wrapper service to adapt the [spaCy API](https://spacy.io/) for the Imixs-ML framework. The service is based on the [Imixs-ML-API](../imixs-ml-api/README.md). 
+
+<p align="center"><img src="../images/imixs-ml-architecture-003.png" /></p>
 
 
 # Docker
 
-The Imixs-ML-spaCy wrapper service is provided as a Docker container. The image is based on the [tiangolo/uvicorn-gunicorn-fastapi-docker](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker) provided Uvicorn. Uvicorn managed by Gunicorn is a high-performance FastAPI application framework written in Python 3.7. The image has an "auto-tuning" mechanism included. This makes it very easy to add custom Rest-API resources like the Imixs-ML API. 
+The Imixs-ML-spaCy service runs in a Docker container and can be deployed in a container environment like Kubernetes or Docker Swarm.  
+
+The image is based on the [tiangolo/uvicorn-gunicorn-fastapi-docker](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker) provided Uvicorn. Uvicorn managed by Gunicorn is a high-performance FastAPI application framework written in Python 3.7. The image has an "auto-tuning" mechanism included. This makes it very easy to add custom Rest-API resources like the Imixs-ML API. 
 
 ## Build and Run
 

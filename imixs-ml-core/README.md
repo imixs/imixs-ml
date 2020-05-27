@@ -6,6 +6,15 @@ In this way the Imixs-ML Core API acts as an *Anti Corruption Layer* between the
 
 <p align="center"><img src="../images/imixs-ml-architecture-002.png" /></p>
 
+
+
+## Adapter Services
+
+For each ml framework a separate Adapter Service implementing the Imixs-ML Core api can be provided. The Adapter service wraps the concrete ml framework API into the Imixs-ML API. 
+
+For example the [Imixs-ML-spaCy](../imixs-ml-spacy/README.md) module provides a wrapper service for the [spaCy](https://spacy.io/) ml framework written in Python. 
+
+
 ## The TrainingData Object
 
 To train a ml-model an array of TraingData objects can be sent to the API resource /trainingdata/
@@ -57,5 +66,17 @@ An AnaylseData object has the following JSON structure:
 	{
 	  "text": "string"
 	}
+
+
+
+
+## The ML-Client
+
+The ML-CLient is a Rest Service Client based on Jax-rs to access an ml framework. It can be used to train data or to analyse data.
+
+
+	MLClient mlClient = new MLClient();
+	
+	mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
 
