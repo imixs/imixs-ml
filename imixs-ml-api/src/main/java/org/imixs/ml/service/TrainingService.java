@@ -82,7 +82,7 @@ public class TrainingService {
      * @param stats          - an itemCollection to collect statistical data.
      * @param workflowClient - a rest client instance
      */
-    public void trainWorkitemData(ItemCollection doc, String[] items, ItemCollection stats,
+    public void trainWorkitemData(ItemCollection doc, List<String> items, ItemCollection stats,
             WorkflowClient workflowClient) {
 
         logger.info("......create new training data for: " + doc.getUniqueID());
@@ -144,7 +144,7 @@ public class TrainingService {
                         } else {
                             // we only send the training data in case of all entities types are found
                             // This means we train optimal training data only
-                            if (entitysFound.size() == items.length) {
+                            if (entitysFound.size() == items.size()) {
                                 // log the XMLTrainingData object....
                                 printXML(trainingData);
 
@@ -156,7 +156,7 @@ public class TrainingService {
                                 
                                 //postTrainingData(trainingData, serviceEndpoint);
                             } else {
-                                double rate = entitysFound.size() / items.length * 100;
+                                double rate = entitysFound.size() / items.size() * 100;
                                 logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: "
                                         + (Math.round(rate * 100.0) / 100.0) + "% - will be ignored!");
                                 stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
@@ -191,7 +191,7 @@ public class TrainingService {
      * @param items          - String list with items
      * @param workflowClient - a rest client instance
      */
-    public void testWorkitemData(ItemCollection doc, String[] items, WorkflowClient workflowClient) {
+    public void testWorkitemData(ItemCollection doc, List<String> items, WorkflowClient workflowClient) {
 
         logger.info("......testing: " + doc.getUniqueID());
 

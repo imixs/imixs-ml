@@ -31,12 +31,12 @@ public class TrainingDataBuilder {
 
     private static Logger logger = Logger.getLogger(TrainingDataBuilder.class.getName());
 
-    private String[] itemNames = null;
+    private List<String> itemNames = null;
     private ItemCollection doc = null;
     private Event<AnalyzeEntityEvent> analyzerEntityEvents = null;
     private XMLTrainingData trainingData=null;
 
-    public TrainingDataBuilder(String text,ItemCollection doc,String[] itemNames) {
+    public TrainingDataBuilder(String text,ItemCollection doc,List<String> itemNames) {
         super();
         this.itemNames = itemNames; 
         this.doc=doc;

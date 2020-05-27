@@ -1,5 +1,6 @@
 package org.imixs.ml.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.imixs.ml.xml.XMLTrainingData;
@@ -91,7 +92,7 @@ public class TestTrainingDataBuilder {
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("test", "{some text}");
 
-        String[] items = { "test" };
+        List<String> items = Arrays.asList(new String[] { "test" });
 
         String text = "some text in a special textblock.\nWith line\nAnd with some text{END}";
 
@@ -136,13 +137,11 @@ public class TestTrainingDataBuilder {
         doc.replaceItemValue("gpe", "U.K.");
         doc.replaceItemValue("money", "$1 billion");
 
-        String[] items = { "org","gpe","money" };
+        List<String> items = Arrays.asList(new String[] { "org", "gpe", "money" });
 
         String text = "Apple is looking at buying U.K. startup for $1 billion";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
-
-       
 
         List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
         Assert.assertEquals(3, trainingEntities.size());
@@ -156,9 +155,6 @@ public class TestTrainingDataBuilder {
         Assert.assertEquals(44, trainingEntities.get(2).getStart());
         Assert.assertEquals(54, trainingEntities.get(2).getStop());
     }
-    
-    
-   
 
     @Test
     public void testCleanTextdata() {
@@ -171,7 +167,7 @@ public class TestTrainingDataBuilder {
         // test new lines
         result = XMLTrainingData.cleanTextdata("some\n{special} \"text\"!");
         Assert.assertEquals("some special text !", result);
-        
+
         // test strip of multiple spaces
         result = XMLTrainingData.cleanTextdata("hello     there");
         Assert.assertEquals("hello there", result);

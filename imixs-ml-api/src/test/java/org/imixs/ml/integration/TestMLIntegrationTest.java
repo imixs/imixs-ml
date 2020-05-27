@@ -1,5 +1,6 @@
 package org.imixs.ml.integration;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ public class TestMLIntegrationTest {
     private IntegrationTest integrationTest = new IntegrationTest(ML_SERVICE_API);
 
     private TrainingService trainingService = null;
-    String[] items = null;
+    List<String> items = null;
     MLClient mlClient = null;
 
     /**
@@ -101,7 +102,7 @@ public class TestMLIntegrationTest {
      */
     @Test
     public void testBuilderStartStop() {
-        items = new String[] { "project", "city" };
+        items = Arrays.asList( new String[] { "project", "city" });
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("project", "Imixs Workflow");
         doc.replaceItemValue("city", "Munich");
@@ -129,7 +130,7 @@ public class TestMLIntegrationTest {
      */
     @Test
     public void testCreateSingleXMLTrainingEntity() {
-        items = new String[] { "iban", "price" };
+        items = Arrays.asList( new String[]  { "iban", "price" });
         String content = "what is the price of 11,00? with an IBAN of XX08 1101 0030 0000 2222 02.";
         ItemCollection doc = new ItemCollection();
         doc.setItemValue("price", "11,00");
@@ -142,7 +143,6 @@ public class TestMLIntegrationTest {
         Assert.assertEquals(26, trainingData.getEntities().get(1).getStop());
 
         trainingService.printXML(trainingData);
-//        trainingService.postTrainingData(trainingData,SERVICE_ENDPOINT);
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
     }
@@ -181,7 +181,7 @@ public class TestMLIntegrationTest {
     @Test
     public void testFullTrainingDataSet() {
 
-        items = new String[] { "iban", "price" };
+        items = Arrays.asList( new String[]  { "iban", "price" });
         String content = null;
         ItemCollection doc = null;
         XMLTrainingData trainingData = null;
@@ -325,10 +325,10 @@ public class TestMLIntegrationTest {
 
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("org", "Kéin");
+  
+        items = Arrays.asList( new String[]  { "org", "gpe", "money" });
 
-        String[] items = { "org", "gpe", "money" };
-
-        String text = "Postfach 51 10 26 - 50946 Kéin  Krieger GmbH Möbelhaus";
+        String text = "Postfach 51 10 26 - 50946 Kéin  Krouser GmbH Möbelhaus";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
 

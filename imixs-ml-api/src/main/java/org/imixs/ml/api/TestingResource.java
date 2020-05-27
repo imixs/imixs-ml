@@ -19,8 +19,9 @@ import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.service.TrainingService;
-import org.imixs.ml.xml.XMLConfig;
 import org.imixs.workflow.ItemCollection;
+import org.imixs.workflow.xml.XMLDocument;
+import org.imixs.workflow.xml.XMLDocumentAdapter;
 
 @Named
 @Path("testing")
@@ -60,43 +61,39 @@ public class TestingResource {
      * @param requestXML - workitem data
      * @return - XMLDocument with option list
      */
+    @SuppressWarnings("unchecked")
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public Response testingData(XMLConfig config) {
+    public Response testingData(XMLDocument xmlConfig) {
 
+        ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
         logger.info("...starting testing....");
-      
-        // properties.get("target.url");
-        logger.info("target.url=" + config.getTarget());
-        try {
-            WorkflowClient worklowClient = new WorkflowClient(config.getTarget());
-            // register the authenticator
-            FormAuthenticator formAuth = new FormAuthenticator(config.getTarget(), config.getUser(),
-                    config.getPassword());
-            worklowClient.registerClientRequestFilter(formAuth);
 
-            String items = config.getEntities();
-            if (items.contains("$file") || items.contains("$snapshotid")) {
+        try {
+            WorkflowClient worklowClient = TrainingApplication.buildWorkflowClient(config);
+
+            List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
+            if (itemNames.contains("$file") || itemNames.contains("$snapshotid")) {
                 logger.severe("$file and $snapshot must not be included in the target.entities!");
                 System.exit(0);
             }
-            // now lets see if we find some of our intem values....
-            String[] itemNames = items.split(",");
 
             // select result
-            String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
+            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_TRAGET_QUERY),
+                    StandardCharsets.UTF_8.toString());
 
-            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true&pageSize="
-                    + config.getPagesize();
+            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
 
-            queryURL = appendItenNames(queryURL, itemNames);
+            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGESIZE)
+                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGEINDEX);
+
+            queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
             logger.info("......select workitems: " + queryURL);
 
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
 
-         
             logger.info("...... " + documents.size() + " documents found");
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
@@ -109,40 +106,12 @@ public class TestingResource {
             e.printStackTrace();
         }
 
-
         logger.info("**************** FINISHED ***********************");
-       
 
         // return response
         return Response.ok(MediaType.APPLICATION_XML).build();
     }
 
-    /**
-     * THis method appends the item query param to an url based on a config list of
-     * itemnames.
-     * <p>
-     * The method tests for | character. If found only the first part is taken as
-     * the item name
-     * 
-     * @param url
-     * @param entities
-     * @return
-     */
-    private String appendItenNames(String url, String[] itemNames) {
-
-        String queryParam = "&items=$file,$snapshotid,$uniqueid";
-        for (String itemName : itemNames) {
-            itemName = itemName.toLowerCase().trim();
-            // if the itemName contains a | character than we do a mapping here.....
-            if (itemName.contains("|")) {
-                itemName = itemName.substring(0, itemName.indexOf('|')).trim();
-
-            }
-            queryParam = queryParam + "," + itemName;
-
-        }
-        url = url + queryParam;
-        return url;
-    }
+    
 
 }

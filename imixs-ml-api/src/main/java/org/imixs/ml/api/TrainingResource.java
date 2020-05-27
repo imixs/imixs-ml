@@ -19,11 +19,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.service.TrainingService;
-import org.imixs.ml.xml.XMLConfig;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.xml.XMLDataCollectionAdapter;
 import org.imixs.workflow.xml.XMLDocument;
@@ -46,16 +44,30 @@ public class TrainingResource {
      * 
      * <pre>
      * {@code
-       <?xml version="1.0" encoding="UTF-8"?>
-    <XMLConfig>
-    <serialVersionUID>0</serialVersionUID>
-    <target>string</target>
-    <user>string</user>
-    <password>string</password>
-    <query>string</query>
-    <pagesize>0</pagesize>
-    <entities>string</entities>
-    </XMLConfig>
+    <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema">
+        <item name="target.url"><value xsi:type=
+    "xs:string">http://localhost:8080/api/</value></item>
+        <item name="target.userid"><value xsi:type="xs:string">admin</value></item>
+        <item name="target.password"><value xsi:type="xs:string">...</value></item>
+        <item name="target.query"><value xsi:type=
+    "xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
+        <item name="target.pagesize"><value xsi:type="xs:int">100</value></item>
+        <item name="target.pageindex"><value xsi:type="xs:int">0</value></item>
+        
+        <item name="entities">
+            <value xsi:type="xs:string">_iban</value>
+            <value xsi:type="xs:string">_bic</value>
+            <value xsi:type="xs:string">_invoicetotal</value>
+            <value xsi:type="xs:string">_invoicenumber</value>
+        </item>
+        
+        <item name="tika.options">
+            <value xsi:type="xs:string">4711-1</value>
+            <value xsi:type="xs:string">4711-2</value>
+        </item>
+    </document>
      * }
      * </pre>
      * 
@@ -67,38 +79,38 @@ public class TrainingResource {
      * @param requestXML - workitem data
      * @return - XMLDocument with option list
      */
+    @SuppressWarnings("unchecked")
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public Response trainData(XMLConfig config) {
+    public Response trainData(XMLDocument xmlConfig) {
+
+        ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
+        // validate Input Data....
+        logger.info("...starting testing....");
 
         // validate Input Data....
         logger.info("...starting training....");
         ItemCollection stats = new ItemCollection();
 
-        // properties.get("target.url");
-        logger.info("target.url=" + config.getTarget());
         try {
-            WorkflowClient worklowClient = new WorkflowClient(config.getTarget());
-            // register the authenticator
-            FormAuthenticator formAuth = new FormAuthenticator(config.getTarget(), config.getUser(),
-                    config.getPassword());
-            worklowClient.registerClientRequestFilter(formAuth);
+            WorkflowClient worklowClient = TrainingApplication.buildWorkflowClient(config);
 
-            String items = config.getEntities();
-            if (items.contains("$file") || items.contains("$snapshotid")) {
+            List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
+            if (itemNames.contains("$file") || itemNames.contains("$snapshotid")) {
                 logger.severe("$file and $snapshot must not be included in the target.entities!");
                 System.exit(0);
             }
-            // now lets see if we find some of our intem values....
-            String[] itemNames = items.split(",");
 
             // select result
-            String encodedQuery = URLEncoder.encode(config.getQuery(), StandardCharsets.UTF_8.toString());
+            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_TRAGET_QUERY),
+                    StandardCharsets.UTF_8.toString());
 
-            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true&pageSize="
-                    + config.getPagesize();
+            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
 
-            queryURL = appendItenNames(queryURL, itemNames);
+            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGESIZE)
+                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGEINDEX);
+
+            queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
             logger.info("......select workitems: " + queryURL);
 
@@ -152,32 +164,6 @@ public class TrainingResource {
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
     }
 
-    /**
-     * THis method appends the item query param to an url based on a config list of
-     * itemnames.
-     * <p>
-     * The method tests for | character. If found only the first part is taken as
-     * the item name
-     * 
-     * @param url
-     * @param entities
-     * @return
-     */
-    private String appendItenNames(String url, String[] itemNames) {
-
-        String queryParam = "&items=$file,$snapshotid,$uniqueid";
-        for (String itemName : itemNames) {
-            itemName = itemName.toLowerCase().trim();
-            // if the itemName contains a | character than we do a mapping here.....
-            if (itemName.contains("|")) {
-                itemName = itemName.substring(0, itemName.indexOf('|')).trim();
-
-            }
-            queryParam = queryParam + "," + itemName;
-
-        }
-        url = url + queryParam;
-        return url;
-    }
+   
 
 }

@@ -1,7 +1,5 @@
 # Imixs-ML - API
 
-
-
 The Imixs-ML API Service is a microservice to train a ML Model based on the workflow content of an Imixs-Office-Workflow instance. The service provides an OpenAPI-UI to interact with the service from your web browser:
 
 	http://localhost:8080/api/openapi-ui/
@@ -11,30 +9,32 @@ The Imixs-ML API Service is a microservice to train a ML Model based on the work
 
 ## The Training Mode
 
-To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with the following XML payload:
+To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with an Imixs XMLDocument providing the following XML payload:
 
-	<?xml version="1.0" encoding="UTF-8"?>
-	<XMLConfig>
-		<target>string</target>
-		<user>string</user>
-		<password>string</password>
-		<query>string</query>
-		<pagesize>0</pagesize>
-		<entities>string</entities>
-	</XMLConfig>
+	<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema">
+		<item name="target.url"><value xsi:type="xs:string">http://localhost:8080/api/</value></item>
+		<item name="target.userid"><value xsi:type="xs:string">admin</value></item>
+		<item name="target.password"><value xsi:type="xs:string">...</value></item>
+		<item name="target.query"><value xsi:type="xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
+		<item name="target.pagesize"><value xsi:type="xs:int">100</value></item>
+		<item name="target.pageindex"><value xsi:type="xs:int">0</value></item>
+		
+		<item name="entities">
+			<value xsi:type="xs:string">_iban</value>
+			<value xsi:type="xs:string">_bic</value>
+			<value xsi:type="xs:string">_invoicetotal</value>
+			<value xsi:type="xs:string">_invoicenumber</value>
+		</item>
+		
+		<item name="tika.options">
+			<value xsi:type="xs:string">4711-1</value>
+			<value xsi:type="xs:string">4711-2</value>
+		</item>
+	</document>
 
-This is an example how to use the training service:
 
-
-	<?xml version="1.0" encoding="UTF-8"?>
-	<config>
-		<target>http://localhost:8080/api/</target>
-		<user>admin</user>
-		<password>adminadmin</password>
-		<query>($workflowgroup:"Invoice") AND ($taskid:5900)</query>
-		<pagesize>100</pagesize>
-		<entities>_iban,_bic,_name,_capacity,_invoicenumber</entities>
-	</config>
 
 
 ### The Entity List
@@ -43,7 +43,7 @@ The property 'entities' contains a list of item names to be taken form the worki
 The itemname is equal to the name identifying the entity within a spaCy model. In case the itemname provided in a workitem does not match the entity name used in a model you can adapt the name with a | character.
 
 	 
-	<entities>_capacity|_invoicetotal,_invoicenumber</entities>
+	<value xsi:type="xs:string">_capacity|_invoicetotal</value>
 
 This example maps the item '_capacity' to the entity '_invoicetotal'.
 
