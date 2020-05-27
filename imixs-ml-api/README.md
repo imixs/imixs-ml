@@ -28,13 +28,21 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 			<value xsi:type="xs:string">_invoicenumber</value>
 		</item>
 		
+		<item name="tika.ocrmode"><value xsi:type="xs:string">MIXED</value></item>
 		<item name="tika.options">
-			<value xsi:type="xs:string">4711-1</value>
-			<value xsi:type="xs:string">4711-2</value>
+			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_AND_TEXT_EXTRACTION</value>
+			<value xsi:type="xs:string">X-Tika-PDFOcrImageType=RGB</value>
+			<value xsi:type="xs:string">X-Tika-PDFOcrDPI=400</value>
 		</item>
 	</document>
 
 
+### OCR Options
+
+During the training mode the TrainingService run a OCR on documents attached to a workitem. The ocr is processed by Apache Tika.
+Out of the box, Apache Tika will start with the default configuration. By providing additional config options you can specify a custom tika configuration to be used by the tika server. These options can be set in the config item 'tika.options' and 'tika.ocrmode'.
+
+Find more details [here](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents#the-tikadocumentservice).
 
 
 ### The Entity List

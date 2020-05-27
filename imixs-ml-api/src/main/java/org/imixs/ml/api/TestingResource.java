@@ -15,7 +15,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.service.TrainingService;
@@ -95,9 +94,13 @@ public class TestingResource {
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
 
             logger.info("...... " + documents.size() + " documents found");
+            
+            List<String> tikaOptions=config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
+            String ocrMode=config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
+            
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                trainingService.testWorkitemData(doc, itemNames, worklowClient);
+                trainingService.testWorkitemData(doc, itemNames, worklowClient,ocrMode,tikaOptions);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {

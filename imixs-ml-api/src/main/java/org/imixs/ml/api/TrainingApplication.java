@@ -20,7 +20,8 @@ public class TrainingApplication extends Application {
     public static final String ITEM_TRAGET_PAGESIZE="target.pagesize";
     public static final String ITEM_ENTITIES="entities";
     public static final String ITEM_TIKA_OPTIONS="tika.options";
-
+    public static final String ITEM_TIKA_OCR_MODE="tika.ocrmode";
+    
     
     public static WorkflowClient buildWorkflowClient(ItemCollection config) {
         

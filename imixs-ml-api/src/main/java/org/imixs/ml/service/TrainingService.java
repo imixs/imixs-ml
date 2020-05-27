@@ -83,7 +83,7 @@ public class TrainingService {
      * @param workflowClient - a rest client instance
      */
     public void trainWorkitemData(ItemCollection doc, List<String> items, ItemCollection stats,
-            WorkflowClient workflowClient) {
+            WorkflowClient workflowClient, String ocrMode, List<String> tikaOptions) {
 
         logger.info("......create new training data for: " + doc.getUniqueID());
 
@@ -100,7 +100,7 @@ public class TrainingService {
                 return;
             }
 
-            tikaDocumentService.extractText(snapshot);
+            tikaDocumentService.extractText(snapshot, ocrMode, tikaOptions);
 
             // now we load the attachments...
             List<FileData> files = snapshot.getFileData();
@@ -150,11 +150,11 @@ public class TrainingService {
 
                                 String serviceEndpoint = "http://imixs-ml:8000/trainingdata/";
                                 // String serviceEndpoint="http://imixs-ml:8000/trainingdatasingle/";
-                                
-                                MLClient mlClient=new MLClient();
+
+                                MLClient mlClient = new MLClient();
                                 mlClient.postTrainingData(trainingData, serviceEndpoint);
-                                
-                                //postTrainingData(trainingData, serviceEndpoint);
+
+                                // postTrainingData(trainingData, serviceEndpoint);
                             } else {
                                 double rate = entitysFound.size() / items.size() * 100;
                                 logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: "
@@ -191,7 +191,8 @@ public class TrainingService {
      * @param items          - String list with items
      * @param workflowClient - a rest client instance
      */
-    public void testWorkitemData(ItemCollection doc, List<String> items, WorkflowClient workflowClient) {
+    public void testWorkitemData(ItemCollection doc, List<String> items, WorkflowClient workflowClient, String ocrMode,
+            List<String> tikaOptions) {
 
         logger.info("......testing: " + doc.getUniqueID());
 
@@ -208,7 +209,7 @@ public class TrainingService {
                 return;
             }
 
-            tikaDocumentService.extractText(snapshot);
+            tikaDocumentService.extractText(snapshot, ocrMode, tikaOptions);
 
             // now we load the attachments...
             List<FileData> files = snapshot.getFileData();
@@ -222,12 +223,11 @@ public class TrainingService {
                     // clean content string....
                     content = XMLTrainingData.cleanTextdata(content);
                     String serviceEndpoint = "http://imixs-ml:8000/analyze/";
-                    
-                    
-                    MLClient mlClient=new MLClient();
+
+                    MLClient mlClient = new MLClient();
                     mlClient.postAnalyzeData(content, serviceEndpoint);
-                    
-                    //postAnalyzeData(content, serviceEndpoint);
+
+                    // postAnalyzeData(content, serviceEndpoint);
 
                 }
 
@@ -240,11 +240,6 @@ public class TrainingService {
         }
 
     }
-
-  
-
-    
-    
 
     public void printXML(XMLTrainingData trainingData) {
 

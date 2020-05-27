@@ -119,9 +119,11 @@ public class TrainingResource {
             stats.setItemValue("doc.count", documents.size());
 
             logger.info("...... " + documents.size() + " documents found");
+            List<String> tikaOptions=config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
+            String ocrMode=config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(doc, itemNames, stats, worklowClient);
+                documentExtractorService.trainWorkitemData(doc, itemNames, stats, worklowClient,ocrMode,tikaOptions);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
