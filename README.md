@@ -1,16 +1,21 @@
 # Imixs-ML
 
-Imixs-ML is a machine learning framework for [Imixs-Workflow](https://www.imixs.org). The project provides several microservices and APIs which integrate into an Imixs-Workflow environment. This project provides a generic machine learning API to adapt different ML frameworks like the [spaCy API](https://spacy.io/). In this way the Imixs-ML project combines the concepts of machine learning with the concepts of business process management. This is a powerful and very flexible solution to digitize business processes.
+Imixs-ML is a machine learning framework for [Imixs-Workflow](https://www.imixs.org). The project provides several microservices and APIs which integrate into an Imixs-Workflow environment. This project provides a generic machine learning API to adapt different ML frameworks like the [spaCy API](https://spacy.io/) or [Apache mxnet](https://mxnet.apache.org/). In this way the Imixs-ML project combines the concepts of machine learning with the concepts of business process management. This is a powerful and very flexible solution to digitize business processes.
 
 <p align="center"><img src="images/imixs-ml-architecture-001.png" /></p>
 
 The project consists of the following modules:
 
- * [Imixs-ML API](./imixs-ml-api/README.md) - a microservice to be integrated into a Imixs-Workflow environment
  * [Imixs-ML Core](./imixs-ml-core/README.md) - java core libraries to be used to access different machine learning frameworks
+ * [Imixs-ML API](./imixs-ml-api/README.md) - a microservice to be integrated into a Imixs-Workflow environment
  * [Imixs-ML spaCy](./imixs-ml-spacy/README.md) - a wrapper service for [spacy.io](https://spacy.io/)
  
  
+# Imixs-ML Core
+
+The module Imixs-ML Core defines the core interface to access a machine learning framework. It is providing java object classes and a client to access a ML framework.. 
+
+Learn more in the section [Imixs-ML Core](./imixs-ml-core/README.md).  
 
 # Imixs-ML API
 
@@ -18,11 +23,7 @@ The Imixs-ML API defines a generic API to exchange business data with a machine 
 
 Learn more in the section [Imixs-ML API](./imixs-ml-api/README.md).  
 
-# Imixs-ML Core
 
-The module Imixs-ML Core provides a java api to be integrated into the Imixs-Workflow engine. 
-
-Learn more in the section [Imixs-ML Core](./imixs-ml-core/README.md).  
 
 
 # Imixs-ML spaCy

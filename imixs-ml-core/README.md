@@ -1,12 +1,10 @@
 # Imixs-ML - Core
 
-
-
 The Imixs-ML Core module defines the core interface to access a machine learning framework. It provides Data Object classes and a RestFull Client to exchange data between the *Imixs-Workflow Engine* and a ML Engine. 
 
 In this way the Imixs-ML Core API acts as an *Anti Corruption Layer* between the Imixs-ML API Service and ML Engine like [spaCy](https://spacy.io/) or [Apache mxnet](https://mxnet.apache.org/).
 
-
+<p align="center"><img src="images/imixs-ml-architecture-002.png" /></p>
 
 ## The TrainingData Object
 
