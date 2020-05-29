@@ -79,28 +79,21 @@ public class TestingResource {
             }
 
             // select result
-            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_TRAGET_QUERY),
+            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_WORKFLOW_QUERY),
                     StandardCharsets.UTF_8.toString());
 
             String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
-
-            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGESIZE)
-                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGEINDEX);
-
+            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGESIZE)
+                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGEINDEX);
             queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
             logger.info("......select workitems: " + queryURL);
-
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-
             logger.info("...... " + documents.size() + " documents found");
-            
-            List<String> tikaOptions=config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
-            String ocrMode=config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
-            
+
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                trainingService.testWorkitemData(doc, itemNames, worklowClient,ocrMode,tikaOptions);
+                trainingService.testWorkitemData(doc, config, worklowClient);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
@@ -114,7 +107,5 @@ public class TestingResource {
         // return response
         return Response.ok(MediaType.APPLICATION_XML).build();
     }
-
-    
 
 }

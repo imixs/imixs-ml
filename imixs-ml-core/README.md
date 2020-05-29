@@ -17,7 +17,9 @@ For example the [Imixs-ML-spaCy](../imixs-ml-spacy/README.md) module provides a 
 
 ## The TrainingData Object
 
-To train a ml-model an array of TraingData objects can be sent to the API resource /trainingdata/
+To train a ml-model an array of TraingData objects can be sent to the API resource 
+
+	/training/
 
 A training data object array is defined by the following JSON structure:
 
@@ -59,7 +61,9 @@ Each Training Data object contains a *text* and a list of *entity* objects. A si
 
 ## The AnalyseData Object
 
-To analyse a text based on a ml-model a AnalyseData object can be send to the API resource /analyse/
+To analyse a text based on a ml-model a AnalyseData object can be send to the API resource 
+
+	/analyse/
 
 An AnaylseData object has the following JSON structure:
 

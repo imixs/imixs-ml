@@ -30,7 +30,7 @@
 										<exec executable="docker">
 											<arg value="build" />
 											<arg value="-t" />
-											<arg value="imixs/imixs-ml-training-service" />
+											<arg value="imixs/${project.artifactId}" />
 											<arg value="." />
 										</exec>
 									</target>
@@ -84,7 +84,7 @@
 			</plugin>
 		</plugins>
 
-		<finalName>imixs-ml-training-service</finalName>
+		<finalName>imixs-ml-api</finalName>
 	</build>
 
 	<dependencies>
@@ -107,8 +107,6 @@
 			<artifactId>imixs-melman</artifactId>
 			<scope>compile</scope>
 		</dependency>
-
-
 
 		<dependency>
 			<groupId>org.imixs.workflow</groupId>
@@ -143,6 +141,7 @@
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
 			<version>2.25.1</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

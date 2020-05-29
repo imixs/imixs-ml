@@ -30,7 +30,7 @@ print("MODEL_LANGUAGE  : " + language)
 print("")                                           
 
 
-@app.post("/trainingdata/")
+@app.post("/training/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
     print(">>START trainingdata/")
     prdnlp = datatrain.updateModel(trainngdata, 10,modelpath)
@@ -38,12 +38,12 @@ def extract_entities(trainngdata: List[datamodel.TrainingData]):
     return {"finished"}
 
 
-@app.post("/trainingdatasingle/")
+@app.post("/training-single-mode/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
-    print(">>START trainingdatasingle/")
+    print(">>START training-single-mode/")
     prdnlp = datatrain.updateModelSingle(trainngdata, modelpath)
-    print(">>STOP trainingdatasingle/")
-    return {"finished single model"}
+    print(">>STOP training-single-mode/")
+    return {"finished training-single-mode model"}
 
 
 

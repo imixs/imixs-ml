@@ -36,6 +36,7 @@ import javax.xml.bind.Marshaller;
 
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
+import org.imixs.ml.api.TrainingApplication;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
@@ -82,10 +83,15 @@ public class TrainingService {
      * @param stats          - an itemCollection to collect statistical data.
      * @param workflowClient - a rest client instance
      */
-    public void trainWorkitemData(ItemCollection doc, List<String> items, ItemCollection stats,
-            WorkflowClient workflowClient, String ocrMode, List<String> tikaOptions) {
+    @SuppressWarnings("unchecked")
+    public void trainWorkitemData(ItemCollection config, ItemCollection doc, WorkflowClient workflowClient,
+            ItemCollection stats) {
 
         logger.info("......create new training data for: " + doc.getUniqueID());
+
+        List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
+        List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
+        String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
 
         ItemCollection snapshot = null;
         try {
@@ -116,7 +122,7 @@ public class TrainingService {
                     if (!content.isEmpty()) {
 
                         // build training data set...
-                        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, items)
+                        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, itemNames)
                                 .setAnalyzerEntityEvents(analyzerEntityEvents).build();
 
                         // update entity stats...
@@ -144,19 +150,19 @@ public class TrainingService {
                         } else {
                             // we only send the training data in case of all entities types are found
                             // This means we train optimal training data only
-                            if (entitysFound.size() == items.size()) {
+                            if (entitysFound.size() == itemNames.size()) {
                                 // log the XMLTrainingData object....
                                 printXML(trainingData);
 
-                                String serviceEndpoint = "http://imixs-ml:8000/trainingdata/";
-                                // String serviceEndpoint="http://imixs-ml:8000/trainingdatasingle/";
+                                String serviceEndpoint = config
+                                        .getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
 
                                 MLClient mlClient = new MLClient();
                                 mlClient.postTrainingData(trainingData, serviceEndpoint);
 
                                 // postTrainingData(trainingData, serviceEndpoint);
                             } else {
-                                double rate = entitysFound.size() / items.size() * 100;
+                                double rate = entitysFound.size() / itemNames.size() * 100;
                                 logger.warning("...document '" + doc.getUniqueID() + "' has bad quality: "
                                         + (Math.round(rate * 100.0) / 100.0) + "% - will be ignored!");
                                 stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
@@ -191,10 +197,13 @@ public class TrainingService {
      * @param items          - String list with items
      * @param workflowClient - a rest client instance
      */
-    public void testWorkitemData(ItemCollection doc, List<String> items, WorkflowClient workflowClient, String ocrMode,
-            List<String> tikaOptions) {
+    @SuppressWarnings("unchecked")
+    public void testWorkitemData(ItemCollection config, ItemCollection doc, WorkflowClient workflowClient) {
 
-        logger.info("......testing: " + doc.getUniqueID());
+        logger.info("......anaysing: " + doc.getUniqueID());
+
+        List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
+        String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
 
         ItemCollection snapshot = null;
         try {
@@ -222,7 +231,9 @@ public class TrainingService {
 
                     // clean content string....
                     content = XMLTrainingData.cleanTextdata(content);
-                    String serviceEndpoint = "http://imixs-ml:8000/analyze/";
+                    
+                    String serviceEndpoint = config
+                            .getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
 
                     MLClient mlClient = new MLClient();
                     mlClient.postAnalyzeData(content, serviceEndpoint);

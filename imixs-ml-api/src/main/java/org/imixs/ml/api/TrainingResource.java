@@ -47,16 +47,16 @@ public class TrainingResource {
     <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:xs="http://www.w3.org/2001/XMLSchema">
-        <item name="target.url"><value xsi:type=
+        <item name="workflow.url"><value xsi:type=
     "xs:string">http://localhost:8080/api/</value></item>
-        <item name="target.userid"><value xsi:type="xs:string">admin</value></item>
-        <item name="target.password"><value xsi:type="xs:string">...</value></item>
-        <item name="target.query"><value xsi:type=
+        <item name="workflow.userid"><value xsi:type="xs:string">admin</value></item>
+        <item name="workflow.password"><value xsi:type="xs:string">...</value></item>
+        <item name="workflow.query"><value xsi:type=
     "xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
-        <item name="target.pagesize"><value xsi:type="xs:int">100</value></item>
-        <item name="target.pageindex"><value xsi:type="xs:int">0</value></item>
+        <item name="workflow.pagesize"><value xsi:type="xs:int">100</value></item>
+        <item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
         
-        <item name="entities">
+        <item name="workflow.entities">
             <value xsi:type="xs:string">_iban</value>
             <value xsi:type="xs:string">_bic</value>
             <value xsi:type="xs:string">_invoicetotal</value>
@@ -67,6 +67,8 @@ public class TrainingResource {
             <value xsi:type="xs:string">4711-1</value>
             <value xsi:type="xs:string">4711-2</value>
         </item>
+        
+        <item name="ml.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/</value></item>
     </document>
      * }
      * </pre>
@@ -86,9 +88,6 @@ public class TrainingResource {
 
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
-        logger.info("...starting testing....");
-
-        // validate Input Data....
         logger.info("...starting training....");
         ItemCollection stats = new ItemCollection();
 
@@ -97,18 +96,18 @@ public class TrainingResource {
 
             List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
             if (itemNames.contains("$file") || itemNames.contains("$snapshotid")) {
-                logger.severe("$file and $snapshot must not be included in the target.entities!");
+                logger.severe("$file and $snapshot must not be included in the workflow.entities!");
                 System.exit(0);
             }
 
             // select result
-            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_TRAGET_QUERY),
+            String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_WORKFLOW_QUERY),
                     StandardCharsets.UTF_8.toString());
 
             String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
 
-            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGESIZE)
-                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_TRAGET_PAGEINDEX);
+            queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGESIZE)
+                    + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGEINDEX);
 
             queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
@@ -119,11 +118,10 @@ public class TrainingResource {
             stats.setItemValue("doc.count", documents.size());
 
             logger.info("...... " + documents.size() + " documents found");
-            List<String> tikaOptions=config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
-            String ocrMode=config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
+            
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(doc, itemNames, stats, worklowClient,ocrMode,tikaOptions);
+                documentExtractorService.trainWorkitemData(config,doc,worklowClient, stats);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {

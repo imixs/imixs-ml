@@ -7,6 +7,33 @@ The Imixs-ML API Service is a microservice to train a ML Model based on the work
 
 
 
+# Build and Run
+
+The Imixs-ML API Service is build with Docker and you can deploy it inot any contaienr environment like Kubernetes or Docker Swarm. 
+
+To build the Imixs-ML API service just build the corresponding Docker containers:
+
+	$ mvn clean install -Pdocker
+
+## Run and Test
+
+To start the dev environment run docker-compose:
+
+	$ docker-compose up
+ 
+You can access the adapter service at:
+
+	http://localhost:8080/
+	
+Run the OpenAPI UI:	
+
+	http://localhost:8080/api/openapi-ui/
+	
+
+
+
+
+
 ## The Training Mode
 
 To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with an Imixs XMLDocument providing the following XML payload:
@@ -14,26 +41,33 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 	<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 	<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:xs="http://www.w3.org/2001/XMLSchema">
-		<item name="target.url"><value xsi:type="xs:string">http://localhost:8080/api/</value></item>
-		<item name="target.userid"><value xsi:type="xs:string">admin</value></item>
-		<item name="target.password"><value xsi:type="xs:string">...</value></item>
-		<item name="target.query"><value xsi:type="xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
-		<item name="target.pagesize"><value xsi:type="xs:int">100</value></item>
-		<item name="target.pageindex"><value xsi:type="xs:int">0</value></item>
 		
-		<item name="entities">
+		<!-- Workflow Instance -->
+		<item name="workflow.endpoint"><value xsi:type="xs:string">http://localhost:8080/api/</value></item>
+		<item name="workflow.userid"><value xsi:type="xs:string">admin</value></item>
+		<item name="workflow.password"><value xsi:type="xs:string">...</value></item>
+		<item name="workflow.query"><value xsi:type="xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
+		<item name="workflow.pagesize"><value xsi:type="xs:int">100</value></item>
+		<item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
+		
+		<item name="workflow.entities">
 			<value xsi:type="xs:string">_iban</value>
 			<value xsi:type="xs:string">_bic</value>
 			<value xsi:type="xs:string">_invoicetotal</value>
 			<value xsi:type="xs:string">_invoicenumber</value>
 		</item>
 		
+		<!-- Tika OCR Server PDF_ONLY|OCR_ONLY|MIXED -->
 		<item name="tika.ocrmode"><value xsi:type="xs:string">MIXED</value></item>
 		<item name="tika.options">
 			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_AND_TEXT_EXTRACTION</value>
 			<value xsi:type="xs:string">X-Tika-PDFOcrImageType=RGB</value>
 			<value xsi:type="xs:string">X-Tika-PDFOcrDPI=400</value>
 		</item>
+		
+		<!-- ML spaCy Server -->
+		<item name="ml.training.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/training</value></item>
+		<item name="ml.analyse.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/analyse</value></item>
 	</document>
 
 
@@ -90,32 +124,5 @@ The TrainingService implements an Observer Pattern based on CDI Events to call r
 The Event is defined by the class:
 
 	org.imixs.ml.service.AnalyzeEntityEvent
-
-
-
-
-# Build and Run
-
-
-To build the Imixs-ML Training service just build the corresponding Docker containers:
-
-	$ mvn clean install -Pdocker
-
-
-## Run and Test
-
-To start the dev environment run docker-compose:
-
-	$ docker-compose up
- 
-	
-You can access the adapter service at:
-
-	http://localhost:8080/
-	
-Run the OpenAPI UI:	
-
-	http://localhost:8080/api/openapi-ui/
-	
 
 

@@ -39,7 +39,7 @@ services:
     ports:
       - "9998:9998"  
     volumes:
-      - ~/git/imixs-ml/imixs-ml-training-service/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
+      - ~/git/imixs-ml/imixs-ml-api/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
 
 
 
