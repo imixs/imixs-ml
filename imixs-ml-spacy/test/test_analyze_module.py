@@ -17,10 +17,10 @@ if __name__ == "__main__":
     
     #text = "what is the price of 30,99"
     
-    dinges=datamodel.AnalyzeData
+    dinges=datamodel.AnalyseData
     dinges.text="what is the price of 30,99"
     
-    result=datatrain.analyzeText(dinges,modelfile)
+    result=datatrain.analyseText(dinges,modelfile)
 
 
     print("result=" , result)

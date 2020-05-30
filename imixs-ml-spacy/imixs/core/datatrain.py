@@ -7,7 +7,7 @@ from spacy.util import minibatch, compounding
 from imixs.core import datamodel
 
 """
-This module provides methods to train a model or to analyze text on an 
+This module provides methods to train a model or to analyse text on an 
 existing model. 
 
 
@@ -27,7 +27,7 @@ def updateModel(trainingDataSet, iterations, modelPath):
     # Read language
     language=os.getenv('MODEL_LANGUAGE', 'en')
     
-    # Analyze the data object ......
+    # Analyse the data object ......
     for _data in trainingDataSet:
         print("text      ==>> "+_data.text)
         for entity in _data.entities:
@@ -128,7 +128,7 @@ def updateModelSingle(trainingDataSet, modelPath):
     # Read language
     language=os.getenv('MODEL_LANGUAGE', 'en')
     
-    # Analyze the data object ......
+    # Analyse the data object ......
     
     for _data in trainingDataSet:
         print("text      ==>> "+_data.text)
@@ -208,13 +208,13 @@ def updateModelSingle(trainingDataSet, modelPath):
 
 
 
-# Analyzing entities for a given text
+# Analysing entities for a given text
 # The method assumes that a model exists  
-def analyzeText(analyzeData, modelPath):
+def analyseText(analyseData, modelPath):
     nlp = spacy.load(modelPath)  # load existing spaCy model
     
-    doc = nlp(analyzeData.text)
-    print("===============> analyze Text....")
+    doc = nlp(analyseData.text)
+    print("===============> analsze Text....")
     result = []
     for ent in doc.ents:
         #print(ent.label_, ent.start_char, ent.end_char,ent.text )

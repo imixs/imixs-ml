@@ -27,8 +27,8 @@ class TrainingData(BaseModel):
 
 
 
-# The Data class defines an object containing a text to be analzed
-class AnalyzeData(BaseModel):
+# The Data class defines an object containing a text to be analsed
+class AnalyseData(BaseModel):
     text: str 
 
 

@@ -19,8 +19,8 @@ TRAIN_DATA_EXAMPLE = [('what is the price of polo?', {'entities': [(21, 25, 'iba
 
 def train(data):
     
-    print("start analyze the data object...")
-    # Analyze the data object ......
+    print("start analyse the data object...")
+    # Analyse the data object ......
     for _data in data:
         print("text="+_data.text)
         for _entity in _data.entities:

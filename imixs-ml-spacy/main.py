@@ -21,7 +21,7 @@ language=os.getenv('MODEL_LANGUAGE', 'en')
 print("   ____      _          ") 
 print("  /  _/_ _  (_)_ __ ___  ") 
 print(" _/ //  ' \/ /\ \ /(_-<  Machine-Learning"  )
-print("/___/_/_/_/_//_\_\/___/  V0.1a")
+print("/___/_/_/_/_//_\_\/___/  V1.0")
 print("")                                           
                                            
 print("ENGINE          : https://spacy.io")                                           
@@ -49,9 +49,9 @@ def extract_entities(trainngdata: List[datamodel.TrainingData]):
 
 # Analyze a text 
 #
-@app.post("/analyze/")
-def train(analyzeData: datamodel.AnalyzeData):
-    result=datatrain.analyzeText(analyzeData,modelpath)
+@app.post("/analyse/")
+def train(analyseData: datamodel.AnalyseData):
+    result=datatrain.analyseText(analyseData,modelpath)
     return result
 
 

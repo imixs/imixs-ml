@@ -14,8 +14,8 @@ The goal of this test program is to demonstrate the usage of the class TrainingD
 
 def train(data, iterations):
     
-    print("start analyze the data object...")
-    # Analyze the data object ......
+    print("start analyse the data object...")
+    # Analyse the data object ......
     for _data in data:
         print("text="+_data.text)
         

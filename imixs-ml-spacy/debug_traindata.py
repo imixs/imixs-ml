@@ -45,8 +45,8 @@ TRAIN_DATA = [('what is the price of polo?', {'entities': [(21, 25, 'iban')]}),
 def train(dataList, iterations, modelPath):
     
     
-    print("start analyze the data object...")
-    # Analyze the data object ......
+    print("start analyse the data object...")
+    # Analyse the data object ......
     for _data in dataList:
         print("text="+_data.text)
         

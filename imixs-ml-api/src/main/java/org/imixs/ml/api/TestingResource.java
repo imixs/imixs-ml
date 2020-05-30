@@ -93,7 +93,7 @@ public class TestingResource {
 
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                trainingService.testWorkitemData(doc, config, worklowClient);
+                trainingService.testWorkitemData(config, doc, worklowClient);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
