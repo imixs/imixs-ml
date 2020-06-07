@@ -2,7 +2,7 @@ from pydantic import BaseModel
 import spacy
 import random
 from spacy.util import minibatch, compounding
-import datamodel 
+from imixs.core import datamodel, datatrain
 import time
 from builtins import str
 import os

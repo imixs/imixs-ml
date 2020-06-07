@@ -9,9 +9,12 @@ services:
       PYTHONUNBUFFERED: 1
       TZ: "Europe/Berlin"
       MODEL_LANGUAGE: "de"
+      MODEL_PATH: "models/invoice-de-0.0.1/" 
 
     ports:
       - "8000:8000"  
+    volumes:
+      - ~/git/imixs-ml/imixs-ml-spacy/models/:/usr/src/app/models/
 
 
 # Imixs-ML API sevice
@@ -35,11 +38,11 @@ services:
     image: imixs/tika
     environment:
       TZ: "Europe/Berlin"
-      TIKA_CONFIG: "/tika-config.xml"
+      #TIKA_CONFIG: "/tika-config.xml"
     ports:
       - "9998:9998"  
-    volumes:
-      - ~/git/imixs-ml/imixs-ml-api/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
+    #volumes:
+    #  - ~/git/imixs-ml/imixs-ml-api/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
 
 
 
