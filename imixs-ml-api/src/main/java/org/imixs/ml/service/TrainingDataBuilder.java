@@ -2,7 +2,9 @@ package org.imixs.ml.service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,16 +36,17 @@ public class TrainingDataBuilder {
     private List<String> itemNames = null;
     private ItemCollection doc = null;
     private Event<AnalyzeEntityEvent> analyzerEntityEvents = null;
-    private XMLTrainingData trainingData=null;
+    private XMLTrainingData trainingData = null;
+    private Set<Locale> locals=null;
 
-    public TrainingDataBuilder(String text,ItemCollection doc,List<String> itemNames) {
+    public TrainingDataBuilder(String text, ItemCollection doc, List<String> itemNames,Set<Locale> locals) {
         super();
-        this.itemNames = itemNames; 
-        this.doc=doc;
+        this.itemNames = itemNames;
+        this.doc = doc;
+        this.locals=locals;
         trainingData = new XMLTrainingData();
         trainingData.setText(text);
     }
-
 
     public TrainingDataBuilder setAnalyzerEntityEvents(Event<AnalyzeEntityEvent> analyzerEntityEvents) {
         this.analyzerEntityEvents = analyzerEntityEvents;
@@ -69,7 +72,8 @@ public class TrainingDataBuilder {
             @SuppressWarnings("unchecked")
             List<Object> values = doc.getItemValue(itemName);
             if (values != null && values.size() > 0) {
-                List<XMLTrainingEntity> trainingEntities = createTraingEntities(trainingData.getText(), values.get(0), itemName);
+                List<XMLTrainingEntity> trainingEntities = createTrainingEntities(trainingData.getText(), values.get(0),
+                        itemName,locals);
 
                 if (trainingEntities != null) {
                     for (XMLTrainingEntity trainingEntity : trainingEntities) {
@@ -100,24 +104,26 @@ public class TrainingDataBuilder {
      * <p>
      * An entity can be found more than once in a training text. For that reason the
      * method returns a list of trainingEntites with all matches!
-     * 
+     * <p>
+     * It may happen that two or more variants of the same entity overlap. Most ml
+     * frameworks do not support this case. For that reason only the best matches
+     * will be included in the Training list.
      * 
      * @param text
      * @param entity
      * @param label
      * @return
      */
-    public List<XMLTrainingEntity> createTraingEntities(String text, Object entity, String label) {
+    public List<XMLTrainingEntity> createTrainingEntities(String text, Object entity, String label,Set<Locale> locals) {
         boolean debug = logger.isLoggable(Level.FINE);
 
-        if (text == null || text.isEmpty()) {
+        if (text == null || text.isEmpty()) { 
             return null;
         }
         if (entity == null || entity.toString().isEmpty()) {
             return null;
         }
 
-        List<XMLTrainingEntity> result = new ArrayList<XMLTrainingEntity>();
         if (debug) {
             logger.finest(".......analyzing: " + label + " value= " + entity + " object class="
                     + entity.getClass().getSimpleName());
@@ -128,7 +134,7 @@ public class TrainingDataBuilder {
         Set<String> enityVariants = new HashSet<String>();
 
         if (analyzerEntityEvents != null) {
-            analyzerEntityEvents.fire(new AnalyzeEntityEvent(entity, enityVariants));
+            analyzerEntityEvents.fire(new AnalyzeEntityEvent(entity, enityVariants,locals));
         } else {
             logger.warning("CDI Support is missing - AnalyzeEntityEvent Not Supported!");
         }
@@ -146,6 +152,25 @@ public class TrainingDataBuilder {
             }
         }
 
+        List<XMLTrainingEntity> result = collectTrainingEntities(text, enityVariants, label);
+        // cleanup duplicates
+        cleanOvelappingEntities(result);
+
+        return result;
+
+    }
+
+    /**
+     * This method builds a List of XMLTrainingEntity for all occurrences of
+     * entityVariants in a given text
+     * 
+     * @param text
+     * @param enityVariants
+     * @param label
+     * @return
+     */
+    public List<XMLTrainingEntity> collectTrainingEntities(String text, Set<String> enityVariants, String label) {
+        List<XMLTrainingEntity> result = new ArrayList<XMLTrainingEntity>();
         // test all variants...
         for (String entityVariant : enityVariants) {
 
@@ -170,11 +195,44 @@ public class TrainingDataBuilder {
                 }
             }
         }
-
         return result;
 
     }
 
-  
+    /**
+     * It may happen that two or more variants of the same entity overlap for the
+     * same text. This is in most cases not supported from ml frameworks. This
+     * method can be used to remove duplicates from a List of XMLTrainingEntity
+     * objects.
+     * <p>
+     * This method is called by the createTrainingEntites.
+     * 
+     */
+    public void cleanOvelappingEntities(List<XMLTrainingEntity> trainingEntites) {
+
+        List<XMLTrainingEntity> overlapps=new ArrayList<XMLTrainingEntity>();
+        
+        for (XMLTrainingEntity analyzeEntity: trainingEntites) {
+            // analyze
+            for (XMLTrainingEntity entity: trainingEntites) {
+                if (!entity.equals(analyzeEntity)) {
+                    if (entity.getStart()>= analyzeEntity.getStart() && entity.getStop()<=analyzeEntity.getStop()) {
+                        overlapps.add(entity);
+                    }
+                }
+                
+                
+            }
+        }
+        
+        // remove overlapping entities....
+        for (Iterator<XMLTrainingEntity> iter = trainingEntites.listIterator(); iter.hasNext(); ) {
+            XMLTrainingEntity a = iter.next();
+            if (overlapps.contains(a)) {
+                iter.remove();
+            }
+        }
+        
+    }
 
 }

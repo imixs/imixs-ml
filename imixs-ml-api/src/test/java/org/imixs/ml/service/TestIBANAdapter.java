@@ -37,7 +37,7 @@ public class TestIBANAdapter {
         
        String iban="DE69 5095 1469 0005 0111 11";
 
-       ibanAdapter.onEvent(new AnalyzeEntityEvent(iban, enityVariants));
+       ibanAdapter.onEvent(new AnalyzeEntityEvent(iban, enityVariants,null));
 
         for (String variant : enityVariants) {
             logger.info(variant);

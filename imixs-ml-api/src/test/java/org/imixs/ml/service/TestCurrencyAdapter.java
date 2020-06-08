@@ -1,6 +1,7 @@
 package org.imixs.ml.service;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -36,8 +37,12 @@ public class TestCurrencyAdapter {
         Set<String> enityVariants = new HashSet<String>();
         
         float f=1700411;
+        
+        Set<Locale> locals=new HashSet<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.GERMAN);
 
-        currencyAdapter.onEvent(new AnalyzeEntityEvent(f, enityVariants));
+        currencyAdapter.onEvent(new AnalyzeEntityEvent(f, enityVariants,locals));
 
         for (String variant : enityVariants) {
             logger.info(variant);

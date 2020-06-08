@@ -49,8 +49,10 @@ public class TrainingResource {
         xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <item name="workflow.url"><value xsi:type=
     "xs:string">http://localhost:8080/api/</value></item>
-        <item name="workflow.userid"><value xsi:type="xs:string">admin</value></item>
-        <item name="workflow.password"><value xsi:type="xs:string">...</value></item>
+        <item name="workflow.userid"><value xsi:type=
+    "xs:string">admin</value></item>
+        <item name="workflow.password"><value xsi:type=
+    "xs:string">...</value></item>
         <item name="workflow.query"><value xsi:type=
     "xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
         <item name="workflow.pagesize"><value xsi:type="xs:int">100</value></item>
@@ -68,7 +70,8 @@ public class TrainingResource {
             <value xsi:type="xs:string">4711-2</value>
         </item>
         
-        <item name="ml.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/</value></item>
+        <item name="ml.endpoint"><value xsi:type=
+    "xs:string">http://imixs-ml-spacy:8000/</value></item>
     </document>
      * }
      * </pre>
@@ -118,10 +121,10 @@ public class TrainingResource {
             stats.setItemValue("doc.count", documents.size());
 
             logger.info("...... " + documents.size() + " documents found");
-            
+
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(config,doc,worklowClient, stats);
+                documentExtractorService.trainWorkitemData(config, doc, worklowClient, stats);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
@@ -132,6 +135,9 @@ public class TrainingResource {
 
         // compute item.rate statistik
         int count = stats.getItemValueInteger("doc.count");
+        stats.setItemValue("doc.valid",
+                count - stats.getItemValueInteger("doc.failures") - stats.getItemValueInteger("doc.ignore"));
+
         if (count > 0) {
             List<String> names = stats.getItemNames();
             for (String item : names) {
@@ -163,7 +169,5 @@ public class TrainingResource {
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
     }
-
-   
 
 }

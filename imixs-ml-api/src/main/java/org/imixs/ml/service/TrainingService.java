@@ -24,7 +24,10 @@ package org.imixs.ml.service;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
@@ -92,6 +95,15 @@ public class TrainingService {
         List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
+        
+        // build locales....
+        List<String> sLocales=config.getItemValue(TrainingApplication.ITEM_LOCALES);
+        Set<Locale> locals=new HashSet<Locale>();
+        for (String _locale: sLocales) {
+            Locale aLocale=new Locale(_locale);
+            locals.add(aLocale);
+            logger.info("......suporting locale " + aLocale);
+        }
 
         ItemCollection snapshot = null;
         try {
@@ -122,7 +134,7 @@ public class TrainingService {
                     if (!content.isEmpty()) {
 
                         // build training data set...
-                        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, itemNames)
+                        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, itemNames, locals)
                                 .setAnalyzerEntityEvents(analyzerEntityEvents).build();
 
                         // update entity stats...

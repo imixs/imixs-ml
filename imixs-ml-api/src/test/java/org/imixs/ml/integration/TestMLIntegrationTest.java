@@ -1,7 +1,10 @@
 package org.imixs.ml.integration;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.imixs.ml.core.MLClient;
@@ -32,7 +35,7 @@ public class TestMLIntegrationTest {
     static String SERVICE_ENDPOINT = "http://localhost:8000/trainingdata/";
 
     private IntegrationTest integrationTest = new IntegrationTest(ML_SERVICE_API);
-
+    private  Set<Locale> locals=null;
     private TrainingService trainingService = null;
     List<String> items = null;
     MLClient mlClient = null;
@@ -80,8 +83,12 @@ public class TestMLIntegrationTest {
         trainingService = new TrainingService();
 
         mlClient = new MLClient();
-
+        locals=new HashSet<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.GERMAN);
     }
+    
+  
 
     /**
      * This test verifies the computes of start stop positions in a text. This test
@@ -109,7 +116,7 @@ public class TestMLIntegrationTest {
 
         String text = "Imixs Workflow in an open source project organized from Munich.";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
 
         trainingService.printXML(trainingData);
 
@@ -137,7 +144,7 @@ public class TestMLIntegrationTest {
         doc.setItemValue("iban", "XX08 1101 0030 0000 2222 02");
 
         // build a trainingData set
-        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, items).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         Assert.assertEquals(2, trainingData.getEntities().size());
         Assert.assertEquals(21, trainingData.getEntities().get(1).getStart());
         Assert.assertEquals(26, trainingData.getEntities().get(1).getStop());
@@ -190,126 +197,126 @@ public class TestMLIntegrationTest {
         doc = new ItemCollection();
         doc.setItemValue("price", "11,00");
         doc.setItemValue("iban", "XX08 1101 0030 0000 2222 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 12,50? with an IBAN of XX08 1101 0030 0000 3333 02.";
         doc = new ItemCollection();
         doc.setItemValue("price", "12,50");
         doc.setItemValue("iban", "XX08 1101 0030 0000 3333 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 20000,00? with an IBAN of XX08 1101 0030 1111 2222 02.";
         doc = new ItemCollection();
         doc.setItemValue("price", "20000,00");
         doc.setItemValue("iban", "XX08 1101 0030 1111 2222 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 10120,00? with an IBAN of XX08 1101 0030 0000 2222 02.";
         doc = new ItemCollection();
         doc.setItemValue("price", "10120,00");
         doc.setItemValue("iban", "XX08 1101 0030 0000 2222 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 333,00? with an IBAN of XX08 1101 0030 0000 2222 02.";
         doc = new ItemCollection();
         doc.setItemValue("price", "333,00");
         doc.setItemValue("iban", "XX08 1101 0030 0000 2222 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 0,50? with an IBAN of aa08 1101 0030 0000 2222 02.";
         doc = new ItemCollection();
         doc.setItemValue("price", "0,50");
         doc.setItemValue("iban", "aa08 1101 0030 0000 2222 02");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 10,40";
         doc = new ItemCollection();
         doc.setItemValue("price", "10,40");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 0,49";
         doc = new ItemCollection();
         doc.setItemValue("price", "0,49");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 0,10";
         doc = new ItemCollection();
         doc.setItemValue("price", "0,10");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 9,99";
         doc = new ItemCollection();
         doc.setItemValue("price", "9,99");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 155,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "155,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 200,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "200,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 90120,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "90120,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 50000,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "50000,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 1600,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "1600,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 1500,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "1500,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 70000,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "70000,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 30,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "30,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 20,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "20,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
         content = "what is the price of 11,00";
         doc = new ItemCollection();
         doc.setItemValue("price", "11,00");
-        trainingData = new TrainingDataBuilder(content, doc, items).build();
+        trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
     }
@@ -330,7 +337,7 @@ public class TestMLIntegrationTest {
 
         String text = "Postfach 51 10 26 - 50946 Kéin  Krouser GmbH Möbelhaus";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
 
         List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
         Assert.assertEquals(1, trainingEntities.size());

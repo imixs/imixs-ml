@@ -19,6 +19,7 @@ public class TrainingApplication extends Application {
     public static final String ITEM_WORKFLOW_PAGEINDEX="workflow.pageindex";
     public static final String ITEM_WORKFLOW_PAGESIZE="workflow.pagesize";
     public static final String ITEM_ENTITIES="workflow.entities";
+    public static final String ITEM_LOCALES="workflow.locale";
     public static final String ITEM_TIKA_OPTIONS="tika.options";
     public static final String ITEM_TIKA_OCR_MODE="tika.ocrmode";
     public static final String ITEM_ML_TRAINING_ENDPOINT="ml.training.endpoint";

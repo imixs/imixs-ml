@@ -28,6 +28,7 @@
 
 package org.imixs.ml.service;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -42,10 +43,13 @@ public class AnalyzeEntityEvent {
 
     private Object value;
     private Set<String> enityVariants;
+    private Set<Locale> locals;
     
-    public AnalyzeEntityEvent(Object value, Set<String> enityVariants) {
+    
+    public AnalyzeEntityEvent(Object value, Set<String> enityVariants, Set<Locale> locals) {
         this.value=value;
         this.enityVariants=enityVariants;
+        this.locals=locals;
     }
 
 
@@ -63,6 +67,16 @@ public class AnalyzeEntityEvent {
 
     public void setEnityVariants(Set<String> enityVariants) {
         this.enityVariants = enityVariants;
+    }
+
+
+    public Set<Locale> getLocals() {
+        return locals;
+    }
+
+
+    public void setLocals(Set<Locale> locals) {
+        this.locals = locals;
     }
 
    

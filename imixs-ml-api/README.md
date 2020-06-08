@@ -56,6 +56,10 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 			<value xsi:type="xs:string">_invoicetotal</value>
 			<value xsi:type="xs:string">_invoicenumber</value>
 		</item>
+		<item name="workflow.locale">
+			<value xsi:type="xs:string">UK</value>
+			<value xsi:type="xs:string">DE</value>
+		</item>
 		
 		<!-- Tika OCR Server PDF_ONLY|OCR_ONLY|MIXED -->
 		<item name="tika.ocrmode"><value xsi:type="xs:string">MIXED</value></item>

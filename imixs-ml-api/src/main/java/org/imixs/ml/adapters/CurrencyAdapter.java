@@ -31,6 +31,7 @@ package org.imixs.ml.adapters;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Named;
@@ -44,8 +45,8 @@ import org.imixs.ml.service.AnalyzeEntityEvent;
  * <ul>
  * <li>1500.00
  * <li>1500,00
- * <li>1.500,00  UK
- * <li>1,500.00  GERMAN
+ * <li>1.500,00 UK
+ * <li>1,500.00 GERMAN
  * <p>
  * see: https://docs.oracle.com/javase/tutorial/java/data/numberformat.html
  * <p>
@@ -55,6 +56,7 @@ import org.imixs.ml.service.AnalyzeEntityEvent;
  */
 @Named
 public class CurrencyAdapter {
+    private static Logger logger = Logger.getLogger(CurrencyAdapter.class.getName());
 
     public void onEvent(@Observes AnalyzeEntityEvent event) {
         if (event.getValue() == null) {
@@ -62,37 +64,36 @@ public class CurrencyAdapter {
         }
         // test if the value is float or double
 
-        BigDecimal d=null;
+        BigDecimal d = null;
         if ((event.getValue()) instanceof BigDecimal) {
-            d=(BigDecimal)event.getValue();
+            d = (BigDecimal) event.getValue();
         }
         if ((event.getValue()) instanceof Double) {
-            d=new BigDecimal((Double) event.getValue());
+            d = new BigDecimal((Double) event.getValue());
         }
         if ((event.getValue()) instanceof Float) {
-            d=new BigDecimal((Float) event.getValue());
+            d = new BigDecimal((Float) event.getValue());
         }
-        
-        if (d==null) {
+
+        if (d == null) {
             return;
         }
         try {
-            
-            DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.GERMAN);
-            formatter.applyPattern("#,###,##0.00");
-            event.getEnityVariants().add(formatter.format(d));
 
-            formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.UK);
-            formatter.applyPattern("#,###,##0.00");
-            event.getEnityVariants().add(formatter.format(d));
+            if (event.getLocals() == null || event.getLocals().size() == 0) {
+                logger.warning("missing locals - adapter can not be applied!");
+                return;
+            }
 
-            formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.UK);
-            formatter.applyPattern("0.00");
-            event.getEnityVariants().add(formatter.format(d));
+            for (Locale locale : event.getLocals()) {
+                DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
+                formatter.applyPattern("#,###,##0.00");
+                event.getEnityVariants().add(formatter.format(d));
 
-            formatter = (DecimalFormat) DecimalFormat.getInstance(Locale.GERMAN);
-            formatter.applyPattern("0.00");
-            event.getEnityVariants().add(formatter.format(d));
+                formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
+                formatter.applyPattern("0.00");
+                event.getEnityVariants().add(formatter.format(d));
+            }
 
         } catch (NumberFormatException nfe) {
             // not a number
