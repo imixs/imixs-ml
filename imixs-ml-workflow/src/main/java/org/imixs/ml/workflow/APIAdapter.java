@@ -35,6 +35,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
@@ -136,8 +137,11 @@ public class APIAdapter implements SignalAdapter {
                 
               
                 MLClient mlClient = new MLClient();
-                mlClient.postAnalyseData(content, mlAPIEndpoint);
+                List<XMLAnalyseEntity> result =  mlClient.postAnalyseData(content, mlAPIEndpoint);
 
+                if (result!=null && result.size()>0) {
+                    // extract entities....
+                }
                 
 
             }

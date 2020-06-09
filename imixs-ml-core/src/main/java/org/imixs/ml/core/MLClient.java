@@ -32,27 +32,31 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
-import org.imixs.ml.xml.XMLAnalyseData;
+import org.imixs.ml.xml.XMLAnalyseText;
+import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.ml.xml.XMLTrainingData;
 
 /**
- * The MLClient provides a Jax-RS client to post training data and analyse data objects. 
+ * The MLClient provides a Jax-RS client to post training data and analyse data
+ * objects.
  * 
  * 
  * @version 1.0
  * @author rsoika
  */
-
 public class MLClient {
     private static Logger logger = Logger.getLogger(MLClient.class.getName());
 
     /**
      * This method posts a spacy json training string to the spacy service endpoint
      * 
-     * @param trainingData
+     * @param trainingData    - the training data object
+     * @param serviceEndpoint - the ml API endpoint
      */
     public void postTrainingData(XMLTrainingData trainingData, String serviceEndpoint) {
         logger.fine("......sending new training data object...");
@@ -67,27 +71,43 @@ public class MLClient {
         GenericEntity<List<XMLTrainingData>> list = new GenericEntity<List<XMLTrainingData>>(dataset) {
         };
 
+        @SuppressWarnings("unused")
         Response response = invocationBuilder.post(Entity.entity(list, MediaType.APPLICATION_JSON));
 
     }
 
     /**
-     * This method posts a spacy json training string to the spacy service endpoint
+     * This method posts a spacy json training string to the spacy service endpoint.
+     * <p>
+     * The method returns a list of XMLAnalyseEntity extracted from the given text
+     * or null if the request failed.
      * 
-     * @param trainingData
-     */
-    public void postAnalyseData(String text, String serviceEndpoint) {
+     * 
+     * @param text            - text to be analysed
+     * @param serviceEndpoint - the ml API endpoint
+     * @return list of XMLAnalyseEntity
+     **/
+    public List<XMLAnalyseEntity> postAnalyseData(String text, String serviceEndpoint) {
         logger.fine("......sending analyse data object...");
-        
-        XMLAnalyseData atext= new XMLAnalyseData(text);
-        
+        XMLAnalyseText atext = new XMLAnalyseText(text);
         Client client = ClientBuilder.newClient();
         WebTarget webTarget = client.target(serviceEndpoint);
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
-       
-
         Response response = invocationBuilder.post(Entity.entity(atext, MediaType.APPLICATION_JSON));
+
+        // in case of successful response we extract the XMLAnalyseEntity objects
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
+            logger.finest("......POST request successfull (" + response.getStatus() + ")");
+            // Now extract the List of XMLAnalyseEntity from the response object....
+            List<XMLAnalyseEntity> entities = response.readEntity(new GenericType<List<XMLAnalyseEntity>>() {
+            });
+
+            return entities;
+        } else {
+            logger.finest("......POST request failed: " + response.getStatus());
+            return null;
+        }
 
     }
 

@@ -1,4 +1,4 @@
-package org.imixs.ml.core;
+package org.imixs.ml.core.adapters;
 
 import java.util.HashSet;
 import java.util.Locale;

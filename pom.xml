@@ -95,7 +95,7 @@
 				<version>${org.imixs.workflow.version}</version>
 				<scope></scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.imixs.workflow</groupId>
 				<artifactId>imixs-melman</artifactId>
@@ -109,8 +109,9 @@
 				<scope>provided</scope>
 			</dependency>
 		</dependencies>
-		
+
 	</dependencyManagement>
+	
 	<dependencies>
 		<!-- JEE Dependencies -->
 		<dependency>
@@ -143,6 +144,22 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Jersey JAX-RS client 2.31 -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>2.25.1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Jackson 2.x as JSON provider -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.25.1</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<!-- Distributen Management oss.sonatype.org -->

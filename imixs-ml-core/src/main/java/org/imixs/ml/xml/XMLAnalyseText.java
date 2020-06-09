@@ -3,11 +3,11 @@ package org.imixs.ml.xml;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "analysedata")
-public class XMLAnalyseData {
+public class XMLAnalyseText {
     
         private String text;
 
-        public XMLAnalyseData(String text) {
+        public XMLAnalyseText(String text) {
             super();
             this.text = text;
         }
