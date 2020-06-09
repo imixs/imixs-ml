@@ -76,7 +76,7 @@ public class MLClient {
      * 
      * @param trainingData
      */
-    public void postAnalyzeData(String text, String serviceEndpoint) {
+    public void postAnalyseData(String text, String serviceEndpoint) {
         logger.fine("......sending analyse data object...");
         
         XMLAnalyseData atext= new XMLAnalyseData(text);

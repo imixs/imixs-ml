@@ -84,3 +84,21 @@ The ML-CLient is a Rest Service Client based on Jax-rs to access an ml framework
 	mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
 
+
+
+# The EntityAdapter
+
+The EntityAdapter can be used to  adapt an entity with alternative fromating values.  This adapter is useful if a string constant can ocure in different formats like a currency. For example the float value 1500.00 can have different presentations in a textfragment:
+
+
+	1500.00
+	1500,00
+	1.500,00
+	1,500.00
+	
+The TrainingService implements an Observer Pattern based on CDI Events to call registered EntityAdapters
+The Event is defined by the class:
+
+	org.imixs.ml.service.AnalyzeEntityEvent
+
+
