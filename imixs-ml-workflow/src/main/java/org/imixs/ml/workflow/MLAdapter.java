@@ -97,7 +97,7 @@ import org.imixs.workflow.exceptions.AdapterException;
  *
  */
 
-public class APIAdapter implements SignalAdapter {
+public class MLAdapter implements SignalAdapter {
 
 	public static final String ERROR_API_COMMUNICATION = "ERROR_API_COMMUNICATION";
 	public static final String ERROR_API_DEFINITION = "ERROR_API_DEFINITION";
@@ -107,7 +107,7 @@ public class APIAdapter implements SignalAdapter {
 	public static final int API_EVENT_FAILURE = 90;
 
 	
-	private static Logger logger = Logger.getLogger(APIAdapter.class.getName());
+	private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
 	  @Inject
 	  @ConfigProperty(name = ML_API_ENDPOINT, defaultValue = "")
