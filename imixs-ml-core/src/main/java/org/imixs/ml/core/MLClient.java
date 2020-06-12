@@ -37,8 +37,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import org.imixs.ml.xml.XMLAnalyseText;
 import org.imixs.ml.xml.XMLAnalyseEntity;
+import org.imixs.ml.xml.XMLAnalyseText;
 import org.imixs.ml.xml.XMLTrainingData;
 
 /**
@@ -59,6 +59,10 @@ public class MLClient {
      * @param serviceEndpoint - the ml API endpoint
      */
     public void postTrainingData(XMLTrainingData trainingData, String serviceEndpoint) {
+        // if the serviceEndpoint has no tailing slash we append one....
+        if (!serviceEndpoint.endsWith("/")) {
+            serviceEndpoint= serviceEndpoint+"/";
+        }
         logger.fine("......sending new training data object...");
         Client client = ClientBuilder.newClient();
         WebTarget webTarget = client.target(serviceEndpoint);
@@ -88,14 +92,20 @@ public class MLClient {
      * @return list of XMLAnalyseEntity
      **/
     public List<XMLAnalyseEntity> postAnalyseData(String text, String serviceEndpoint) {
+        // if the serviceEndpoint has no tailing slash we append one....
+        if (!serviceEndpoint.endsWith("/")) {
+            serviceEndpoint= serviceEndpoint+"/";
+        }
+        
         logger.fine("......sending analyse data object...");
         XMLAnalyseText atext = new XMLAnalyseText(text);
         Client client = ClientBuilder.newClient();
+        //client.register(RedirectFilterWorkAround.class);
+        
         WebTarget webTarget = client.target(serviceEndpoint);
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-
         Response response = invocationBuilder.post(Entity.entity(atext, MediaType.APPLICATION_JSON));
-
+        
         // in case of successful response we extract the XMLAnalyseEntity objects
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             logger.finest("......POST request successfull (" + response.getStatus() + ")");
@@ -105,7 +115,7 @@ public class MLClient {
 
             return entities;
         } else {
-            logger.finest("......POST request failed: " + response.getStatus());
+            logger.warning("......POST request failed: " + response.getStatus());
             return null;
         }
 

@@ -43,54 +43,19 @@ import org.imixs.workflow.SignalAdapter;
 import org.imixs.workflow.exceptions.AdapterException;
 
 /**
- * This adapter class is used as a generic API Adapter for the PWGY. The adapter
- * connects to an API endpoint to exchange data. The Adapter supports the REST
- * request methods GET and POST. The result of a request is added to the current
- * workitem.
+ * This adapter class is used for ml analysis based on the Imixs-ML project.
  * <p>
- * A result of an API request can be a single workitem or a list of workitems.
- * <p>
- * The Adapter is configured through the model by defining a workflow result
- * item named 'pgwy_api'.
+ * The Adapter is configured through the model by defining a ml.model item
  * <p>
  * Example:
  * 
  * <pre>
  * {@code
-		<api>
-			<method>POST</method>
-			<resource>https://localhost:8111/api/resource/</resource>
-			<mediatype>application/json</mediatype>
-			<input>customer.firstname,customer.lastname</input>
-			<output>id|order.id,desc|order.description</output>
-		</api>
+		<item name="ml.model">models/invoice-de-0.0.2</item>
  * }
  * </pre>
  * 
- * This example definition will initiate an api call against the endpoint
- * 'https://localhost:8111/api/resource/' with a POST method. The call will send
- * the items customer.firstname,customer.lastname in the payload and adds the
- * items order.id,order.description from the result into the current workitem.
- * <p>
- * The list of output items can be mapped to custom item names by using the |
- * character to separate the origin item name (from the api call) to a target
- * item name.
- * <p>
- * For example 'id|order.id' will map the item 'id' into the current workitem
- * with the item named 'order.id'.
- * <p>
- * By using the optional tag 'output.target' it is possible to map a resultset
- * of multiple documents into an embedded list of ItemCollections. This allows
- * to store multiple results into a single workitem by using child-item
- * structures.
- * <p>
- * Examlple:
  * 
- * {@code<output.target>offers</output.target>}
- * 
- * <p>
- * The adapter catches any type of exception and continues with event=90 to
- * avoid an exception loop
  * 
  * @author Ralph Soika
  * @version 1.0
@@ -130,14 +95,14 @@ public class MLAdapter implements SignalAdapter {
 
                 logger.info("...analyzing content of '" + file.getName() + "'.....");
                 ItemCollection metadata = new ItemCollection(file.getAttributes());
-                String content = metadata.getItemValueString("content");
+                String ocrText = metadata.getItemValueString("text");
 
                 // clean content string....
-                content = XMLTrainingData.cleanTextdata(content);
+                ocrText = XMLTrainingData.cleanTextdata(ocrText);
                 
               
                 MLClient mlClient = new MLClient();
-                List<XMLAnalyseEntity> result =  mlClient.postAnalyseData(content, mlAPIEndpoint);
+                List<XMLAnalyseEntity> result =  mlClient.postAnalyseData(ocrText, mlAPIEndpoint);
 
                 if (result!=null && result.size()>0) {
                     // extract entities....

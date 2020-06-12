@@ -69,6 +69,8 @@ services:
       TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
       TIKA_OCR_MODE: "MIXED"
 
+      ML_API_ENDPOINT: "http://imixs-ml-spacy:8000/analyse/"
+
     ports:
       - "8080:8080"
       - "8787:8787"
