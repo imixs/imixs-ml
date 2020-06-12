@@ -26,7 +26,7 @@ services:
       #TIKA_OCR_MODE: "PDF_ONLY"
       TIKA_OCR_MODE: "MIXED"
       # Payara-Micor ENV
-      MP_OPENAPI_SERVERS: "http://localhost:8080"
+      MP_OPENAPI_SERVERS: "http://localhost:8081"
     ports:
       - "8081:8080"
       - "9009:9009"
