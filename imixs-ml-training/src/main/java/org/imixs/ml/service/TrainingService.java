@@ -37,16 +37,16 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.imixs.archive.ocr.OCRService;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
-import org.imixs.ml.adapters.AnalyzeEntityEvent;
 import org.imixs.ml.api.TrainingApplication;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
-import org.imixs.workflow.documents.TikaDocumentService;
 import org.imixs.workflow.exceptions.PluginException;
 
 /**
@@ -69,10 +69,10 @@ public class TrainingService {
     private static Logger logger = Logger.getLogger(TrainingService.class.getName());
 
     @Inject
-    TikaDocumentService tikaDocumentService;
+    OCRService ocrService;
 
     @Inject
-    protected Event<AnalyzeEntityEvent> analyzerEntityEvents;
+    protected Event<EntityObjectEvent> analyzerEntityEvents;
 
     /**
      * This method is used to extract the text contained in a snapshot document and
@@ -119,7 +119,7 @@ public class TrainingService {
                 return;
             }
 
-            tikaDocumentService.extractText(snapshot, ocrMode, tikaOptions);
+            ocrService.extractText(snapshot,null, ocrMode, tikaOptions);
 
             // now we load the attachments...
             List<FileData> files = snapshot.getFileData();
@@ -231,7 +231,7 @@ public class TrainingService {
                 return;
             }
 
-            tikaDocumentService.extractText(snapshot, ocrMode, tikaOptions);
+            ocrService.extractText(snapshot,null, ocrMode, tikaOptions);
 
             // now we load the attachments...
             List<FileData> files = snapshot.getFileData();

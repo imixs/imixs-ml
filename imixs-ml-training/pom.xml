@@ -110,7 +110,7 @@
 
 		<dependency>
 			<groupId>org.imixs.workflow</groupId>
-			<artifactId>imixs-archive-documents</artifactId>
+			<artifactId>imixs-archive-ocr</artifactId>
 			<scope>compile</scope>
 		</dependency>
 
