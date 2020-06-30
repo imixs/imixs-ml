@@ -14,6 +14,11 @@ public class XMLAnalyseEntity {
 
     private String label;
 
+    /**
+     * Returns the name of the entity.
+     * 
+     * @return - name of this entity
+     */
     public String getLabel() {
         return label;
     }
@@ -29,6 +34,10 @@ public class XMLAnalyseEntity {
 
     }
 
+    /**
+     * Returns the text value of the entity
+     * @return - text value
+     */
     public String getText() {
         return text;
     }
