@@ -65,6 +65,7 @@ services:
       POSTGRES_CONNECTION: "jdbc:postgresql://imixs-documents-db/office"      
       TZ: "Europe/Berlin"
 
+      ASYNCEVENT_PROCESSOR_ENABLED: "true"
       TIKA_SERVICE_MODE: "model"
       TIKA_SERVICE_ENDPONT: "http://tika:9998/tika"
       TIKA_OCR_MODE: "MIXED"
