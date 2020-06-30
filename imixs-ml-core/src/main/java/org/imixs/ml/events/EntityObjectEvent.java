@@ -26,32 +26,35 @@
  *      Ralph Soika - Software Developer
  */
 
-package org.imixs.ml.adapters;
+package org.imixs.ml.events;
 
 import java.util.Locale;
 import java.util.Set;
 
 /**
- * The AnalyzeEntityEvent provides a CDI event fired by the TrainingService EJB.
- * This even can be used in a observer pattern to provide alternative text representation for a given item value.
+ * The EntityObjectEvent provides a CDI event fired by the TrainingService EJB.
+ * This even can be used in a observer pattern to provide alternative text
+ * representation for a given object value.
+ * <p>
+ * The event provides a given object value and a set of textVariants already
+ * resolved for the given object. If an Observer finds new text variants for
+ * the object value it adds those variants to the textVariants.
  * 
  * @author Ralph Soika
  * @version 1.0
  * @see org.imixs.workflow.engine.WorkflowService
  */
-public class AnalyzeEntityEvent {
+public class EntityObjectEvent {
 
     private Object value;
-    private Set<String> enityVariants;
+    private Set<String> enityTextVariants;
     private Set<Locale> locals;
-    
-    
-    public AnalyzeEntityEvent(Object value, Set<String> enityVariants, Set<Locale> locals) {
-        this.value=value;
-        this.enityVariants=enityVariants;
-        this.locals=locals;
-    }
 
+    public EntityObjectEvent(Object value, Set<String> enityTextVariants, Set<Locale> locals) {
+        this.value = value;
+        this.enityTextVariants = enityTextVariants;
+        this.locals = locals;
+    }
 
     public Object getValue() {
         return value;
@@ -61,24 +64,20 @@ public class AnalyzeEntityEvent {
         this.value = value;
     }
 
-    public Set<String> getEnityVariants() {
-        return enityVariants;
+    public Set<String> getEnityTextVariants() {
+        return enityTextVariants;
     }
 
-    public void setEnityVariants(Set<String> enityVariants) {
-        this.enityVariants = enityVariants;
+    public void setEnityTextVariants(Set<String> enityTextVariants) {
+        this.enityTextVariants = enityTextVariants;
     }
-
 
     public Set<Locale> getLocals() {
         return locals;
     }
 
-
     public void setLocals(Set<Locale> locals) {
         this.locals = locals;
     }
-
-   
 
 }
