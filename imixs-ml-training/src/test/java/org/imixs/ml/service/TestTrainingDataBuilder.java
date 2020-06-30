@@ -8,8 +8,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.imixs.ml.adapters.AnalyzeEntityEvent;
 import org.imixs.ml.adapters.DateAdapter;
+import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
@@ -225,7 +225,7 @@ public class TestTrainingDataBuilder {
         cal.set(Calendar.YEAR, 2020);
 
         Set<String> enityVariants = new HashSet<String>();
-        dateAdapter.onEvent(new AnalyzeEntityEvent(cal.getTime(), enityVariants,locals));
+        dateAdapter.onEvent(new EntityObjectEvent(cal.getTime(), enityVariants,locals));
 
         ItemCollection doc = new ItemCollection();
         doc.setItemValue("_invoicedate", cal.getTime());

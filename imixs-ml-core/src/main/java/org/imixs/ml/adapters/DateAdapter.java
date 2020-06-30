@@ -40,6 +40,8 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 
+import org.imixs.ml.events.EntityObjectEvent;
+
 /**
  * The DateAdapter creates text variants for a Date value.
  * <p>
@@ -57,7 +59,7 @@ import javax.enterprise.event.Observes;
 public class DateAdapter {
     private static Logger logger = Logger.getLogger(DateAdapter.class.getName());
 
-    public void onEvent(@Observes AnalyzeEntityEvent event) {
+    public void onEvent(@Observes EntityObjectEvent event) {
         if (event.getValue() == null) {
             return;
         }
@@ -87,19 +89,19 @@ public class DateAdapter {
             DateFormat dateFormat = null;
 
             dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            event.getEnityVariants().add(dateFormat.format(date));
+            event.getEnityTextVariants().add(dateFormat.format(date));
 
             dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            event.getEnityVariants().add(dateFormat.format(date));
+            event.getEnityTextVariants().add(dateFormat.format(date));
 
             dateFormat = new SimpleDateFormat("d.M.yyyy");
-            event.getEnityVariants().add(dateFormat.format(date));
+            event.getEnityTextVariants().add(dateFormat.format(date));
 
             dateFormat = new SimpleDateFormat("dd.MM.yy");
-            event.getEnityVariants().add(dateFormat.format(date));
+            event.getEnityTextVariants().add(dateFormat.format(date));
 
             dateFormat = new SimpleDateFormat("d.M.yy");
-            event.getEnityVariants().add(dateFormat.format(date));
+            event.getEnityTextVariants().add(dateFormat.format(date));
 
             if (event.getLocals() == null || event.getLocals().size() == 0) {
                 logger.warning("missing locals - adapter can not applied locale formats!");
@@ -107,9 +109,9 @@ public class DateAdapter {
             } else {
                 for (Locale locale : event.getLocals()) {
                     dateFormat = new SimpleDateFormat("d MMMMM yyyy", locale);
-                    event.getEnityVariants().add(dateFormat.format(date));
+                    event.getEnityTextVariants().add(dateFormat.format(date));
                     dateFormat = new SimpleDateFormat("d. MMMMM yyyy", locale);
-                    event.getEnityVariants().add(dateFormat.format(date));
+                    event.getEnityTextVariants().add(dateFormat.format(date));
                 }
             }
 

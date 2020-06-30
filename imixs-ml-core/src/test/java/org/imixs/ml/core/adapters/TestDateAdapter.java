@@ -7,8 +7,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.imixs.ml.adapters.AnalyzeEntityEvent;
 import org.imixs.ml.adapters.DateAdapter;
+import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.workflow.exceptions.PluginException;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class TestDateAdapter {
         cal.set(Calendar.YEAR,2020);
         date=cal.getTime();
 
-         dateAdapter.onEvent(new AnalyzeEntityEvent(date, enityVariants,locals));
+         dateAdapter.onEvent(new EntityObjectEvent(date, enityVariants,locals));
 
         for (String variant : enityVariants) {
             logger.info(variant);

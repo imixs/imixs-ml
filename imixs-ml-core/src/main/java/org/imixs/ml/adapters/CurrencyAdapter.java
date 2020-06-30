@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 
+import org.imixs.ml.events.EntityObjectEvent;
+
 /**
  * The CurrencyAdapter creates text variants for a float value.
  * <p>
@@ -54,7 +56,7 @@ import javax.enterprise.event.Observes;
 public class CurrencyAdapter {
     private static Logger logger = Logger.getLogger(CurrencyAdapter.class.getName());
 
-    public void onEvent(@Observes AnalyzeEntityEvent event) {
+    public void onEvent(@Observes EntityObjectEvent event) {
         if (event.getValue() == null) {
             return;
         }
@@ -84,11 +86,11 @@ public class CurrencyAdapter {
             for (Locale locale : event.getLocals()) {
                 DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
                 formatter.applyPattern("#,###,##0.00");
-                event.getEnityVariants().add(formatter.format(d));
+                event.getEnityTextVariants().add(formatter.format(d));
 
                 formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
                 formatter.applyPattern("0.00");
-                event.getEnityVariants().add(formatter.format(d));
+                event.getEnityTextVariants().add(formatter.format(d));
             }
 
         } catch (NumberFormatException nfe) {

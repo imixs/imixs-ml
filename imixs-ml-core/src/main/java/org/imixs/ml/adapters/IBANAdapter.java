@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 import javax.enterprise.event.Observes;
 
+import org.imixs.ml.events.EntityObjectEvent;
+
 /**
  * The IBANAdapter creates text variants for an IBAN value
  * <p>
@@ -50,7 +52,7 @@ public class IBANAdapter {
 
     public static final String IBAN_PATTERN = "^$|(^[A-Z]{2}(?:[ ]?[A-Z0-9]){13,32}$)";
 
-    public void onEvent(@Observes AnalyzeEntityEvent event) {
+    public void onEvent(@Observes EntityObjectEvent event) {
 
         if (event.getValue() == null) {
             return;
@@ -60,11 +62,11 @@ public class IBANAdapter {
         if (Pattern.matches(IBAN_PATTERN, iban)) {
 
             // first take the string as is...
-            event.getEnityVariants().add(iban.trim());
+            event.getEnityTextVariants().add(iban.trim());
 
             // next strip ' '
             iban = iban.replace(" ", "");
-            event.getEnityVariants().add(iban.trim());
+            event.getEnityTextVariants().add(iban.trim());
 
             // finally add standard spaces...
             String iban_formated = "";
@@ -79,7 +81,7 @@ public class IBANAdapter {
                 }
 
             }
-            event.getEnityVariants().add(iban_formated.trim());
+            event.getEnityTextVariants().add(iban_formated.trim());
         }
 
     }

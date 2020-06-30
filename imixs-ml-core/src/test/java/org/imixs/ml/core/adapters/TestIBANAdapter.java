@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.imixs.ml.adapters.AnalyzeEntityEvent;
 import org.imixs.ml.adapters.IBANAdapter;
+import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.workflow.exceptions.PluginException;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class TestIBANAdapter {
         
        String iban="DE69 5095 1469 0005 0111 11";
 
-       ibanAdapter.onEvent(new AnalyzeEntityEvent(iban, enityVariants,null));
+       ibanAdapter.onEvent(new EntityObjectEvent(iban, enityVariants,null));
 
         for (String variant : enityVariants) {
             logger.info(variant);
