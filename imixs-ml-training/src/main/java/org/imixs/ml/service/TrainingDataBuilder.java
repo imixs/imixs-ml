@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Event;
 
-import org.imixs.ml.adapters.AnalyzeEntityEvent;
+import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
@@ -36,7 +36,7 @@ public class TrainingDataBuilder {
 
     private List<String> itemNames = null;
     private ItemCollection doc = null;
-    private Event<AnalyzeEntityEvent> analyzerEntityEvents = null;
+    private Event<EntityObjectEvent> entityObjectEvents = null;
     private XMLTrainingData trainingData = null;
     private Set<Locale> locals=null;
 
@@ -49,8 +49,8 @@ public class TrainingDataBuilder {
         trainingData.setText(text);
     }
 
-    public TrainingDataBuilder setAnalyzerEntityEvents(Event<AnalyzeEntityEvent> analyzerEntityEvents) {
-        this.analyzerEntityEvents = analyzerEntityEvents;
+    public TrainingDataBuilder setAnalyzerEntityEvents(Event<EntityObjectEvent> analyzerEntityEvents) {
+        this.entityObjectEvents = analyzerEntityEvents;
         return this;
     }
 
@@ -132,28 +132,28 @@ public class TrainingDataBuilder {
 
         // adapt value formats...
         // fire event
-        Set<String> enityVariants = new HashSet<String>();
+        Set<String> enityTextVariants = new HashSet<String>();
 
-        if (analyzerEntityEvents != null) {
-            analyzerEntityEvents.fire(new AnalyzeEntityEvent(entity, enityVariants,locals));
+        if (entityObjectEvents != null) {
+            entityObjectEvents.fire(new EntityObjectEvent(entity, enityTextVariants,locals));
         } else {
             logger.warning("CDI Support is missing - AnalyzeEntityEvent Not Supported!");
         }
 
         // if the EntityAdapters provide no value, than we are adding the plain string
         // value only..
-        if (enityVariants.size() == 0) {
-            enityVariants.add(entity.toString());
+        if (enityTextVariants.size() == 0) {
+            enityTextVariants.add(entity.toString());
         }
 
         if (debug) {
             logger.finest("...... entity variants for : '" + entity.toString() + "'");
-            for (String entityVariant : enityVariants) {
+            for (String entityVariant : enityTextVariants) {
                 logger.finest("......    " + entityVariant);
             }
         }
 
-        List<XMLTrainingEntity> result = collectTrainingEntities(text, enityVariants, label);
+        List<XMLTrainingEntity> result = collectTrainingEntities(text, enityTextVariants, label);
         // cleanup duplicates
         cleanOvelappingEntities(result);
 
