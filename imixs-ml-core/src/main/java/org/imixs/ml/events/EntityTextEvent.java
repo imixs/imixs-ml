@@ -28,61 +28,64 @@
 
 package org.imixs.ml.events;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 /**
- * The EntityTextEvent provides a CDI event fired by the MLAdapter.
- * This even can be used in a observer pattern to find the best Object value
- * representation for a given text value.
+ * The EntityTextEvent provides a CDI event fired by the MLAdapter. This event
+ * can be used in a observer pattern to find the best Object value
+ * representation for a given set of text values.
  * <p>
- * The event provides a given text value and a set of...?
- * 
- * 
+ * If the observer finds a matching value than the object property of the event
+ * is be set.
+ * <p>
+ * The event provides a List of textVariants instead of a Set because also the
+ * duplication of a textVariant can be a hint for the relevance of a value.
  * 
  * @author Ralph Soika
- * @version 1.0 
+ * @version 1.0
  * @see org.imixs.workflow.engine.WorkflowService
  */
 public class EntityTextEvent {
 
-    private String text;
+    private List<String> textVariants;
     private Object itemValue;
+    private String itemType;
     private Set<Locale> locals;
 
-    public EntityTextEvent(String text, Set<Locale> locals) {
-        this.text = text;
+    public EntityTextEvent(List<String> textVariants, Set<Locale> locals, String itemType) {
+        this.textVariants = textVariants;
         this.locals = locals;
+        this.itemType = itemType;
     }
 
-  
-    public String getText() {
-        return text;
+    public List<String> getTextVariants() {
+        return textVariants;
     }
 
-
-    public void setText(String text) {
-        this.text = text;
+    public void setTextVariants(List<String> textVariants) {
+        this.textVariants = textVariants;
     }
-
-
 
     public Object getItemValue() {
         return itemValue;
     }
 
-
     public void setItemValue(Object itemValue) {
         this.itemValue = itemValue;
     }
-
 
     public Set<Locale> getLocals() {
         return locals;
     }
 
-    public void setLocals(Set<Locale> locals) {
-        this.locals = locals;
+  
+
+    public String getItemType() {
+        return itemType;
     }
+
+ 
 
 }

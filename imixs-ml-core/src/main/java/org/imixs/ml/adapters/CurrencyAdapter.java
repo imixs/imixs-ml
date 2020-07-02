@@ -30,12 +30,15 @@ package org.imixs.ml.adapters;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 
 import org.imixs.ml.events.EntityObjectEvent;
+import org.imixs.ml.events.EntityTextEvent;
 
 /**
  * The CurrencyAdapter creates text variants for a float value.
@@ -56,7 +59,7 @@ import org.imixs.ml.events.EntityObjectEvent;
 public class CurrencyAdapter {
     private static Logger logger = Logger.getLogger(CurrencyAdapter.class.getName());
 
-    public void onEvent(@Observes EntityObjectEvent event) {
+    public void onObjectEvent(@Observes EntityObjectEvent event) {
         if (event.getValue() == null) {
             return;
         }
@@ -97,4 +100,87 @@ public class CurrencyAdapter {
             // not a number
         }
     }
+
+    public void onTextEvent(@Observes EntityTextEvent event) {
+
+        // if the event already has a object then we return
+        if (event.getItemValue() != null) {
+            return;
+        }
+
+        List<String> variants = event.getTextVariants();
+        BigDecimal result = null;
+
+        for (String variant : variants) {
+
+            BigDecimal b=textToCurrency(variant, event.getLocals());
+            if (b!=null ) {
+                if (result!=null) {
+                    // take highest value...
+                    if (b.compareTo(result)==1) {
+                        result=b;
+                    }
+                } else {
+                    result=b;
+                }
+            }
+        }
+        
+        if (result!=null) {
+            // convert to float
+            event.setItemValue(result.floatValue());
+        }
+
+    }
+
+    /**
+     * This helper method translates a text into a BigDecimal by applying different
+     * currency formats and different locals
+     * 
+     * @param text   - text representing a number
+     * @param locals - list of locales
+     * @return BigDecimal or null if no number was found.
+     */
+    private BigDecimal textToCurrency(String text, Set<Locale> locals) {
+        for (Locale locale : locals) {
+
+            BigDecimal b = null;
+
+            b = formatTextToNumber(text, "#,###,##0.00", locale);
+            if (b == null) {
+                // try second pattern
+                b = formatTextToNumber(text, "0.00", locale);
+            }
+            if (b != null) {
+                return b;
+            }
+        }
+        // no match!
+        return null;
+    }
+
+    /**
+     * This helper method formats a text by a given number pattern and a locale into
+     * number.
+     * 
+     * @param text
+     * @param pattern
+     * @param locale
+     * @return
+     */
+    private BigDecimal formatTextToNumber(String text, String pattern, Locale locale) {
+        DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
+        formatter.applyPattern(pattern);
+
+        try {
+            Number n = formatter.parse(text);
+            Double d = n.doubleValue();
+            return BigDecimal.valueOf(d);
+
+        } catch (java.text.ParseException e) {
+            // no number!
+        }
+        return null;
+    }
+
 }
