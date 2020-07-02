@@ -25,6 +25,11 @@
 			<artifactId>imixs-workflow-core</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.imixs.workflow</groupId>
+			<artifactId>imixs-workflow-engine</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		
 
 		<!-- Testing -->
