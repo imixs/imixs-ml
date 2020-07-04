@@ -107,6 +107,14 @@ public class CurrencyAdapter {
         if (event.getItemValue() != null) {
             return;
         }
+        
+        // did the event type match our adapter type?
+        if (event.getItemType()!=null && !event.getItemType().isEmpty() 
+                && !event.getItemType().equalsIgnoreCase("currency")) {
+            // no match!
+            return;
+        }
+        
 
         List<String> variants = event.getTextVariants();
         BigDecimal result = null;

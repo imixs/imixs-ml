@@ -28,11 +28,13 @@
 
 package org.imixs.ml.adapters;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.enterprise.event.Observes;
 
 import org.imixs.ml.events.EntityObjectEvent;
+import org.imixs.ml.events.EntityTextEvent;
 
 /**
  * The IBANAdapter creates text variants for an IBAN value
@@ -70,18 +72,49 @@ public class IBANAdapter {
 
             // finally add standard spaces...
             String iban_formated = "";
-          //  int pos = 0;
+            // int pos = 0;
             while (true) {
                 if (iban.length() >= 4) {
                     iban_formated = iban_formated + iban.substring(0, 4) + " ";
-                    iban=iban.substring(4);
+                    iban = iban.substring(4);
                 } else {
-                    iban_formated=iban_formated+iban;
+                    iban_formated = iban_formated + iban;
                     break;
                 }
 
             }
             event.getEnityTextVariants().add(iban_formated.trim());
+        }
+
+    }
+
+    /**
+     * Method to parse text variants for IBAN objects. The event is only processed
+     * if the event type is 'iban'.
+     * 
+     * @param event
+     */
+    public void onTextEvent(@Observes EntityTextEvent event) {
+
+        // if the event already has a object then we return
+        if (event.getItemValue() != null) {
+            return;
+        }
+
+        // did the event type match our adapter type?
+        if (event.getItemType() != null && !event.getItemType().isEmpty()
+                && !event.getItemType().equalsIgnoreCase("iban")) {
+            // no match!
+            return;
+        }
+
+        List<String> variants = event.getTextVariants();
+        for (String variant : variants) {
+            if (Pattern.matches(IBAN_PATTERN, variant)) {
+                event.setItemValue(variant);
+                return;
+            }
+
         }
 
     }

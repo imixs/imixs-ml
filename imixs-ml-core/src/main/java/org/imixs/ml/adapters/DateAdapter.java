@@ -29,18 +29,22 @@
 package org.imixs.ml.adapters;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 
 import org.imixs.ml.events.EntityObjectEvent;
+import org.imixs.ml.events.EntityTextEvent;
 
 /**
  * The DateAdapter creates text variants for a Date value.
@@ -119,4 +123,99 @@ public class DateAdapter {
             // not a number
         }
     }
+
+    /**
+     * Method to parse text variants for date objects. The event is only processed
+     * if the event type is 'date'.
+     * 
+     * @param event
+     */
+    public void onTextEvent(@Observes EntityTextEvent event) {
+
+        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" };
+        String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy" };
+
+        // if the event already has a object then we return
+        if (event.getItemValue() != null) {
+            return;
+        }
+
+        // did the event type match our adapter type?
+        if (event.getItemType() != null && !event.getItemType().isEmpty()
+                && !event.getItemType().equalsIgnoreCase("date")) {
+            // no match!
+            return;
+        }
+
+        List<String> variants = event.getTextVariants();
+        Date result = null;
+
+        for (String variant : variants) {
+
+            for (String simplePattern : simplePatternList) {
+                result = parseDateByPattern(variant, simplePattern);
+                if (result != null) {
+                    event.setItemValue(result);
+                    return;
+                }
+            }
+
+            // try locale patterns...
+            if (event.getLocals() == null || event.getLocals().size() == 0) {
+                for (String localePattern : localePatternList) {
+                    result = parseDateByLocale(variant, localePattern, event.getLocals());
+                    if (result != null) {
+                        event.setItemValue(result);
+                        return;
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    /**
+     * Helper method to parse a string for a date object by a given pattern.
+     * 
+     * @param pattern - date pattern
+     * @return date object if parse able - otherwise null.
+     */
+    private Date parseDateByPattern(String text, String pattern) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+            Date result = dateFormat.parse(text);
+            // success!
+            return result;
+        } catch (ParseException e) {
+            // unable to parse ...
+            return null;
+        }
+
+    }
+
+    /**
+     * Helper method to parse a string for a date object by a given pattern and all
+     * available locales.
+     * 
+     * @param pattern - date pattern
+     * @return date object if parse able - otherwise null.
+     */
+    private Date parseDateByLocale(String text, String pattern, Set<Locale> locales) {
+
+        for (Locale locale : locales) {
+
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, locale);
+                Date result = dateFormat.parse(text);
+                // success!
+                return result;
+            } catch (ParseException e) {
+                // unable to parse ...
+                return null;
+            }
+        }
+        return null;
+    }
+
 }
