@@ -23,25 +23,29 @@ The MLAdapter can be optional configured through the model by defining a workflo
 <img src="model-configuration.png" />
 
 See the following example:
+    
+	<ml-config name="endpoint">
+	    https://localhost:8111/api/resource/
+	</ml-config>
+	<ml-config name="locales">DE,UK</ml-config>
 
-	<item name="ml.config">
-	    <endpoint>https://localhost:8111/api/resource/</endpoint>
-	    <locales>DE,UK</locales>
-	</item>
+
+
 
 Per default the MLAdapter takes all entities into the current workitem if an item with the name did not yet exist. 
 To configure the behavior of the entity adaption in a more fine grained way optional configuration via the workflow
  model is possible via the item 'ml.entity':
 
-	<item name="ml.entity">
+	<ml-config name="entity">
 	    <name>_invoicetotal</name>
 	    <type>currency</type>
-	</item>
-	<item name="ml.entity">
+	</ml-config>
+	<ml-config name="entity">
 	    <name>_cdtr_bic</name>
 	    <type>text</type>
 	    <mapping>bic</mapping>
-	</item>
+	</ml-config>
+	
 
 In this example the entity '_invoicetotal' will be adapted by the Currency Adapter. 
 The entity '_cdtr_bic' will be mapped into the item 'bic'.

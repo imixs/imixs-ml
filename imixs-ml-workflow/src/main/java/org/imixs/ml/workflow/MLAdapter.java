@@ -65,16 +65,16 @@ import org.imixs.workflow.util.XMLParser;
  * (ML_API_ENDPOINT' and 'ML_LOCALES')
  * <p>
  * The Adapter can be optional configured through the model by defining a
- * workflow result item named 'ml.config'.
+ * workflow result tag named 'ml-config'.
  * <p>
  * Example:
  * 
  * <pre>
  * {@code
-<item name="ml.config">
+<ml-config>
     <endpoint>https://localhost:8111/api/resource/</endpoint>
     <locales>DE,UK</locales>
-</item>
+</ml-config>
  * }
  * </pre>
  * <p>
@@ -87,15 +87,15 @@ import org.imixs.workflow.util.XMLParser;
  * 
  * <pre>
  * {@code
-<item name="ml.entity">
+<ml-entity>
     <name>_invoicetotal</name>
     <type>currency</type>
-</item>
-<item name="ml.entity">
+</ml-entity>
+<ml-entity>
     <name>_cdtr_bic</name>
     <type>text</type>
     <mapping>bic</mapping>
-</item>
+</ml-entity>
  * }
  * </pre>
  * 
@@ -106,10 +106,10 @@ import org.imixs.workflow.util.XMLParser;
 
 public class MLAdapter implements SignalAdapter {
 
-    public static final String ML_API_ENDPOINT = "ml.endpoint";
+    public static final String ML_SERVICE_ENDPOINT = "ml.service.endpoint";
     public static final String ML_LOCALES = "ml.locales";
 
-    public static final String ML_ENTITY = "ml.entity";
+    public static final String ML_ENTITY = "entity";
 
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
@@ -117,12 +117,12 @@ public class MLAdapter implements SignalAdapter {
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
     @Inject
-    @ConfigProperty(name = ML_API_ENDPOINT, defaultValue = "")
-    private String mlDefaultAPIEndpoint;
+    @ConfigProperty(name = ML_SERVICE_ENDPOINT, defaultValue = "")
+    private String mlDefaultEndpoint;
 
     @Inject
     @ConfigProperty(name = ML_LOCALES, defaultValue = "DE,UK")
-    private String mlDefaultAPILocales;
+    private String mlDefaultLocales;
 
     @Inject
     private WorkflowService workflowService;
@@ -146,16 +146,15 @@ public class MLAdapter implements SignalAdapter {
 
         // read configuration either form the model or imixs.properties....
         try {
-            ItemCollection evalItemCollection = workflowService.evalWorkflowResult(event, document, false);
-            ItemCollection mlConfig = XMLParser.parseItemStructure(evalItemCollection.getItemValueString("ml.config"));
+            ItemCollection mlConfig = workflowService.evalWorkflowResult(event, "ml-config", document, false);
+
             mlAPIEndpoint = parseMLEndpointByModel(mlConfig);
             locals = parseMLLocalesByModel(mlConfig);
 
             // test if the model provides optional entity definitions.
-            enityDefinitions = parseEntityDefinitionsByModel(evalItemCollection);
+            enityDefinitions = parseEntityDefinitionsByModel(mlConfig);
         } catch (PluginException e) {
-            logger.warning("Unable to parse item definitions for 'ml.config' and 'ml.entity', verify model - "
-                    + e.getMessage());
+            logger.warning("Unable to parse item definitions for 'ml-config', verify model - " + e.getMessage());
         }
 
         // analyse file content....
@@ -242,9 +241,12 @@ public class MLAdapter implements SignalAdapter {
 
         // test if the model provides a MLEndpoint. If not, the adapter uses the
         // mlDefaultAPIEndpoint
-        mlAPIEndpoint = mlConfig.getItemValueString("endpoint");
-        if (mlAPIEndpoint.isEmpty()) {
-            mlAPIEndpoint = mlDefaultAPIEndpoint;
+        mlAPIEndpoint = null;
+        if (mlConfig != null) {
+            mlAPIEndpoint = mlConfig.getItemValueString("endpoint");
+        }
+        if (mlAPIEndpoint == null || mlAPIEndpoint.isEmpty()) {
+            mlAPIEndpoint = mlDefaultEndpoint;
         }
         if (debug) {
             logger.info("......ml api endpoint " + mlAPIEndpoint);
@@ -268,9 +270,12 @@ public class MLAdapter implements SignalAdapter {
 
         // test if the model provides locales. If not, the adapter uses the
         // mlDefaultAPILocales
-        String mlAPILocales = mlConfig.getItemValueString("locales");
-        if (mlAPILocales.isEmpty()) {
-            mlAPILocales = mlDefaultAPILocales;
+        String mlAPILocales = null;
+        if (mlConfig != null) {
+            mlAPILocales = mlConfig.getItemValueString("locales");
+        }
+        if (mlAPILocales == null || mlAPILocales.isEmpty()) {
+            mlAPILocales = mlDefaultLocales;
         }
 
         // translate locales..
@@ -290,41 +295,32 @@ public class MLAdapter implements SignalAdapter {
      * This method parses the workflow result for optional entity definitions
      */
     @SuppressWarnings("unchecked")
-    private Map<String, EntityDefinition> parseEntityDefinitionsByModel(ItemCollection evalItemCollection) {
-        boolean debug = logger.isLoggable(Level.FINE);
-        debug = true;
+    private Map<String, EntityDefinition> parseEntityDefinitionsByModel(ItemCollection mlConfig) {
 
+        List<String> entityDevList = mlConfig.getItemValue("entity");
         Map<String, EntityDefinition> result = new HashMap<String, EntityDefinition>();
 
-        // test if the model provides optional entity definitions.
-        if (evalItemCollection.hasItem(ML_ENTITY)) {
-            if (debug) {
-                logger.info("......processing " + ML_ENTITY);
+        for (String entityDev : entityDevList) {
+
+            if (entityDev.trim().isEmpty()) {
+                // no definition
+                continue;
             }
-            // extract the create subprocess definitions...
-            List<String> entityDevList = evalItemCollection.getItemValue(ML_ENTITY);
+            try {
+                // evaluate the item content (XML format expected here!)
+                ItemCollection entityData = XMLParser.parseItemStructure(entityDev);
 
-            for (String entityDev : entityDevList) {
-
-                if (entityDev.trim().isEmpty()) {
-                    // no definition
-                    continue;
+                if (entityData != null) {
+                    String name = entityData.getItemValueString("name");
+                    String type = entityData.getItemValueString("type");
+                    String mapping = entityData.getItemValueString("mapping");
+                    // add definition into the definition map...
+                    result.put(name, new EntityDefinition(name, type, mapping));
                 }
-                try {
-                    // evaluate the item content (XML format expected here!)
-                    ItemCollection entityData = XMLParser.parseItemStructure(entityDev);
-
-                    if (entityData != null) {
-                        String name = entityData.getItemValueString("name");
-                        String type = entityData.getItemValueString("type");
-                        String mapping = entityData.getItemValueString("mapping");
-                        // add definition into the definition map...
-                        result.put(name, new EntityDefinition(name, type, mapping));
-                    }
-                } catch (PluginException e) {
-                    logger.warning("Invalid ml.entity definition - verify model!");
-                }
+            } catch (PluginException e) {
+                logger.warning("Invalid ml.config definition with unexpected entity element - verify model!");
             }
+
         }
 
         return result;
@@ -375,6 +371,9 @@ public class MLAdapter implements SignalAdapter {
 
         public EntityDefinition(String name, String itemType, String itemName) {
             super();
+            if (name==null || name.isEmpty()) {
+                logger.warning("Invalid ml.config entity definition - missing name!");
+            }
             this.name = name;
             this.itemType = itemType;
             this.itemName = itemName;
@@ -389,7 +388,11 @@ public class MLAdapter implements SignalAdapter {
         }
 
         public String getItemName() {
-            return itemName;
+            if (itemName == null || itemName.isEmpty()) {
+                return name;
+            } else {
+                return itemName;
+            }
         }
 
     }
