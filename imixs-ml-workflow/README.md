@@ -24,7 +24,7 @@ Optional the parameters can be set by the environment variables *ML_SERVICE_ENDP
 
 The MLAdapter can be optional be configured through the model by defining a workflow result item named '*ml.config*'.
 
-<img src="model-configuration.png" />
+<img src="ml-model-configuration.png" />
 
 See the following example:
     
@@ -87,4 +87,19 @@ The MLController set the item '*ml.status*' with one of the following options:
  - confirmed - confirmed by the user
  - training - workitem is ready for a training
    
+### ML Input
 
+With the JavaScrit library 'imixs-offic.ml.js' input fields with a computed value from the ml analysys can be highlighted to give the user a hint that the value of a field comes from the ml engine.
+
+<img src="ml-input-suggest.png" />
+
+The script library adds a css class named 'imixs-ml' to a input field associated with a ml entity. You can add a custom stile for this css class into your application:
+
+	.imixs-ml {
+		background: url(./idea_16.png) no-repeat scroll right #d6fdd6 !important;
+		background-position: 100% 5px !important;
+	} 
+
+	
+	
+### ML Suggestion	

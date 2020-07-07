@@ -1,33 +1,32 @@
 package org.imixs.ml.workflow;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.event.Observes;
+import javax.enterprise.context.ConversationScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.imixs.workflow.ItemCollection;
-import org.imixs.workflow.Model;
-import org.imixs.workflow.engine.ModelService;
-import org.imixs.workflow.engine.ProcessingEvent;
-import org.imixs.workflow.exceptions.ModelException;
 import org.imixs.workflow.faces.data.WorkflowController;
 
 /**
- * The MLController CDI Bean controls the ml.status item. If no ml.status item
- * exists, and ml.item is not empty, than the status is set to 'suggest'. If the
- * status is 'suggest' and the current event is 'public' than the status is set
- * to 'confirmed'
+ * The MLController CDI Bean provides Front-End methods for the ml integration.
+ * The method getJSON returns a sringified JSON object providing the mls status
+ * and ml items.
+ * <p>
+ * The method search provides a suggest list searching a phrase within the
+ * document content of the current workitem.
  * 
  * @author rsoika
  *
  */
 @Named("mlController")
-@RequestScoped
+//@RequestScoped
+@ConversationScoped
 public class MLController implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,67 +35,7 @@ public class MLController implements Serializable {
     @Inject
     protected WorkflowController workflowController;
 
-    @Inject
-    protected ModelService modelService;
-
-    /**
-     * WorkflowEvent listener to update the ml.status property.
-     * <p>
-     * If no ml.status item exists, and ml.item is not empty, than the status is set
-     * to 'suggest'
-     * <p>
-     * If the status is 'suggest' and the current event is 'public' than the status
-     * is set to 'confirmed'
-     * 
-     * @param processingEvent
-     */
-    @SuppressWarnings("unchecked")
-    public void onWorkflowEvent(@Observes ProcessingEvent processingEvent) {
-        if (processingEvent == null)
-            return;
-
-        ItemCollection workitem = processingEvent.getDocument();
-
-        // skip if not a workItem...
-        if (workitem != null && !workitem.getItemValueString("type").startsWith("workitem"))
-            return;
-
-        int eventType = processingEvent.getEventType();
-
-        // if it was an public event we set the ml.status to 'verified'
-        List<String> mlItems = workitem.getItemValue(MLAdapter.ITEM_ML_ITEMES);
-
-        // set initial status?
-        if (ProcessingEvent.AFTER_PROCESS == eventType) {
-            if (mlItems.size() > 0 && workitem.getItemValueString(MLAdapter.ITEM_ML_STATUS).isEmpty()) {
-                workitem.setItemValue(MLAdapter.ITEM_ML_STATUS, MLAdapter.ML_STATUS_SUGGEST);
-                return;
-            }
-        }
-
-        // set confirmed status?
-        if (ProcessingEvent.BEFORE_PROCESS == eventType) {
-            if (mlItems.size() > 0
-                    && MLAdapter.ML_STATUS_SUGGEST.equals(workitem.getItemValueString(MLAdapter.ITEM_ML_STATUS))) {
-                // test if we have a public event
-                Model model;
-                try {
-                    model = modelService.getModelByWorkitem(workitem);
-                    ItemCollection event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
-                    // ad only activities with userControlled != No
-                    if (!"0".equals(event.getItemValueString("keypublicresult"))) {
-                        // update status
-                        workitem.setItemValue(MLAdapter.ITEM_ML_STATUS, MLAdapter.ML_STATUS_CONFIRMED);
-                        return;
-                    }
-                } catch (ModelException e) {
-                    logger.warning("unable to parse current bpmn event: " + e.getMessage());
-                }
-            }
-
-        }
-
-    }
+    private List<String> searchResult = null;
 
     /**
      * This method returns true if the item value for a given item was computed by
@@ -164,4 +103,64 @@ public class MLController implements Serializable {
         result = result + "}";
         return result;
     }
+
+    /**
+     * This method searches a text phrase within the document content of attached
+     * documents. The textphrase  is extracted from the RequestParamterMap.  
+     * <p>
+     * JSF Integration:
+     * 
+     * {@code
+     *  <h:commandScript name="imixsOfficeWorkflow.mlSearch" action="#{mlController.search()}" 
+            rendered="#{mlController!=null}" render="ml-results" />
+     * }
+     *  
+     * <p>
+     * JavaScript Example:
+     * 
+     * <pre>
+     * {@code
+     *  imixsOfficeWorkflow.mlSearch({ item: '_invoicenumber' })
+     *  }
+     * </pre>
+     * 
+     */
+    public void search() {
+        
+        
+        // get the param from faces context....
+        FacesContext fc = FacesContext.getCurrentInstance();
+        String itemName = fc.getExternalContext().getRequestParameterMap().get("item"); 
+        String phrase = fc.getExternalContext().getRequestParameterMap().get("phrase"); 
+
+        logger.info("search prase '" + phrase + "'");
+        
+      //  String input =workflowController.getWorkitem().getItemValueString(itemName);
+        if (phrase == null || phrase.length() < 2) {
+            return;
+        }
+
+        logger.finest(".......triger search...");
+        logger.fine("search for=" + phrase);
+        searchResult = new ArrayList<String>();
+
+        searchResult.add("Hallo: "+phrase);
+        searchResult.add("Hallo Welt: "+phrase);
+
+    }
+    
+    public List<String> getSearchResult() {
+        return searchResult;
+    }
+
+    
+
+    /**
+     * This method reset the search and input state.
+     */
+    public void reset() {
+        searchResult = new ArrayList<String>();
+        logger.fine("reset");
+    }
+
 }
