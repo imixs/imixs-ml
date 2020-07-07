@@ -113,6 +113,17 @@ public class MLAdapter implements SignalAdapter {
 
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
+    
+    public static final String ITEM_ML_ITEMES = "ml.items";
+    public static final String ITEM_ML_STATUS = "ml.status";
+    
+    
+    
+    public static final String ML_STATUS_SUGGEST = "suggest";
+    public static final String ML_STATUS_CONFIRMED = "confirmed";
+    public static final String ML_STATUS_TRAINING = "training";
+    
+    
 
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
@@ -138,6 +149,8 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         Set<Locale> locals = new HashSet<Locale>();
 
+        document.setItemValue("sepp", "Hughu");
+        logger.info("set sepp");
         Map<String, EntityDefinition> enityDefinitions = null;
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
@@ -216,14 +229,14 @@ public class MLAdapter implements SignalAdapter {
 
                 }
                 // update the ml.item list with all new assigned items....
-                document.setItemValue("ml.items", groupedEntityList.keySet());
-
+                document.setItemValue(ITEM_ML_ITEMES,groupedEntityList.keySet());
             }
 
         } else {
             logger.finest("......no files found for " + document.getUniqueID());
         }
-
+        
+        
         return document;
     }
 

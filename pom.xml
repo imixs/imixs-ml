@@ -101,7 +101,13 @@
 				<version>${org.imixs.workflow.version}</version>
 				<scope>provided</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>org.imixs.workflow</groupId>
+				<artifactId>imixs-workflow-faces</artifactId>
+				<version>${org.imixs.workflow.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			
 			<dependency>
 				<groupId>org.imixs.workflow</groupId>
 				<artifactId>imixs-melman</artifactId>
@@ -117,7 +123,7 @@
 		</dependencies>
 
 	</dependencyManagement>
-	
+
 	<dependencies>
 		<!-- JEE Dependencies -->
 		<dependency>
