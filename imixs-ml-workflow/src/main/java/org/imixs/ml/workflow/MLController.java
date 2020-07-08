@@ -35,7 +35,7 @@ public class MLController implements Serializable {
 
     @Inject
     protected WorkflowController workflowController;
-    
+
     @Inject
     protected MLService mlService;
 
@@ -146,42 +146,89 @@ public class MLController implements Serializable {
         logger.finest(".......triger search...");
         logger.fine("search for=" + phrase);
         searchResult = new ArrayList<String>();
-        
-        String text=getAllDocumentText();
-        if (text!=null) {
-            text=text.toLowerCase();
-            int startPos=0;
-            while (true) {
-                // find up to 5 variants....
-                int found=text.indexOf(phrase,startPos);
-                if (found>-1) {
-                    startPos=found+1;
-                    
-                    // take until next space 
-                    String hit=text.substring(found ,text.indexOf( " ",startPos+1) );
-                    
-                    // the hit may not contain new lines...
-                    
-                    
-                    
-                    if (!searchResult.contains(hit)) {
-                        searchResult.add(hit);
-                    }
-                    
+
+        String text = getAllDocumentText();
+
+        if (text != null) {
+            searchResult = findMatches(phrase, text);
+        }
+
+    }
+
+    /**
+     * Returns a matching text sequence form a search phrase
+     * <p>
+     * e.g. 'cat' is found in 'Catalog'
+     * <p>
+     * The method also searches for computed phrases based on the first hit.
+     * <p>
+     * It seems that this kind of problem can not be solved with regex.
+     * 
+     * @param data
+     * @return
+     */
+    public static List<String> findMatches(String phrase, String text) {
+
+        List<String> result = new ArrayList<String>();
+
+        String searchText = text.toLowerCase();
+        String searchPhrase = phrase.toLowerCase();
+        String originSearchPhrase=searchPhrase;
+
+        // find start pos...
+        int index = 0;
+        while (true) {
+            int found = searchText.indexOf(searchPhrase, index);
+            if (found > -1) {
+                String hit = null;
+                int endPos = text.indexOf(" ", found +searchPhrase.length()+ 1);
+                // if we do not found a space, we search for a .
+                if (endPos == -1) {
+                    endPos = text.indexOf(".", found+searchPhrase.length() + 1);
+                }
+                if (endPos > -1) {
+                    hit = text.substring(found, endPos).trim();
+                   
                 } else {
-                    // no more found!
-                    break;
+                    // take it as is
+                    hit = text.substring(found).trim();
+                    
+                }
+
+                // if the hit is longer than 32 chars - we cut it....
+                if (hit.length() > 32) {
+                    hit = hit.substring(0, 32).trim();
+                }
+
+                if (!result.contains(hit)) {
+                    result.add(hit);
+                    
+                    // lets see if it makes sense to search for variant with spaces 
+                    if (!searchPhrase.endsWith(" ")) {
+                        searchPhrase=hit.toLowerCase() + " ";
+                    } else {
+                        // reset to origin search phrase
+                        searchPhrase=originSearchPhrase;
+                        index = found + hit.length();
+                    }
+                } else {
+                    index = found + hit.length();
                 }
                 
-                // max 5 results!
-                if (searchResult.size()>=5) {
-                    break;
-                }
+                
+
+            } else {
+                // no more matches
+                break;
             }
-         }
-
-       
-
+            
+            // if max count of 7 matches is reached we break;
+            if (result.size()>=7) {
+                break;
+            }
+                
+        }
+        return result;
     }
 
     public List<String> getSearchResult() {
@@ -212,7 +259,7 @@ public class MLController implements Serializable {
 
         for (FileData fileData : fileDataList) {
             List fileText = (List) fileData.getAttribute("text");
-            if (fileText != null && fileText.size()>0) {
+            if (fileText != null && fileText.size() > 0) {
                 result = result + fileText.get(0) + " ";
             }
         }
