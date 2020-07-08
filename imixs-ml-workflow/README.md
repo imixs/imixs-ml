@@ -55,8 +55,24 @@ The entity '_cdtr_bic' will be mapped into the item 'bic'.
 
 ### Named Entity Recognition (NER)
 
-The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER). The results will automatically stored into the current process instance. The ML Adapter creates a field 'ml.items' with all item names the adapter has filled with data. The MLAdatper will not overwrite existing data in any way. A front-end can use the MLController class to signal new ML Data to the user. 
+The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER). The results will automatically stored into the current process instance. 
 
+The ML Adapter creates a field 'ml.items' with all item names which are part of the NER.
+This means even if an entity was not found in the document content, but was configured by the bpmn model, the entity name will
+be part of 'ml.items'. With this mechanism, as new entity can later be trained even if the entiy is yet not part of the model.
+
+## The MLService
+
+The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status item. If no ml.status item
+ exists, and ml.items is not empty, than the status is set to 'suggest'. If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
+ 
+ The item '*ml.status*' has one of the following options:
+
+ - suggest - not yet confirmed by the user
+ - confirmed - confirmed by the user
+ - training - workitem is ready for a training
+
+The status 'training' indicates that all known entities are filled with data found in the document content. This means that this worktiem can be used for later training. See the 'ML TrainingScheduler'.
 
 ## The MLController
 
@@ -79,13 +95,6 @@ This method is used in JavaScript to get the ml status information:
 	</ui:fragment>
 
 
-### ML Status
-
-The MLController set the item '*ml.status*' with one of the following options:
-
- - suggest - not yet confirmed by the user
- - confirmed - confirmed by the user
- - training - workitem is ready for a training
    
 ### ML Input
 
@@ -102,4 +111,11 @@ The script library adds a css class named 'imixs-ml' to a input field associated
 
 	
 	
-### ML Suggestion	
+### ML Suggestion
+
+Imixs-ML Workflow provides a UI widget that allows the user to search a text phrase within the document content. This helps to generate valid training data, as the text values of input items are part of the document content which is important for later training.
+
+
+## ML Training Scheduler
+
+The service MLTrainingScheduler is a managed executer service which is sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'

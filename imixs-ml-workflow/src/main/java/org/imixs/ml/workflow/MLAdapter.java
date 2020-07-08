@@ -200,8 +200,9 @@ public class MLAdapter implements SignalAdapter {
                     // do we have an entityDefinition for this entity?
                     EntityDefinition entityDef = enityDefinitions.get(entityName);
                     if (entityDef == null) {
-                        // create dummy
+                        // create dummy - used for later training
                         entityDef = new EntityDefinition(entityName, null, entityName);
+                        enityDefinitions.put(entityName, entityDef);
                     }
 
                     // set the item value if the workItem did not have a value for this entity....
@@ -228,8 +229,11 @@ public class MLAdapter implements SignalAdapter {
                     }
 
                 }
-                // update the ml.item list with all new assigned items....
-                document.setItemValue(ITEM_ML_ITEMES,groupedEntityList.keySet());
+                
+                
+                
+                // update the ml.items list with all items of the entityDef list....
+                document.setItemValue(ITEM_ML_ITEMES,enityDefinitions.keySet());
             }
 
         } else {
