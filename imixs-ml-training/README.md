@@ -87,12 +87,27 @@ Find more details [here](https://github.com/imixs/imixs-archive/tree/master/imix
 ### The Entity List
 
 The property 'entities' contains a list of item names to be taken form the workitems to be analzed.
-The itemname is equal to the name identifying the entity within a spaCy model. In case the itemname provided in a workitem does not match the entity name used in a model you can adapt the name with a | character.
+The itemname is equal to the name identifying the entity within a ml-model (e.g. spaCy). In case the itemname provided in a workitem does not match the entity name used in a model you can adapt the name with a | character.
 
 	 
 	<value xsi:type="xs:string">_capacity|_invoicetotal</value>
 
 This example maps the item '_capacity' to the entity '_invoicetotal'.
+
+### The Training Data Quality
+
+The training data quality depends on the entities found in the content of a workitem.  There are the following training data quality levels defined:
+
+ - FULL - all training items in the workitem have a value and all values are part of the traingData. This means a 100% match.
+ - PARTIAL - not all training items in the workitem have a value, but all values are part of the  traingData. This means the workitem data has a partial  match.
+ - BAD - not all training item values of the workitem are part of the traingData.  This means the training object has a bad quality and can not be used for training
+
+The requested quality level for a traing data set can be defined with the config item "ml.training.quality"
+
+	....
+	<!-- ML Quality Level (FULL|PARTIAL) -->
+	<item name="ml.training.quality"><value xsi:type="xs:string">FULL</value></item>
+	....
 
 
 

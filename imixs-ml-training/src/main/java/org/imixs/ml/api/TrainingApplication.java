@@ -24,6 +24,7 @@ public class TrainingApplication extends Application {
     public static final String ITEM_TIKA_OCR_MODE = "tika.ocrmode";
     public static final String ITEM_ML_TRAINING_ENDPOINT = "ml.training.endpoint";
     public static final String ITEM_ML_ANALYSE_ENDPOINT = "ml.analyse.endpoint";
+    public static final String ITEM_ML_TRAINING_QUALITYLEVEL = "ml.training.quality";
 
     public static WorkflowClient buildWorkflowClient(ItemCollection config) {
 
