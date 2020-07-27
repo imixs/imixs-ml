@@ -19,6 +19,7 @@ target/
 # Python
 __pycache__/
 
+
 # Training files
 .config/
 training_model/
