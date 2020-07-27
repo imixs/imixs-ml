@@ -106,33 +106,23 @@ import org.imixs.workflow.util.XMLParser;
 
 public class MLAdapter implements SignalAdapter {
 
-    public static final String ML_SERVICE_ENDPOINT = "ml.service.endpoint";
-    public static final String ML_LOCALES = "ml.locales";
-
+  
     public static final String ML_ENTITY = "entity";
 
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
     
-    public static final String ITEM_ML_ITEMES = "ml.items";
-    public static final String ITEM_ML_STATUS = "ml.status";
-    
-    
-    
-    public static final String ML_STATUS_SUGGEST = "suggest";
-    public static final String ML_STATUS_CONFIRMED = "confirmed";
-    public static final String ML_STATUS_TRAINING = "training";
-    
+   
     
 
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
     @Inject
-    @ConfigProperty(name = ML_SERVICE_ENDPOINT, defaultValue = "")
+    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT, defaultValue = "")
     private String mlDefaultEndpoint;
 
     @Inject
-    @ConfigProperty(name = ML_LOCALES, defaultValue = "DE,UK")
+    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
     private String mlDefaultLocales;
 
     @Inject
@@ -149,13 +139,12 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         Set<Locale> locals = new HashSet<Locale>();
 
-        document.setItemValue("sepp", "Hughu");
-        logger.info("set sepp");
+      
         Map<String, EntityDefinition> enityDefinitions = null;
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
 
-        logger.info("...running api adapter...");
+        logger.finest("...running api adapter...");
 
         // read configuration either form the model or imixs.properties....
         try {
@@ -233,7 +222,7 @@ public class MLAdapter implements SignalAdapter {
                 
                 
                 // update the ml.items list with all items of the entityDef list....
-                document.setItemValue(ITEM_ML_ITEMES,enityDefinitions.keySet());
+                document.setItemValue(MLService.ITEM_ML_ITEMES,enityDefinitions.keySet());
             }
 
         } else {

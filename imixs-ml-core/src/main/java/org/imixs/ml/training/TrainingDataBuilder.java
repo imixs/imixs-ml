@@ -1,4 +1,4 @@
-package org.imixs.ml.service;
+package org.imixs.ml.training;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,7 +25,7 @@ import org.imixs.workflow.ItemCollection;
  * <li>itemNames - list of items to be analyzed
  * <li>content - a text content form a file
  * <li>doc - the document containing the entity data
- * <li>analyzerEntityEvents - optional list of AnalyzerEntityEvents
+ * <li>entityObjectEvents - optional list of EntityObjectEvent
  * </ul>
  * 
  * @author rsoika

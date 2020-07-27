@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.imixs.ml.core.MLClient;
-import org.imixs.ml.service.TrainingDataBuilder;
 import org.imixs.ml.service.TrainingService;
+import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;

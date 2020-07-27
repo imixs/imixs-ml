@@ -43,6 +43,7 @@ import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.api.TrainingApplication;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.events.EntityObjectEvent;
+import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.FileData;
@@ -72,7 +73,7 @@ public class TrainingService {
     OCRService ocrService;
 
     @Inject
-    protected Event<EntityObjectEvent> analyzerEntityEvents;
+    protected Event<EntityObjectEvent> entityObjectEvents;
 
     /**
      * This method is used to extract the text contained in a snapshot document and
@@ -136,7 +137,7 @@ public class TrainingService {
 
                         // build training data set...
                         XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, itemNames, locals)
-                                .setAnalyzerEntityEvents(analyzerEntityEvents).build();
+                                .setAnalyzerEntityEvents(entityObjectEvents).build();
 
                         // update entity stats...
                         for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {

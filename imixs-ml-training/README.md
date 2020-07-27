@@ -51,10 +51,11 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 		<item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
 		
 		<item name="workflow.entities">
-			<value xsi:type="xs:string">_iban</value>
-			<value xsi:type="xs:string">_bic</value>
-			<value xsi:type="xs:string">_invoicetotal</value>
-			<value xsi:type="xs:string">_invoicenumber</value>
+		   <!-- use a mapping for optional items names -->
+			<value xsi:type="xs:string">_iban|cdtr.iban</value>
+			<value xsi:type="xs:string">_biccdtr.bic</value>
+			<value xsi:type="xs:string">_invoicetotal|invoice.total</value>
+			<value xsi:type="xs:string">_invoicenumber|invoice.number</value>
 		</item>
 		<item name="workflow.locale">
 			<value xsi:type="xs:string">UK</value>

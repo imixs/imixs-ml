@@ -72,7 +72,11 @@ The MLService is a stateless EJB reacting on Processing events. The service upda
  - confirmed - confirmed by the user
  - training - workitem is ready for a training
 
+
 The status 'training' indicates that all known entities are filled with data found in the document content. This means that this worktiem can be used for later training. See the 'ML TrainingScheduler'.
+
+
+
 
 ## The MLController
 
@@ -117,5 +121,12 @@ Imixs-ML Workflow provides a UI widget that allows the user to search a text phr
 
 
 ## ML Training Scheduler
+
+If the ml status of a workitem was already confirmed and the workitem type is 'archive', than the MLService set the ml status to 'training' and a eventLog entry is created to indicate that this workitem can be send to the training service. 
+
+**Note:** the training service can reject the workitem for training if the data is insufficient of quality.
+
+
+
 
 The service MLTrainingScheduler is a managed executer service which is sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'

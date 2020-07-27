@@ -11,7 +11,6 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.imixs.workflow.FileData;
 import org.imixs.workflow.faces.data.WorkflowController;
 
 /**
@@ -52,7 +51,7 @@ public class MLController implements Serializable {
     public boolean isMLItem(String name) {
 
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLAdapter.ITEM_ML_ITEMES);
+            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMES);
             return mlItems.contains(name);
         }
         return false;
@@ -87,11 +86,11 @@ public class MLController implements Serializable {
         String result = "{";
 
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLAdapter.ITEM_ML_ITEMES);
+            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMES);
 
             // set status
             result = result + "\"status\":\""
-                    + workflowController.getWorkitem().getItemValueString(MLAdapter.ITEM_ML_STATUS) + "\"";
+                    + workflowController.getWorkitem().getItemValueString(MLService.ITEM_ML_STATUS) + "\"";
 
             if (mlItems != null && mlItems.size() > 0) {
                 result = result + ",\"items\":";
@@ -147,7 +146,7 @@ public class MLController implements Serializable {
         logger.fine("search for=" + phrase);
         searchResult = new ArrayList<String>();
 
-        String text = getAllDocumentText();
+        String text = mlService.getAllDocumentText(workflowController.getWorkitem());
 
         if (text != null) {
             searchResult = findMatches(phrase, text);
@@ -243,28 +242,5 @@ public class MLController implements Serializable {
         logger.fine("reset");
     }
 
-    /**
-     * Retruns a string with all the document text
-     * 
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private String getAllDocumentText() {
-        if (workflowController.getWorkitem() == null) {
-            return null;
-        }
-
-        String result = "";
-        List<FileData> fileDataList = workflowController.getWorkitem().getFileData();
-
-        for (FileData fileData : fileDataList) {
-            List fileText = (List) fileData.getAttribute("text");
-            if (fileText != null && fileText.size() > 0) {
-                result = result + fileText.get(0) + " ";
-            }
-        }
-        // clean the text form unsupported characters
-        return mlService.cleanTextdata(result);
-    }
-
+  
 }
