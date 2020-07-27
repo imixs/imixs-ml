@@ -18,7 +18,7 @@ import org.imixs.workflow.ItemCollection;
 
 /**
  * The TrainingDataBuilder builds a new XMLTraingData object based on a given
- * document applied to a content.
+ * Workitem applied to a textual content.
  * <p>
  * The TrainingDataBuilder provides the following properties:
  * <ul>

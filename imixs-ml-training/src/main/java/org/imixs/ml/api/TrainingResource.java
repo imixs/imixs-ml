@@ -33,7 +33,7 @@ import org.imixs.workflow.xml.XMLDocumentAdapter;
 public class TrainingResource {
 
     @Inject
-    TrainingService documentExtractorService;
+    TrainingService trainingService;
 
     private static Logger logger = Logger.getLogger(TrainingResource.class.getName());
 
@@ -106,34 +106,27 @@ public class TrainingResource {
             // select result
             String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_WORKFLOW_QUERY),
                     StandardCharsets.UTF_8.toString());
-
             String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
-
             queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGESIZE)
                     + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGEINDEX);
-
             queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
             logger.info("......select workitems: " + queryURL);
-
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-
             stats.setItemValue("doc.count", documents.size());
 
-            logger.info("...... " + documents.size() + " documents found");
-
             // now iterate over all documents and start the training algorithm
+            logger.info("...... " + documents.size() + " documents found");
             for (ItemCollection doc : documents) {
-                documentExtractorService.trainWorkitemData(config, doc, worklowClient, stats);
+                trainingService.trainWorkitemData(config, doc, worklowClient, stats);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
-
             logger.warning("Failed to query documents: " + e.getMessage());
             e.printStackTrace();
         }
 
-        // compute item.rate statistik
+        // compute item.rate statistics
         int count = stats.getItemValueInteger("doc.count");
         stats.setItemValue("doc.valid",
                 count - stats.getItemValueInteger("doc.failures") - stats.getItemValueInteger("doc.ignore"));
