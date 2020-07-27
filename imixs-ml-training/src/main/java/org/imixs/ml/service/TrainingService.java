@@ -129,7 +129,9 @@ public class TrainingService {
 
                     logger.info("...analyzing content of '" + file.getName() + "'.....");
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    String content = metadata.getItemValueString("content");
+                    
+                    // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
+                    String content = metadata.getItemValueString("text");
                     // clean content string....
                     // content=TrainingDataBuilder.cleanTextdata(content);
 
@@ -241,7 +243,8 @@ public class TrainingService {
 
                     logger.info("...analyzing content of '" + file.getName() + "'.....");
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    String content = metadata.getItemValueString("content");
+                    // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
+                    String content = metadata.getItemValueString("text");
 
                     // clean content string....
                     content = XMLTrainingData.cleanTextdata(content);
