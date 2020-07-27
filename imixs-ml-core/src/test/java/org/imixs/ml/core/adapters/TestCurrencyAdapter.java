@@ -43,7 +43,7 @@ public class TestCurrencyAdapter {
         locals.add(Locale.UK);
         locals.add(Locale.GERMAN);
 
-        currencyAdapter.onEvent(new EntityObjectEvent(f, enityVariants,locals));
+        currencyAdapter.onObjectEvent(new EntityObjectEvent(f, enityVariants,locals));
 
         for (String variant : enityVariants) {
             logger.info(variant);
