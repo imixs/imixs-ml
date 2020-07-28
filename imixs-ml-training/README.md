@@ -102,13 +102,14 @@ The training data quality depends on the entities found in the content of a work
  - PARTIAL - not all training items in the workitem have a value, but all values are part of the  traingData. This means the workitem data has a partial  match.
  - BAD - not all training item values of the workitem are part of the traingData.  This means the training object has a bad quality and can not be used for training
 
-The requested quality level for a traing data set can be defined with the config item "ml.training.quality"
+The requested quality level for a training data set can be defined with the config item "ml.training.quality"
 
 	....
 	<!-- ML Quality Level (FULL|PARTIAL) -->
 	<item name="ml.training.quality"><value xsi:type="xs:string">FULL</value></item>
 	....
 
+**Note:** It is recommended to set the training quality to 'FULL' which is the default level. The training quality level 'PARTIAL' can lead to a lesser quality of the ML model. 
 
 
 ## The Testing Mode

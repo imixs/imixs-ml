@@ -98,7 +98,10 @@ public class TrainingService {
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
-
+        if (qualityLevel.isEmpty()) {
+            qualityLevel="FULL"; // default level!
+        }
+        
         // build locales....
         List<String> sLocales = config.getItemValue(TrainingApplication.ITEM_LOCALES);
         Set<Locale> locals = new HashSet<Locale>();
