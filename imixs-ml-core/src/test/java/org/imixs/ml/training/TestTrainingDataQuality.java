@@ -78,6 +78,22 @@ public class TestTrainingDataQuality {
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
+
+        // ##########################################################
+        // second variant also the text does not contain a company
+        // ##########################################################
+        doc = new ItemCollection();
+        doc.replaceItemValue("dummy", "xxx");
+        doc.replaceItemValue("name", "anna");
+        doc.replaceItemValue("city", "munich");
+        // no company - doc.replaceItemValue("company", "IBM");
+
+        items = Arrays.asList(new String[] { "name", "city", "company" });
+
+        text = "anna is working in munich";
+
+        trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
     }
 
     /**

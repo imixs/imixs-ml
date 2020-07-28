@@ -85,11 +85,12 @@ public class TrainingService {
      * @param config         - a config object providing the training configuration
      * @param workitem       - a workitem providing the data
      * @param workflowClient - a rest client instance
-     * @param stats          - an itemCollection to collect statistical data.
+     * @return - quality result
      */
     @SuppressWarnings("unchecked")
-    public void trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient,
-            ItemCollection stats) {
+    public int trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
+
+        int qualityResult = -1;
 
         logger.info("......create new training data for: " + workitem.getUniqueID());
 
@@ -104,7 +105,7 @@ public class TrainingService {
         for (String _locale : sLocales) {
             Locale aLocale = new Locale(_locale);
             locals.add(aLocale);
-            logger.info("......suporting locale " + aLocale);
+            logger.finest("......suporting locale " + aLocale);
         }
 
         ItemCollection snapshot = null;
@@ -117,7 +118,7 @@ public class TrainingService {
 
             if (snapshot == null) {
                 logger.warning("Unable to load snapshot for document " + workitem.getUniqueID());
-                return;
+                return XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
             }
 
             ocrService.extractText(snapshot, null, ocrMode, tikaOptions);
@@ -140,14 +141,6 @@ public class TrainingService {
                         XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, trainingItemNames,
                                 locals).setAnalyzerEntityEvents(entityObjectEvents).build();
 
-                        // update entity stats...
-                        for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
-                            if (stats != null) {
-                                stats.replaceItemValue("item.count." + trainingEntity.getLabel(),
-                                        stats.getItemValueInteger("item.count." + trainingEntity.getLabel()) + 1);
-
-                            }
-                        }
                         // compute stats rate for found entities
                         List<String> entitysFound = new ArrayList<String>();
                         for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
@@ -155,26 +148,29 @@ public class TrainingService {
                                 entitysFound.add(trainingEntity.getLabel());
                             }
                         }
-                       
+
                         // we only send the training data in case of quality level is sufficient
                         if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                            logger.warning("...document '" + workitem.getUniqueID()
+                            logger.severe("...document '" + workitem.getUniqueID()
                                     + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                            stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
+
+                            qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
                         } else if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
                                 && "FULL".equalsIgnoreCase(qualityLevel)) {
-                            logger.warning("...document '" + workitem.getUniqueID()
+                            logger.severe("...document '" + workitem.getUniqueID()
                                     + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
-                            stats.replaceItemValue("doc.ignore", stats.getItemValueInteger("doc.ignore") + 1);
+                            qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
                         } else {
                             // trainingData quality level is sufficient
                             if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()) {
-                                logger.info("...document '" + workitem.getUniqueID()
+                                logger.warning("...document '" + workitem.getUniqueID()
                                         + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL ...");
+                                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL;
                             }
                             if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL == trainingData.getQuality()) {
                                 logger.info("...document '" + workitem.getUniqueID()
                                         + "' TRAININGDATA_QUALITY_LEVEL=FULL ...");
+                                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL;
                             }
 
                             // log the XMLTrainingData object....
@@ -188,18 +184,20 @@ public class TrainingService {
                     } else {
                         logger.severe(
                                 "......no content found in '" + file.getName() + "' (" + workitem.getUniqueID() + ")");
-                        stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
+                        qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
                     }
 
                 }
 
             } else {
                 logger.severe("......no files found for " + workitem.getUniqueID());
-                stats.replaceItemValue("doc.failures", stats.getItemValueInteger("doc.failures") + 1);
+                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
             }
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
+
+        return qualityResult;
 
     }
 

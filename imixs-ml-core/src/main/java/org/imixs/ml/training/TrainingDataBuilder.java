@@ -98,7 +98,7 @@ public class TrainingDataBuilder {
                     for (XMLTrainingEntity trainingEntity : trainingEntities) {
                         trainingData.addTrainingEntity(trainingEntity);
                         if (debug) {
-                            logger.info("......found entity " + trainingEntity.getLabel() + " = '"
+                            logger.finest("......found entity " + trainingEntity.getLabel() + " = '"
                                     + trainingEntity.getValue() + "' at " + " " + trainingEntity.getStart() + ","
                                     + trainingEntity.getStop());
                         }

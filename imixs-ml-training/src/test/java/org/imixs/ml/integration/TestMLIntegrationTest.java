@@ -1,5 +1,6 @@
 package org.imixs.ml.integration;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -349,6 +350,16 @@ public class TestMLIntegrationTest {
         // trainingService.postTrainingData(trainingData, SERVICE_ENDPOINT);
         mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
 
+    }
+    
+    @Test
+    public void testRound() {
+        int countTotal=10;
+        int countQualityFull=1;
+        DecimalFormat df = new DecimalFormat("###.##");
+        logger.info("......workitems read in total = "+countTotal );
+        logger.info("......           full quality = "+ df.format(((double)countQualityFull/(double)countTotal)*100)  + "%  (" + countQualityFull + ")");
+     
     }
 
 }

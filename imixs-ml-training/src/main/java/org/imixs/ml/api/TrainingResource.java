@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -22,6 +23,7 @@ import javax.xml.bind.Marshaller;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.service.TrainingService;
+import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.xml.XMLDataCollectionAdapter;
 import org.imixs.workflow.xml.XMLDocument;
@@ -89,10 +91,15 @@ public class TrainingResource {
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response trainData(XMLDocument xmlConfig) {
 
+        int countTotal=0;
+        int countQualityFull=0;
+        int countQualityPartial=0;
+        int countQualityBad=0;
+
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
         logger.info("...starting training....");
-        ItemCollection stats = new ItemCollection();
+       
 
         try {
             WorkflowClient worklowClient = TrainingApplication.buildWorkflowClient(config);
@@ -113,12 +120,26 @@ public class TrainingResource {
 
             logger.info("......select workitems: " + queryURL);
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-            stats.setItemValue("doc.count", documents.size());
+            countTotal=documents.size();
 
             // now iterate over all documents and start the training algorithm
             logger.info("...... " + documents.size() + " documents found");
             for (ItemCollection doc : documents) {
-                trainingService.trainWorkitemData(config, doc, worklowClient, stats);
+                int qualityResult=trainingService.trainWorkitemData(config, doc, worklowClient);
+                
+                // compute quality statistic
+                switch(qualityResult) {
+                case XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL:
+                    countQualityFull++;
+                  break;
+                case XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL:
+                    countQualityPartial++;
+                    break;
+                default:
+                    countQualityBad++;
+              }
+
+              
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
@@ -126,37 +147,36 @@ public class TrainingResource {
             e.printStackTrace();
         }
 
-        // compute item.rate statistics
-        int count = stats.getItemValueInteger("doc.count");
-        stats.setItemValue("doc.valid",
-                count - stats.getItemValueInteger("doc.failures") - stats.getItemValueInteger("doc.ignore"));
-
-        if (count > 0) {
-            List<String> names = stats.getItemNames();
-            for (String item : names) {
-                if (item.startsWith("item.count.")) {
-                    float rate = stats.getItemValueFloat(item) / count;
-                    logger.finest("......" + item + " count=" + stats.getItemValueInteger(item) + " rate=" + rate);
-                    stats.replaceItemValue("item.rate." + item.substring(11), rate);
-                }
-            }
-        }
+       
 
         logger.info("**************** FINISHED ***********************");
         // log the stats XMLDocument object....
-        try {
-            JAXBContext context;
-            context = JAXBContext.newInstance(XMLDocument.class);
-            Marshaller marshaller = context.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            StringWriter out = new StringWriter();
-            marshaller.marshal(XMLDocumentAdapter.getDocument(stats), out);
-            String xml = out.toString();
-            logger.info(xml);
+        ItemCollection stats = new ItemCollection();
+      //  try {
+            
+            stats.setItemValue("workitems.total", countTotal);
+            stats.setItemValue("workitems.quality.full", countQualityFull);
+            stats.setItemValue("workitems.quality.partial", countQualityPartial);
+            stats.setItemValue("workitems.quality.bad", countQualityBad);
+            
+//            JAXBContext context;
+//            context = JAXBContext.newInstance(XMLDocument.class);
+//            Marshaller marshaller = context.createMarshaller();
+//            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+//            StringWriter out = new StringWriter();
+//            marshaller.marshal(XMLDocumentAdapter.getDocument(stats), out);
+//            String xml = out.toString();
+//            logger.info(xml);
 
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
+//        } catch (JAXBException e) {
+//            e.printStackTrace();
+//        }
+        DecimalFormat df = new DecimalFormat("###.##");
+     String log="......workitems read in total = "+countTotal +"\n";
+        log=log+"  ......           full quality = "+ df.format(((double)countQualityFull/(double)countTotal)*100)  + "%  (" + countQualityFull + ")"+"\n";
+        log=log+"  ......        partial quality = "+ df.format(((double)countQualityPartial/(double)countTotal)*100)  + "%  (" + countQualityPartial + ")"+"\n";
+        log=log+"  ......            bad quality = "+ df.format(((double)countQualityBad/(double)countTotal)*100)  + "%  (" + countQualityBad + ")"+"\n";
+        logger.info(log);
         logger.info("**************** FINISHED ***********************");
 
         // return response

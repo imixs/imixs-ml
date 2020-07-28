@@ -53,11 +53,11 @@ def updateModel(trainingDataSet, iterations, modelPath):
     
     # 2.) set up the pipeline and entity recognizer.
     if 'ner' not in nlp.pipe_names:
-        print("we have no ner so we create an empty one...")
+        # print("we have no ner so we create an empty one...")
         ner = nlp.create_pipe('ner')
         nlp.add_pipe(ner)
     else:
-        print("we have a ner so we fetch it...")
+        # print("we have a ner so we fetch it...")
         ner = nlp.get_pipe('ner')
         
         
@@ -69,7 +69,7 @@ def updateModel(trainingDataSet, iterations, modelPath):
             _labelList = ner.labels
             # We only need to add the label if it is not already part of the entityRecognizer
             if _label not in _labelList:
-                print("...adding new label '" + _label + "'...")
+                # print("...adding new label '" + _label + "'...")
                 ner.add_label(_label)
 
       
@@ -154,11 +154,11 @@ def updateModelSingle(trainingDataSet, modelPath):
     
     # 2.) set up the pipeline and entity recognizer.
     if 'ner' not in nlp.pipe_names:
-        print("we have no ner so we create an empty one...")
+        # print("we have no ner so we create an empty one...")
         ner = nlp.create_pipe('ner')
         nlp.add_pipe(ner)
     else:
-        print("we have a ner so we fetch it...")
+        # print("we have a ner so we fetch it...")
         ner = nlp.get_pipe('ner')
         
         
