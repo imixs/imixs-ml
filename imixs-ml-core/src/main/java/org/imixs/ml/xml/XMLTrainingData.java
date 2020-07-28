@@ -118,18 +118,16 @@ public class XMLTrainingData implements Serializable {
     }
 
     /**
-     * This method strip control codes and the characters '{', '}' and '"' from a
-     * text string.
-     * <p>
-     * The method also strips multiple space characters. 'A B' -> 'A B'
+     * This method replaces newlines with a pilcrow sign and strip control codes and
+     * the characters '{', '}' and '"' from a text string.
      * 
      * @param text
      * @return
      */
     public static String cleanTextdata(String text) {
-
-        // replace newline with a space
-        String result = text.replaceAll("\n", " ");
+        // replace newline with the pilcrow sign (¶)
+        String result = text.replaceAll("\n", "¶");
+        result = result.replaceAll("\r", "¶");
 
         // strip control codes
         result = stripChars(result, c -> c > '\u001F' && c != '\u007F');
@@ -137,11 +135,7 @@ public class XMLTrainingData implements Serializable {
         // replace '{', '}' and '"' with a space
         result = result.replaceAll("[{}\"]", " ");
 
-        // strip more than one space.
-        result = result.replaceAll("[ ]{2,}", " ");
-
         return result;
-
     }
 
     private static String stripChars(String s, IntPredicate include) {
