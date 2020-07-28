@@ -51,7 +51,17 @@ import javax.xml.bind.annotation.XmlTransient;
 public class XMLTrainingData implements Serializable {
 
     @XmlTransient
+    public static final int TRAININGDATA_QUALITY_LEVEL_FULL = 1;
+    @XmlTransient
+    public static final int TRAININGDATA_QUALITY_LEVEL_PARTIAL = 2;
+    @XmlTransient
+    public static final int TRAININGDATA_QUALITY_LEVEL_BAD = 0;
+
+    @XmlTransient
     private static final long serialVersionUID = 1L;
+
+    @XmlTransient
+    private int quality = 0;
 
     private String text;
 
@@ -81,6 +91,7 @@ public class XMLTrainingData implements Serializable {
 
     public void setEntities(List<XMLTrainingEntity> entities) {
         this.entities = entities;
+
     }
 
     public void addTrainingEntity(XMLTrainingEntity trainingEntity) {
@@ -88,10 +99,29 @@ public class XMLTrainingData implements Serializable {
     }
 
     /**
+     * Returns the quality level of the trainingData set. The quality is computed
+     * during the build() method.
+     * 
+     * @return
+     */
+    public int getQuality() {
+        return quality;
+    }
+
+    /**
+     * Set the trainingData quality leval
+     * 
+     * @param quality
+     */
+    public void setQuality(int quality) {
+        this.quality = quality;
+    }
+
+    /**
      * This method strip control codes and the characters '{', '}' and '"' from a
      * text string.
      * <p>
-     * The method also strips multiple space characters. 'A   B' -> 'A B'
+     * The method also strips multiple space characters. 'A B' -> 'A B'
      * 
      * @param text
      * @return
@@ -106,7 +136,7 @@ public class XMLTrainingData implements Serializable {
 
         // replace '{', '}' and '"' with a space
         result = result.replaceAll("[{}\"]", " ");
-        
+
         // strip more than one space.
         result = result.replaceAll("[ ]{2,}", " ");
 
