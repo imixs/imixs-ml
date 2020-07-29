@@ -119,9 +119,9 @@ public class XMLTrainingData implements Serializable {
     /**
      * This method is used to cleanup the text data send for training or analysis.
      * <p>
-     * The method replaces newlines with a pilcrow sign and JSON structure
-     * characters with spaces. Control codes which are not allowed in a text are
-     * removed.
+     * The method replaces newlines with a pilcrow sign and two space characters.
+     * JSON structure characters are replaced with spaces. Control codes which are
+     * not allowed in a text are removed.
      * <p>
      * This method is called by the setText() method of the XMLTraingData class and
      * the XMLAnalyseText class. The method ensures that the text is clean for any

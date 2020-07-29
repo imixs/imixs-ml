@@ -120,7 +120,7 @@ public class TestTrainingDataBuilder {
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
 
-        Assert.assertEquals("some text in a special textblock.¶With line¶And with some text END ",
+        Assert.assertEquals("some text in a special textblock. ¶ With line ¶ And with some text END ",
                 trainingData.getText());
 
         List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
@@ -129,8 +129,8 @@ public class TestTrainingDataBuilder {
         Assert.assertEquals(0, trainingEntities.get(0).getStart());
         Assert.assertEquals(9, trainingEntities.get(0).getStop());
 
-        Assert.assertEquals(53, trainingEntities.get(1).getStart());
-        Assert.assertEquals(62, trainingEntities.get(1).getStop());
+        Assert.assertEquals(57, trainingEntities.get(1).getStart());
+        Assert.assertEquals(66, trainingEntities.get(1).getStop());
 
     }
 
@@ -192,11 +192,11 @@ public class TestTrainingDataBuilder {
 
         // test new lines
         result = XMLTrainingData.cleanTextdata("some\n{special} \"text\"!");
-        Assert.assertEquals("some¶ special   text !", result);
+        Assert.assertEquals("some ¶  special   text !", result);
 
         // test strip of multiple spaces
         result = XMLTrainingData.cleanTextdata("hello    \n     there");
-        Assert.assertEquals("hello    ¶     there", result);
+        Assert.assertEquals("hello     ¶      there", result);
 
     }
 
