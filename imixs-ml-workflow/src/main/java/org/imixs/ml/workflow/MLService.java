@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.function.IntPredicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -152,40 +151,10 @@ public class MLService implements Serializable {
 
     }
 
-    /**
-     * This method strip control codes and the characters '{', '}' and '"' from a
-     * text string.
-     * <p>
-     * The method also strips multiple space characters. 'A B' -> 'A B'
-     * 
-     * @param text
-     * @return
-     */
-    public String cleanTextdata(String text) {
-
-        // replace newline with a space
-        String result = text.replaceAll("\n", " ");
-
-        // strip control codes
-        result = stripChars(result, c -> c > '\u001F' && c != '\u007F');
-
-        // replace '{', '}' and '"' with a space
-        result = result.replaceAll("[{}\"]", " ");
-
-        // strip more than one space.
-        result = result.replaceAll("[ ]{2,}", " ");
-
-        return result;
-
-    }
-
-    private String stripChars(String s, IntPredicate include) {
-        return s.codePoints().filter(include::test)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
-    }
 
     /**
-     * Retruns a string with all the document text
+     * This method returns a string with all the text content of all documents
+     * attached to a workitem.
      * 
      * @return
      */
@@ -204,8 +173,8 @@ public class MLService implements Serializable {
                 result = result + fileText.get(0) + " ";
             }
         }
-        // clean the text form unsupported characters
-        return cleanTextdata(result);
+
+        return result;
     }
 
     /**

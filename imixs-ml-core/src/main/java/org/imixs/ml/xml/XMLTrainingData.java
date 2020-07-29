@@ -64,7 +64,6 @@ public class XMLTrainingData implements Serializable {
     private int quality = 0;
 
     private String text;
-
     private List<XMLTrainingEntity> entities;
 
     public XMLTrainingData() {
@@ -118,16 +117,23 @@ public class XMLTrainingData implements Serializable {
     }
 
     /**
-     * This method replaces newlines with a pilcrow sign and strip control codes and
-     * the characters '{', '}' and '"' from a text string.
+     * This method is used to cleanup the text data send for training or analysis.
+     * <p>
+     * The method replaces newlines with a pilcrow sign and JSON structure
+     * characters with spaces. Control codes which are not allowed in a text are
+     * removed.
+     * <p>
+     * This method is called by the setText() method of the XMLTraingData class and
+     * the XMLAnalyseText class. The method ensures that the text is clean for any
+     * ML training or analyse procedure.
      * 
      * @param text
      * @return
      */
     public static String cleanTextdata(String text) {
         // replace newline with the pilcrow sign (¶)
-        String result = text.replaceAll("\n", "¶");
-        result = result.replaceAll("\r", "¶");
+        String result = text.replaceAll("\n", " ¶ ");
+        result = result.replaceAll("\r", " ¶ ");
 
         // strip control codes
         result = stripChars(result, c -> c > '\u001F' && c != '\u007F');

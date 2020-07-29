@@ -109,7 +109,7 @@ def updateModel(trainingDataSet, iterations, modelPath):
     print("total time = "+str(int(round(time.time() * 1000))-lMilis) + "ms  ")        
   
     # finally we save the updated model to disk
-    print("save model to disk "+modelPath)
+    # print("save model to disk "+modelPath)
     nlp.to_disk(modelPath)
   
     return nlp
@@ -144,10 +144,10 @@ def updateModelSingle(trainingDataSet, modelPath):
     """Load the model, set up the pipeline and train the entity recognizer."""
     if modelExists:
         nlp = spacy.load(modelPath)  # load existing spaCy model
-        print("Loaded model '%s'" % modelPath)
+        # print("Loaded model '%s'" % modelPath)
     else:
         nlp = spacy.blank(language)  # create blank Language class
-        print("Created blank '" +language + "' model")
+        # print("Created blank '" +language + "' model")
     
     
   
@@ -198,10 +198,10 @@ def updateModelSingle(trainingDataSet, modelPath):
             print("Losses", losses)
         
       
-    print("total time = "+str(int(round(time.time() * 1000))-lMilis) + "ms  ")        
+    # print("total time = "+str(int(round(time.time() * 1000))-lMilis) + "ms  ")        
   
     # finally we save the updated model to disk
-    print("save model to disk "+modelPath)
+    # print("save model to disk "+modelPath)
     nlp.to_disk(modelPath)
   
     return nlp

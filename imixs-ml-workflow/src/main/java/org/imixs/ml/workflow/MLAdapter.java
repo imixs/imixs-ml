@@ -45,7 +45,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.events.EntityTextEvent;
 import org.imixs.ml.xml.XMLAnalyseEntity;
-import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.SignalAdapter;
@@ -160,7 +159,6 @@ public class MLAdapter implements SignalAdapter {
         }
 
         // analyse file content....
-
         List<FileData> files = document.getFileData();
         if (files != null && files.size() > 0) {
             for (FileData file : files) {
@@ -168,9 +166,6 @@ public class MLAdapter implements SignalAdapter {
                 logger.info("...analyzing content of '" + file.getName() + "'.....");
                 ItemCollection metadata = new ItemCollection(file.getAttributes());
                 String ocrText = metadata.getItemValueString("text");
-
-                // clean content string....
-                ocrText = XMLTrainingData.cleanTextdata(ocrText);
 
                 MLClient mlClient = new MLClient();
                 List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlAPIEndpoint);

@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
@@ -89,7 +90,7 @@ public class TrainingService {
      */
     @SuppressWarnings("unchecked")
     public int trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
-
+        boolean debug = logger.isLoggable(Level.FINE);
         int qualityResult = -1;
 
         logger.info("......create new training data for: " + workitem.getUniqueID());
@@ -137,8 +138,7 @@ public class TrainingService {
                     // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
                     String content = metadata.getItemValueString("text");
                     // clean content string....
-                    // content=TrainingDataBuilder.cleanTextdata(content);
-
+                   
                     if (!content.isEmpty()) {
                         // build training data set...
                         XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, trainingItemNames,
@@ -177,7 +177,9 @@ public class TrainingService {
                             }
 
                             // log the XMLTrainingData object....
-                            printXML(trainingData);
+                            if (debug) {
+                                 printXML(trainingData);
+                            }
                             String serviceEndpoint = config
                                     .getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
                             MLClient mlClient = new MLClient();
@@ -242,21 +244,13 @@ public class TrainingService {
             if (files != null && files.size() > 0) {
                 for (FileData file : files) {
 
-                    logger.info("...analyzing content of '" + file.getName() + "'.....");
+                    logger.fine("...analyzing content of '" + file.getName() + "'.....");
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
                     // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
                     String content = metadata.getItemValueString("text");
-
-                    // clean content string....
-                    content = XMLTrainingData.cleanTextdata(content);
-
                     String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
-
                     MLClient mlClient = new MLClient();
                     mlClient.postAnalyseData(content, serviceEndpoint);
-
-                    // postAnalyzeData(content, serviceEndpoint);
-
                 }
 
             } else {

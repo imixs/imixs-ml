@@ -7,17 +7,21 @@ public class XMLAnalyseText {
     
         private String text;
 
-        public XMLAnalyseText(String text) {
+        public XMLAnalyseText(String _text) {
             super();
-            this.text = text;
+            setText(_text);
         }
 
         public String getText() {
             return text;
         }
 
-        public void setText(String text) {
-            this.text = text;
+        public void setText(String _text) {
+            if (_text != null) {
+                this.text = XMLTrainingData.cleanTextdata(_text);
+            } else {
+                this.text = null;
+            }
         }
     
 }
