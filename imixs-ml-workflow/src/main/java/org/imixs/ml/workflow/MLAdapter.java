@@ -191,7 +191,6 @@ public class MLAdapter implements SignalAdapter {
 
                     // set the item value if the workItem did not have a value for this entity....
                     if (document.isItemEmpty(entityDef.getItemName())) {
-
                         // fire entityTextEvents so that an adapter can resolve the text value into a
                         // object
                         EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
@@ -209,13 +208,9 @@ public class MLAdapter implements SignalAdapter {
                             // set the first text value as is
                             document.setItemValue(entityDef.getItemName(), entity.getValue().iterator().next());
                         }
-
                     }
-
                 }
-                
-                
-                
+               
                 // update the ml.items list with all items of the entityDef list....
                 document.setItemValue(MLService.ITEM_ML_ITEMES,enityDefinitions.keySet());
             }
@@ -223,7 +218,6 @@ public class MLAdapter implements SignalAdapter {
         } else {
             logger.finest("......no files found for " + document.getUniqueID());
         }
-        
         
         return document;
     }

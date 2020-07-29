@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 
- * { "label": "_invoicedate", "text": "0002" },
+ * { "label": "invoice.total", "text": "42.00" },
  * 
  * @author rsoika
  *
@@ -13,6 +13,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class XMLAnalyseEntity {
 
     private String label;
+    private String text;
+
+    public XMLAnalyseEntity() {
+        super();
+    }
 
     /**
      * Returns the name of the entity.
@@ -27,15 +32,9 @@ public class XMLAnalyseEntity {
         this.label = label;
     }
 
-    private String text;
-
-    public XMLAnalyseEntity() {
-        super();
-
-    }
-
     /**
      * Returns the text value of the entity
+     * 
      * @return - text value
      */
     public String getText() {
