@@ -21,7 +21,7 @@ language=os.getenv('MODEL_LANGUAGE', 'en')
 print("   ____      _          ") 
 print("  /  _/_ _  (_)_ __ ___  ") 
 print(" _/ //  ' \/ /\ \ /(_-<  Machine-Learning"  )
-print("/___/_/_/_/_//_\_\/___/  V1.0")
+print("/___/_/_/_/_//_\_\/___/  V1.0.a")
 print("")                                           
                                            
 print("ENGINE          : https://spacy.io")                                           
@@ -32,17 +32,17 @@ print("")
 
 @app.post("/training/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
-    print(">>START trainingdata/")
-    prdnlp = datatrain.updateModel(trainngdata, 10,modelpath)
-    print(">>STOP trainingdata/")
+    # print(">>START trainingdata/")
+    prdnlp = datatrain.updateModel(trainngdata, modelpath)
+    # print(">>STOP trainingdata/")
     return {"finished"}
 
 
-@app.post("/training-single-mode/")
+@app.post("/training-iterations/")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
-    print(">>START training-single-mode/")
-    prdnlp = datatrain.updateModelSingle(trainngdata, modelpath)
-    print(">>STOP training-single-mode/")
+    # print(">>START training-single-mode/")
+    prdnlp = datatrain.updateModelWithInteration(trainngdata, 10, modelpath)
+    # print(">>STOP training-single-mode/")
     return {"finished training-single-mode model"}
 
 
