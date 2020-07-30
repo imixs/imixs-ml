@@ -119,9 +119,8 @@ public class XMLTrainingData implements Serializable {
     /**
      * This method is used to cleanup the text data send for training or analysis.
      * <p>
-     * The method replaces newlines with a pilcrow sign and two space characters.
-     * JSON structure characters are replaced with spaces. Control codes which are
-     * not allowed in a text are removed.
+     * The method replaces JSON structure characters with spaces. Control codes
+     * which are not allowed in a text are removed.
      * <p>
      * This method is called by the setText() method of the XMLTraingData class and
      * the XMLAnalyseText class. The method ensures that the text is clean for any
@@ -131,19 +130,20 @@ public class XMLTrainingData implements Serializable {
      * @return
      */
     public static String cleanTextdata(String text) {
-        // replace newline with the pilcrow sign (¶)
-        String result = text.replaceAll("\n", " ¶ ");
-        result = result.replaceAll("\r", " ¶ ");
-
-        // strip control codes
-        result = stripChars(result, c -> c > '\u001F' && c != '\u007F');
-
-        // replace '{', '}' and '"' with a space
+        String result = text;
+        // strip control characters but prevent newline and tab  
+        result = stripChars(result, c -> (c > '\u001F' && c != '\u007F') || (c == '\n') || (c == '\t'));
+        // replace JSON structure characters with spaces
         result = result.replaceAll("[{}\"]", " ");
-
         return result;
     }
 
+    /**
+     * Helper method to strip Chars form a string. 
+     * @param s
+     * @param include
+     * @return
+     */
     private static String stripChars(String s, IntPredicate include) {
         return s.codePoints().filter(include::test)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
