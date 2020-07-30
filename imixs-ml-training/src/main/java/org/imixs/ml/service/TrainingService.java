@@ -100,16 +100,18 @@ public class TrainingService {
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
         if (qualityLevel.isEmpty()) {
-            qualityLevel="FULL"; // default level!
+            qualityLevel = "FULL"; // default level!
         }
-        
+
         // build locales....
         List<String> sLocales = config.getItemValue(TrainingApplication.ITEM_LOCALES);
         Set<Locale> locals = new HashSet<Locale>();
         for (String _locale : sLocales) {
             Locale aLocale = new Locale(_locale);
             locals.add(aLocale);
-            logger.finest("......suporting locale " + aLocale);
+            if (debug) {
+                logger.finest("......suporting locale " + aLocale);
+            }
         }
 
         ItemCollection snapshot = null;
@@ -132,14 +134,20 @@ public class TrainingService {
             if (files != null && files.size() > 0) {
                 for (FileData file : files) {
 
-                    logger.info("...analyzing content of '" + file.getName() + "'.....");
+                    if (debug) {
+                        logger.fine("...analyzing content of '" + file.getName() + "'.....");
+                    }
+
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
 
-                    // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
-                    String content = metadata.getItemValueString("text");
+                    String content = metadata.getItemValueString(OCRService.FILE_ATTRIBUTE_TEXT);
                     // clean content string....
-                   
+
                     if (!content.isEmpty()) {
+                        if (debug) {
+                            logger.fine("extracted text content to be analysed=");
+                            logger.fine(content);
+                        }
                         // build training data set...
                         XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, trainingItemNames,
                                 locals).setAnalyzerEntityEvents(entityObjectEvents).build();
@@ -178,7 +186,7 @@ public class TrainingService {
 
                             // log the XMLTrainingData object....
                             if (debug) {
-                                 printXML(trainingData);
+                                printXML(trainingData);
                             }
                             String serviceEndpoint = config
                                     .getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
@@ -218,7 +226,7 @@ public class TrainingService {
      */
     @SuppressWarnings("unchecked")
     public void testWorkitemData(ItemCollection config, ItemCollection doc, WorkflowClient workflowClient) {
-
+        boolean debug = logger.isLoggable(Level.FINE);
         logger.info("......anaysing: " + doc.getUniqueID());
 
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
@@ -243,11 +251,11 @@ public class TrainingService {
             List<FileData> files = snapshot.getFileData();
             if (files != null && files.size() > 0) {
                 for (FileData file : files) {
-
-                    logger.fine("...analyzing content of '" + file.getName() + "'.....");
+                    if (debug) {
+                        logger.fine("...analyzing content of '" + file.getName() + "'.....");
+                    }
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    // TODO replace "text" with OCRServcie.FILE_ATTRIBUTE_TEXT
-                    String content = metadata.getItemValueString("text");
+                    String content = metadata.getItemValueString(OCRService.FILE_ATTRIBUTE_TEXT);
                     String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
                     MLClient mlClient = new MLClient();
                     mlClient.postAnalyseData(content, serviceEndpoint);
