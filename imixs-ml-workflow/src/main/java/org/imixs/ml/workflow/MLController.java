@@ -58,8 +58,8 @@ public class MLController implements Serializable {
     }
 
     /**
-     * Returns a JSON object containing the current ml status and the item names
-     * collected by the MLAdatper.
+     * Returns a JSON object containing the current ml result status and the item
+     * names collected by the MLAdatper.
      * <p>
      * 
      * <pre>
@@ -82,7 +82,7 @@ public class MLController implements Serializable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public String getJSON() {
+    public String getMLResult() {
         String result = "{";
 
         if (workflowController.getWorkitem() != null) {
@@ -166,13 +166,20 @@ public class MLController implements Serializable {
      * @param data
      * @return
      */
-    public static List<String> findMatches(String phrase, String text) {
+    public static List<String> findMatches(String phrase,final String _text) {
 
         List<String> result = new ArrayList<String>();
 
+        String text=_text;
+        // replace \n with space
+        text=text.replace("\n", " ");
+        
+        // search text is lower case!
         String searchText = text.toLowerCase();
+       
+        
         String searchPhrase = phrase.toLowerCase();
-        String originSearchPhrase=searchPhrase;
+        String originSearchPhrase = searchPhrase;
 
         // find start pos...
         int index = 0;
@@ -180,18 +187,19 @@ public class MLController implements Serializable {
             int found = searchText.indexOf(searchPhrase, index);
             if (found > -1) {
                 String hit = null;
-                int endPos = text.indexOf(" ", found +searchPhrase.length()+ 1);
+
+                // take the phrase up to the space
+                int endPos = searchText.indexOf(" ", found + searchPhrase.length() + 1);
                 // if we do not found a space, we search for a .
                 if (endPos == -1) {
-                    endPos = text.indexOf(".", found+searchPhrase.length() + 1);
+                    endPos = searchText.indexOf(".", found + searchPhrase.length() + 1);
                 }
                 if (endPos > -1) {
                     hit = text.substring(found, endPos).trim();
-                   
                 } else {
                     // take it as is
                     hit = text.substring(found).trim();
-                    
+
                 }
 
                 // if the hit is longer than 32 chars - we cut it....
@@ -201,31 +209,29 @@ public class MLController implements Serializable {
 
                 if (!result.contains(hit)) {
                     result.add(hit);
-                    
-                    // lets see if it makes sense to search for variant with spaces 
+
+                    // lets see if it makes sense to search for variant with spaces
                     if (!searchPhrase.endsWith(" ")) {
-                        searchPhrase=hit.toLowerCase() + " ";
+                        searchPhrase = hit.toLowerCase() + " ";
                     } else {
                         // reset to origin search phrase
-                        searchPhrase=originSearchPhrase;
+                        searchPhrase = originSearchPhrase;
                         index = found + hit.length();
                     }
                 } else {
                     index = found + hit.length();
                 }
-                
-                
 
             } else {
                 // no more matches
                 break;
             }
-            
+
             // if max count of 7 matches is reached we break;
-            if (result.size()>=7) {
+            if (result.size() >= 7) {
                 break;
             }
-                
+
         }
         return result;
     }
@@ -242,5 +248,4 @@ public class MLController implements Serializable {
         logger.fine("reset");
     }
 
-  
 }
