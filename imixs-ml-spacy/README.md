@@ -114,3 +114,9 @@ Next you can import the spacy and fastapi dependencys
 If you use the Eclipse Plugin Pydev make sure you added the spacy lib folder.
 In the properties for your pydev project, there's a pane called "PyDev - PYTHONPATH", with a sub-pane called "External Libraries". You can add source folders to the path using that pane. Your project code will then be able to import modules from those source folders. For spacy this may be the folder _~/.local/lib/python3.7/site-packages/spacy_
 
+# Docker Hub
+
+To push the latest image to a repository run:
+
+	$ docker build -t imixs/imixs-ml-spacy:latest . 
+	$ docker push imixs/imixs-ml-spacy:latest

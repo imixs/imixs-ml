@@ -5,8 +5,6 @@ The Imixs-ML API Service is a microservice to train a ML Model based on the work
 	http://localhost:8080/api/openapi-ui/
 
 
-
-
 # Build and Run
 
 The Imixs-ML API Service is build with Docker and you can deploy it inot any contaienr environment like Kubernetes or Docker Swarm. 
@@ -31,9 +29,6 @@ Run the OpenAPI UI:
 	
 
 
-
-
-
 ## The Training Mode
 
 To train a new model the Imixs-ML Training service provides the Rest Resource */training/*. This resource expects a POST request with an Imixs XMLDocument providing the following XML payload:
@@ -53,7 +48,7 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 		<item name="workflow.entities">
 		   <!-- use a mapping for optional items names -->
 			<value xsi:type="xs:string">_iban|cdtr.iban</value>
-			<value xsi:type="xs:string">_biccdtr.bic</value>
+			<value xsi:type="xs:string">_bic|cdtr.bic</value>
 			<value xsi:type="xs:string">_invoicetotal|invoice.total</value>
 			<value xsi:type="xs:string">_invoicenumber|invoice.number</value>
 		</item>
@@ -90,9 +85,9 @@ The property 'entities' contains a list of item names to be taken form the worki
 The itemname is equal to the name identifying the entity within a ml-model (e.g. spaCy). In case the itemname provided in a workitem does not match the entity name used in a model you can adapt the name with a | character.
 
 	 
-	<value xsi:type="xs:string">_capacity|_invoicetotal</value>
+	<value xsi:type="xs:string">_capacity|invoice.total</value>
 
-This example maps the item '_capacity' to the entity '_invoicetotal'.
+This example maps the item '_capacity' to the entity 'invoice.total'.
 
 ### The Training Data Quality
 
