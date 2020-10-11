@@ -78,12 +78,6 @@
 		</repository>
 	</repositories>
 
-
-
-	<profiles>
-	</profiles>
-
-
 	<build>
 		<plugins>
 			<plugin>
