@@ -12,7 +12,17 @@
 		<module>imixs-ml-core</module>
 		<module>imixs-ml-training</module>
 		<module>imixs-ml-workflow</module>
-	</modules>
+	</modules>	
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<org.imixs.workflow.version>5.2.3</org.imixs.workflow.version>
+		<org.imixs.melman.version>1.0.18</org.imixs.melman.version>
+		<org.imixs.archive.version>2.2.1</org.imixs.archive.version>
+		<microprofile.version>2.2</microprofile.version>
+	</properties>
+	
+	<description>Connect Imixs-Workflow with services and software platforms</description>
 
 	<url>https://github.com/imixs/imixs-ml</url>
 
@@ -20,25 +30,6 @@
 		<name>Imixs Software Solutions GmbH</name>
 		<url>http://www.imixs.com</url>
 	</organization>
-
-
-	<description>Connect Imixs-Workflow with services and software platforms</description>
-
-	<developers>
-		<developer>
-			<id>rsoika</id>
-			<name>Ralph Soika</name>
-			<email>ralph.soika@imixs.com</email>
-			<url>http://www-02.imixs.com/roller/ralphsjavablog/</url>
-			<organization>Imixs Software Solutions GmbH</organization>
-			<organizationUrl>http://www.imixs.com</organizationUrl>
-			<roles>
-				<role>developer</role>
-				<role>testing</role>
-			</roles>
-			<timezone>2</timezone>
-		</developer>
-	</developers>
 	<issueManagement>
 		<url>https://github.com/imixs/imixs-ml/issues</url>
 	</issueManagement>
@@ -57,13 +48,25 @@
 		</license>
 	</licenses>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<org.imixs.workflow.version>5.2.3-SNAPSHOT</org.imixs.workflow.version>
-		<org.imixs.melman.version>1.0.18</org.imixs.melman.version>
-		<org.imixs.archive.version>2.2.1-SNAPSHOT</org.imixs.archive.version>
-		<microprofile.version>2.2</microprofile.version>
-	</properties>
+	
+
+
+	<developers>
+		<developer>
+			<id>rsoika</id>
+			<name>Ralph Soika</name>
+			<email>ralph.soika@imixs.com</email>
+			<url>http://www-02.imixs.com/roller/ralphsjavablog/</url>
+			<organization>Imixs Software Solutions GmbH</organization>
+			<organizationUrl>http://www.imixs.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+				<role>testing</role>
+			</roles>
+			<timezone>2</timezone>
+		</developer>
+	</developers>
+
 
 
 	<repositories>
