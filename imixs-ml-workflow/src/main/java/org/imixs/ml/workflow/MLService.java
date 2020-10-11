@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -63,12 +64,12 @@ public class MLService implements Serializable {
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
 
     @Inject
-    @ConfigProperty(name = ML_SERVICE_ENDPOINT, defaultValue = "")
-    private String mlAPIEndpoint;
+    @ConfigProperty(name = ML_SERVICE_ENDPOINT)
+    Optional<String> mlAPIEndpoint;
 
     @Inject
     @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
-    private String mlDefaultLocales;
+    String mlDefaultLocales;
 
     @Inject
     protected Event<EntityObjectEvent> entityObjectEvents;
@@ -100,9 +101,17 @@ public class MLService implements Serializable {
 
         ItemCollection workitem = processingEvent.getDocument();
 
+        
         // skip if not a workItem...
-        if (workitem != null && !workitem.getItemValueString("type").startsWith("workitem"))
+        if (workitem != null && !workitem.getItemValueString("type").startsWith("workitem")) {
             return;
+        }
+        
+        if (!mlAPIEndpoint.isPresent() || mlAPIEndpoint.get().isEmpty()) {
+            // ML Module is not present
+            return;
+        }
+
 
         int eventType = processingEvent.getEventType();
 
@@ -135,7 +144,6 @@ public class MLService implements Serializable {
                     logger.warning("unable to parse current bpmn event: " + e.getMessage());
                 }
             }
-
         }
 
         // set trainng status?
@@ -188,7 +196,7 @@ public class MLService implements Serializable {
         // load the workitem
         ItemCollection workitem = workflowService.getWorkItem(uid);
 
-        if (workitem != null) {
+        if (workitem != null && mlAPIEndpoint.isPresent() && !mlAPIEndpoint.get().isEmpty()) {
             // send workitem to training service
             MLClient mlClient = new MLClient();
 
@@ -202,7 +210,7 @@ public class MLService implements Serializable {
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
 
-            mlClient.postTrainingData(trainingData, mlAPIEndpoint);
+            mlClient.postTrainingData(trainingData, mlAPIEndpoint.get());
         }
 
     }

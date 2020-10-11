@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,7 +108,7 @@ public class MLAdapter implements SignalAdapter {
 
   
     public static final String ML_ENTITY = "entity";
-
+    public static final String PLUGIN_ERROR = "PLUGIN_ERROR";
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
     
@@ -117,9 +118,10 @@ public class MLAdapter implements SignalAdapter {
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
     @Inject
-    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT, defaultValue = "")
-    private String mlDefaultEndpoint;
-
+    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT)
+    Optional<String> mlDefaultAPIEndpoint;
+    
+   
     @Inject
     @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
     private String mlDefaultLocales;
@@ -158,6 +160,12 @@ public class MLAdapter implements SignalAdapter {
             logger.warning("Unable to parse item definitions for 'ml-config', verify model - " + e.getMessage());
         }
 
+        // do we have a valid endpoint?
+        if (mlAPIEndpoint==null || mlAPIEndpoint.isEmpty()) {
+            throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
+                    "imixs-ml service endpoing is empty!");
+        }
+        
         // analyse file content....
         List<FileData> files = document.getFileData();
         if (files != null && files.size() > 0) {
@@ -240,8 +248,13 @@ public class MLAdapter implements SignalAdapter {
         if (mlConfig != null) {
             mlAPIEndpoint = mlConfig.getItemValueString("endpoint");
         }
+        
+        // switch to default api endpoint?
         if (mlAPIEndpoint == null || mlAPIEndpoint.isEmpty()) {
-            mlAPIEndpoint = mlDefaultEndpoint;
+            // set defautl api endpoint if defined
+            if (mlDefaultAPIEndpoint.isPresent() && !mlDefaultAPIEndpoint.get().isEmpty()) {
+                mlAPIEndpoint = mlDefaultAPIEndpoint.get();
+            }
         }
         if (debug) {
             logger.info("......ml api endpoint " + mlAPIEndpoint);

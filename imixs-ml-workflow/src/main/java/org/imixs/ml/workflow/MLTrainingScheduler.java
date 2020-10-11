@@ -29,6 +29,7 @@
 package org.imixs.ml.workflow;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,6 +74,10 @@ public class MLTrainingScheduler {
     @ConfigProperty(name = ML_TRAINING_SCHEDULER_ENABLED, defaultValue = "false")
     boolean enabled;
 
+    @Inject
+    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT)
+    Optional<String> mlAPIEndpoint;
+
     // timeout interval in ms - default every 10 minutes
     @Inject
     @ConfigProperty(name = ML_TRAINING_SCHEDULER_INTERVAL, defaultValue = "600000")
@@ -99,12 +104,16 @@ public class MLTrainingScheduler {
         if (enabled) {
             logger.info(
                     "Starting MLTrainingScheduler - initalDelay=" + initialDelay + "  inverval=" + interval + " ....");
-
-            // Registering a non-persistent Timer Service.
-            final TimerConfig timerConfig = new TimerConfig();
-            timerConfig.setInfo("Imixs-Workflow MLTrainingScheduler");
-            timerConfig.setPersistent(false);
-            timerService.createIntervalTimer(initialDelay, interval, timerConfig);
+            if (mlAPIEndpoint.isPresent() && !mlAPIEndpoint.get().isEmpty()) {
+                // Registering a non-persistent Timer Service.
+                final TimerConfig timerConfig = new TimerConfig();
+                timerConfig.setInfo("Imixs-Workflow MLTrainingScheduler");
+                timerConfig.setPersistent(false);
+                timerService.createIntervalTimer(initialDelay, interval, timerConfig);
+            } else {
+                logger.severe(
+                        "Scheduler  can not be started because no valid ML Service Endpoint was defined. Verfify environment parameter 'ML_SERVICE_ENDPOINT'");
+            }
         }
     }
 
@@ -121,7 +130,7 @@ public class MLTrainingScheduler {
         // test for new event log entries by timeout...
         List<EventLog> events = eventLogService.findEventsByTimeout(10, MLService.EVENTLOG_TOPIC_TRAINING);
 
-        if (events.size()>0) {
+        if (events.size() > 0) {
             logger.finest("...starting ml training. " + events.size() + " new MLTrainingEvents found....");
         }
         for (EventLog eventLogEntry : events) {
