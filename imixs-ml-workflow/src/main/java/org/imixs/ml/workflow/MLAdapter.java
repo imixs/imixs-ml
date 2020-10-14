@@ -163,9 +163,18 @@ public class MLAdapter implements SignalAdapter {
         // do we have a valid endpoint?
         if (mlAPIEndpoint==null || mlAPIEndpoint.isEmpty()) {
             throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
-                    "imixs-ml service endpoing is empty!");
+                    "imixs-ml service endpoint is empty!");
         }
-        
+        // add the analyzse/ resource
+        if (mlAPIEndpoint.indexOf("/analyzse")>-1) {
+            throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
+                    "imixs-ml wrong service endpoint - should not contain \"/analyzse\" resource!");
+        }
+        if (!mlAPIEndpoint.endsWith("/")) {
+            mlAPIEndpoint=mlAPIEndpoint+"/";
+        }
+        mlAPIEndpoint=mlAPIEndpoint+"analyzse/";
+         
         // analyse file content....
         List<FileData> files = document.getFileData();
         if (files != null && files.size() > 0) {

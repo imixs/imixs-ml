@@ -215,8 +215,14 @@ public class MLService implements Serializable {
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
-
-            mlClient.postTrainingData(trainingData, mlAPIEndpoint.get());
+            
+            // compute URL
+            String url=mlAPIEndpoint.get();
+            if (!url.endsWith("/")) {
+                url=url+"/";
+            }
+            url=url+"training/";
+            mlClient.postTrainingData(trainingData,url);
         }
 
     }
