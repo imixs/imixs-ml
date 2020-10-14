@@ -66,6 +66,12 @@ public class MLService implements Serializable {
     @Inject
     @ConfigProperty(name = ML_SERVICE_ENDPOINT)
     Optional<String> mlAPIEndpoint;
+    
+    // enabled
+    @Inject
+    @ConfigProperty(name = MLTrainingScheduler.ML_TRAINING_SCHEDULER_ENABLED, defaultValue = "false")
+    boolean trainingSchedulerEnabled;
+
 
     @Inject
     @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
@@ -146,11 +152,11 @@ public class MLService implements Serializable {
             }
         }
 
-        // set trainng status?
+        // set training status?
         if (ProcessingEvent.AFTER_PROCESS == eventType
+                && trainingSchedulerEnabled
                 && ML_STATUS_CONFIRMED.equals(workitem.getItemValueString(ITEM_ML_STATUS))
                 && "workitemarchive".equals(workitem.getType())) {
-
             // update status...
             workitem.setItemValue(ITEM_ML_STATUS, ML_STATUS_TRAINING);
             // ... and create a eventLog entry
