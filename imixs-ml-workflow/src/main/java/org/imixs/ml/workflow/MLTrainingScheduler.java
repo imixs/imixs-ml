@@ -65,7 +65,7 @@ import org.imixs.workflow.engine.jpa.EventLog;
 @LocalBean
 public class MLTrainingScheduler {
 
-    public static final String ML_TRAINING_SCHEDULER_ENABLED = "ml.trainng.scheduler.enabled";
+    public static final String ML_TRAINING_SCHEDULER_ENABLED = "ml.training.scheduler.enabled";
     public static final String ML_TRAINING_SCHEDULER_INTERVAL = "ml.training.scheduler.interval";
     public static final String ML_TRAINING_SCHEDULER_INITIALDELAY = "ml.training.scheduler.initialdelay";
 
