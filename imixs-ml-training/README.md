@@ -7,7 +7,7 @@ The Imixs-ML API Service is a microservice to train a ML Model based on the work
 
 # Build and Run
 
-The Imixs-ML API Service is build with Docker and you can deploy it inot any contaienr environment like Kubernetes or Docker Swarm. 
+The Imixs-ML API Service is build with Docker and you can deploy it into any container environment like Kubernetes or Docker Swarm. 
 
 To build the Imixs-ML API service just build the corresponding Docker containers:
 

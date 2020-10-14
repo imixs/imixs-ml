@@ -124,9 +124,20 @@ Imixs-ML Workflow provides a UI widget that allows the user to search a text phr
 
 If the ml status of a workitem was already confirmed and the workitem type is 'archive', than the MLService set the ml status to 'training' and a eventLog entry is created to indicate that this workitem can be send to the training service. 
 
-**Note:** the training service can reject the workitem for training if the data is insufficient of quality.
+**Note:** the training service can reject the workitem for training if the data is of an insufficient quality.
 
 
+The service MLTrainingScheduler is an EJB Timer Service sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'. The service can be configured by the following configuration parameters:
 
+ - ML_TRAINING_SCHEDULER_ENABLED - true|false
+ - ML_TRAINING_SCHEDULER_INTERVAL - scheduler interval in milliseconds
+ - ML_TRAINING_SCHEDULER_INITIALDELAY - initial delay during first startup (deployment) 
+ 
+To activate the Training Scheduler the service need to be enabled (it is disabled per default). See the following example configuration:
 
-The service MLTrainingScheduler is a managed executer service which is sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'
+	ML_TRAINING_SCHEDULER_ENABLED=true
+	ML_TRAINING_SCHEDULER_INTERVAL=30000
+	ML_TRAINING_SCHEDULER_INITIALDELAY=60000
+
+This setting will enable the training scheduler with an interval of 30 seconds and an initial delay of 60 seconds. 
+  
