@@ -29,8 +29,8 @@
 package org.imixs.ml.workflow;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
@@ -125,21 +125,22 @@ public class MLTrainingScheduler {
     @Timeout
     public void run(Timer timer) {
         long l = System.currentTimeMillis();
-        boolean debug = logger.isLoggable(Level.FINE);
-
         // test for new event log entries by timeout...
         List<EventLog> events = eventLogService.findEventsByTimeout(10, MLService.EVENTLOG_TOPIC_TRAINING);
 
         if (events.size() > 0) {
-            logger.finest("...starting ml training. " + events.size() + " new MLTrainingEvents found....");
-        }
-        for (EventLog eventLogEntry : events) {
-            // start training
-            mlService.trainWorkitem(eventLogEntry.getRef());
-        }
+            logger.info("... " + events.size() + " new MLTrainingEvents found....");
 
-        if (debug) {
-            logger.fine("..." + events.size() + " MLTrainingEvents processed in " + (System.currentTimeMillis() - l)
+            // iterate over event list and remove the event after processing
+            ListIterator<EventLog> iter = events.listIterator();
+            while (iter.hasNext()) {
+                EventLog eventLogEntry = iter.next();
+                // start training
+                mlService.trainWorkitem(eventLogEntry.getRef());
+                // remove event log entry
+                eventLogService.removeEvent(eventLogEntry);
+            }
+            logger.info("..." + events.size() + " MLTrainingEvents processed in " + (System.currentTimeMillis() - l)
                     + "ms");
         }
     }
