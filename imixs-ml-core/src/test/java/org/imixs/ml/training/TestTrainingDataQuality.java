@@ -1,18 +1,16 @@
 package org.imixs.ml.training;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.exceptions.PluginException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Test class to test the computation of the TraingData quality level by
@@ -22,11 +20,11 @@ import junit.framework.Assert;
  */
 public class TestTrainingDataQuality {
 
-    private Set<Locale> locals = null;
+    private List<Locale> locals = null;
 
     @Before
     public void setup() throws PluginException {
-        locals = new HashSet<Locale>();
+        locals = new ArrayList<Locale>();
         locals.add(Locale.UK);
         locals.add(Locale.GERMAN);
     }

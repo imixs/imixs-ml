@@ -1,11 +1,10 @@
 package org.imixs.ml.integration;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.imixs.ml.core.MLClient;
@@ -14,10 +13,9 @@ import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * TestMLIntegrationTest is used to test againsed the python imixs-ml service
@@ -36,7 +34,7 @@ public class TestMLIntegrationTest {
     static String SERVICE_ENDPOINT = "http://localhost:8000/trainingdata/";
 
     private IntegrationTest integrationTest = new IntegrationTest(ML_SERVICE_API);
-    private  Set<Locale> locals=null;
+    private  List<Locale> locals=null;
     private TrainingService trainingService = null;
     List<String> items = null;
     MLClient mlClient = null;
@@ -84,7 +82,7 @@ public class TestMLIntegrationTest {
         trainingService = new TrainingService();
 
         mlClient = new MLClient();
-        locals=new HashSet<Locale>();
+        locals=new ArrayList<Locale>();
         locals.add(Locale.UK);
         locals.add(Locale.GERMAN);
     }

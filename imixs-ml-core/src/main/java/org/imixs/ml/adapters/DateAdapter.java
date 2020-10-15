@@ -38,7 +38,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
@@ -160,8 +159,8 @@ public class DateAdapter {
                 }
             }
 
-            // try locale patterns...
-            if (event.getLocals() == null || event.getLocals().size() == 0) {
+            // try locale patterns if locale is provided
+            if (event.getLocals() != null && event.getLocals().size() > 0) {
                 for (String localePattern : localePatternList) {
                     result = parseDateByLocale(variant, localePattern, event.getLocals());
                     if (result != null) {
@@ -201,7 +200,7 @@ public class DateAdapter {
      * @param pattern - date pattern
      * @return date object if parse able - otherwise null.
      */
-    private Date parseDateByLocale(String text, String pattern, Set<Locale> locales) {
+    private Date parseDateByLocale(String text, String pattern, List<Locale> locales) {
 
         for (Locale locale : locales) {
 
@@ -212,7 +211,7 @@ public class DateAdapter {
                 return result;
             } catch (ParseException e) {
                 // unable to parse ...
-                return null;
+                continue;
             }
         }
         return null;

@@ -7,10 +7,9 @@ import java.util.logging.Logger;
 import org.imixs.ml.adapters.IBANAdapter;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.workflow.exceptions.PluginException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Test class for the XMLTrainingService
@@ -25,7 +24,6 @@ public class TestIBANAdapter {
     @Before
     public void setup() throws PluginException {
         ibanAdapter = new IBANAdapter();
-
     }
 
     /**

@@ -24,10 +24,8 @@ package org.imixs.ml.service;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,7 +103,7 @@ public class TrainingService {
 
         // build locales....
         List<String> sLocales = config.getItemValue(TrainingApplication.ITEM_LOCALES);
-        Set<Locale> locals = new HashSet<Locale>();
+        List<Locale> locals = new ArrayList<Locale>();
         for (String _locale : sLocales) {
             Locale aLocale = new Locale(_locale);
             locals.add(aLocale);

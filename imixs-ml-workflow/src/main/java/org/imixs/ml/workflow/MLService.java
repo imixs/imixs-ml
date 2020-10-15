@@ -1,11 +1,10 @@
 package org.imixs.ml.workflow;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,7 +73,7 @@ public class MLService implements Serializable {
 
 
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
+    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK,US")
     String mlDefaultLocales;
 
     @Inject
@@ -210,7 +209,7 @@ public class MLService implements Serializable {
             List<String> itemNames = workitem.getItemValue(ITEM_ML_ITEMS);
 
             // parse locales
-            Set<Locale> locales = parseMLLocales();
+            List<Locale> locales = parseMLLocales();
 
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
@@ -234,10 +233,10 @@ public class MLService implements Serializable {
      * 
      * @return
      */
-    private Set<Locale> parseMLLocales() {
+    private List<Locale> parseMLLocales() {
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
-        Set<Locale> locals = new HashSet<Locale>();
+        List<Locale> locals = new ArrayList<Locale>();
 
         // translate locales..
         String[] sLocales = mlDefaultLocales.split(",");

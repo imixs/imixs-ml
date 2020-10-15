@@ -30,7 +30,6 @@ package org.imixs.ml.events;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * The EntityTextEvent provides a CDI event fired by the MLAdapter. This event
@@ -52,9 +51,9 @@ public class EntityTextEvent {
     private List<String> textVariants;
     private Object itemValue;
     private String itemType;
-    private Set<Locale> locals;
+    private List<Locale> locals;
 
-    public EntityTextEvent(List<String> textVariants, Set<Locale> locals, String itemType) {
+    public EntityTextEvent(List<String> textVariants, List<Locale> locals, String itemType) {
         this.textVariants = textVariants;
         this.locals = locals;
         this.itemType = itemType;
@@ -76,7 +75,7 @@ public class EntityTextEvent {
         this.itemValue = itemValue;
     }
 
-    public Set<Locale> getLocals() {
+    public List<Locale> getLocals() {
         return locals;
     }
 

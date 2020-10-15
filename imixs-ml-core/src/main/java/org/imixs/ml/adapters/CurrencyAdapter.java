@@ -30,9 +30,9 @@ package org.imixs.ml.adapters;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
@@ -107,34 +107,33 @@ public class CurrencyAdapter {
         if (event.getItemValue() != null) {
             return;
         }
-        
+
         // did the event type match our adapter type?
-        if (event.getItemType()!=null && !event.getItemType().isEmpty() 
+        if (event.getItemType() != null && !event.getItemType().isEmpty()
                 && !event.getItemType().equalsIgnoreCase("currency")) {
             // no match!
             return;
         }
-        
 
         List<String> variants = event.getTextVariants();
         BigDecimal result = null;
 
         for (String variant : variants) {
 
-            BigDecimal b=textToCurrency(variant, event.getLocals());
-            if (b!=null ) {
-                if (result!=null) {
+            BigDecimal b = textToCurrency(variant, event.getLocals());
+            if (b != null) {
+                if (result != null) {
                     // take highest value...
-                    if (b.compareTo(result)==1) {
-                        result=b;
+                    if (b.compareTo(result) == 1) {
+                        result = b;
                     }
                 } else {
-                    result=b;
+                    result = b;
                 }
             }
         }
-        
-        if (result!=null) {
+
+        if (result != null) {
             // convert to float
             event.setItemValue(result.floatValue());
         }
@@ -143,14 +142,36 @@ public class CurrencyAdapter {
 
     /**
      * This helper method translates a text into a BigDecimal by applying different
-     * currency formats and different locals
+     * currency formats and different locals.
+     * <p>
+     * The method verifies the DecimalSeparator and GroupingSeparator to validate if
+     * the currency text can be applied to the given locale. If the DecimalSeparator
+     * is missing but a getGroupingSeparator is found, than we assume that this text can not be calculated with the
+     * current locale.  (e.g. 123.44 seems not to be a German currency)
      * 
      * @param text   - text representing a number
      * @param locals - list of locales
      * @return BigDecimal or null if no number was found.
      */
-    private BigDecimal textToCurrency(String text, Set<Locale> locals) {
+    private BigDecimal textToCurrency(String text, List<Locale> locals) {
         for (Locale locale : locals) {
+
+            DecimalFormatSymbols dfs = new DecimalFormatSymbols(locale);
+            
+            char d = dfs.getDecimalSeparator();
+            char g = dfs.getGroupingSeparator();
+            
+           // int i=g;
+            
+//            if (i==0) {
+//                //
+//            }
+            //String sg=""+g; // groupSeparator can be empty
+            // validate GroupingSeparator...
+            if ( text.indexOf(d)==-1 && (g==160|| text.indexOf(g)>-1)) {
+                // locale did not match text format
+                continue;
+            }
 
             BigDecimal b = null;
 

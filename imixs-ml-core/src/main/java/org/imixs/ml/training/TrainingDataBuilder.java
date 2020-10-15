@@ -41,9 +41,9 @@ public class TrainingDataBuilder {
     private ItemCollection workitem = null;
     private Event<EntityObjectEvent> entityObjectEvents = null;
     private XMLTrainingData trainingData = null;
-    private Set<Locale> locals = null;
+    private List<Locale> locals = null;
 
-    public TrainingDataBuilder(String text, ItemCollection workitem, List<String> itemNames, Set<Locale> locals) {
+    public TrainingDataBuilder(String text, ItemCollection workitem, List<String> itemNames, List<Locale> locals) {
         super();
         this.itemNames = itemNames;
         if (workitem != null) {
@@ -212,7 +212,7 @@ public class TrainingDataBuilder {
      * @return
      */
     protected List<XMLTrainingEntity> createTrainingEntities(String text, Object entity, String label,
-            Set<Locale> locals) {
+            List<Locale> locals) {
         boolean debug = logger.isLoggable(Level.FINE);
 
         if (text == null || text.isEmpty()) {

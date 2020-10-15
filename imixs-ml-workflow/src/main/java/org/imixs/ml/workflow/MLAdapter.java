@@ -30,12 +30,10 @@ package org.imixs.ml.workflow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -123,7 +121,7 @@ public class MLAdapter implements SignalAdapter {
     
    
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK")
+    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK,US")
     private String mlDefaultLocales;
 
     @Inject
@@ -138,7 +136,7 @@ public class MLAdapter implements SignalAdapter {
      */
     public ItemCollection execute(ItemCollection document, ItemCollection event) throws AdapterException {
         String mlAPIEndpoint = null;
-        Set<Locale> locals = new HashSet<Locale>();
+        List<Locale> locals = new ArrayList<Locale>();
 
       
         Map<String, EntityDefinition> entityDefinitions = null;
@@ -205,7 +203,7 @@ public class MLAdapter implements SignalAdapter {
                         EntityDefinition entityDef = entityDefinitions.get(mlEntityName);
                         if (document.isItemEmpty(entityDef.getItemName())) {
                             List<String> itemValueList = mlEntity.getValue();
-                            // fire entityTextEvents so that an adapter can resolve the text value into a
+                            // fire entityTextEvents so that an adapter can resolve the text into a
                             // object
                             EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
                                     entityDef.getItemType());
@@ -277,10 +275,10 @@ public class MLAdapter implements SignalAdapter {
      * @param mlConfig
      * @return
      */
-    private Set<Locale> parseMLLocalesByModel(ItemCollection mlConfig) {
+    private List<Locale> parseMLLocalesByModel(ItemCollection mlConfig) {
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
-        Set<Locale> locals = new HashSet<Locale>();
+        List<Locale> locals = new ArrayList<Locale>();
 
         // test if the model provides locales. If not, the adapter uses the
         // mlDefaultAPILocales

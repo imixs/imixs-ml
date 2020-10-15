@@ -1,5 +1,6 @@
 package org.imixs.ml.training;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -14,10 +15,9 @@ import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.exceptions.PluginException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Test class for the XMLTrainingService
@@ -26,13 +26,13 @@ import junit.framework.Assert;
  */
 public class TestTrainingDataBuilder {
 
-    private  Set<Locale> locals=null;
+    private  List<Locale> locals=null;
     private static Logger logger = Logger.getLogger(TestTrainingDataBuilder.class.getName());
 
 
     @Before
     public void setup() throws PluginException {
-        locals=new HashSet<Locale>();
+        locals=new ArrayList<Locale>();
         locals.add(Locale.UK);
         locals.add(Locale.GERMAN);
 

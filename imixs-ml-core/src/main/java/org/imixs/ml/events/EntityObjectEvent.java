@@ -28,6 +28,7 @@
 
 package org.imixs.ml.events;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -48,9 +49,9 @@ public class EntityObjectEvent {
 
     private Object value;
     private Set<String> enityTextVariants;
-    private Set<Locale> locals;
+    private List<Locale> locals;
 
-    public EntityObjectEvent(Object value, Set<String> enityTextVariants, Set<Locale> locals) {
+    public EntityObjectEvent(Object value, Set<String> enityTextVariants, List<Locale> locals) {
         this.value = value;
         this.enityTextVariants = enityTextVariants;
         this.locals = locals;
@@ -72,11 +73,11 @@ public class EntityObjectEvent {
         this.enityTextVariants = enityTextVariants;
     }
 
-    public Set<Locale> getLocals() {
+    public List<Locale> getLocals() {
         return locals;
     }
 
-    public void setLocals(Set<Locale> locals) {
+    public void setLocals(List<Locale> locals) {
         this.locals = locals;
     }
 

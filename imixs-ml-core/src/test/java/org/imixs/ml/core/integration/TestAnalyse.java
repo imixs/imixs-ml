@@ -6,10 +6,9 @@ import java.util.logging.Logger;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.workflow.exceptions.PluginException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Integration Test class for the MLClient. The test assumes that a
@@ -27,12 +26,10 @@ public class TestAnalyse {
 
     @Before
     public void setup() throws PluginException {
-
         // Assumptions for integration tests
         org.junit.Assume.assumeTrue(integrationTest.connected());
 
         mlClient = new MLClient();
-
     }
 
     /**
