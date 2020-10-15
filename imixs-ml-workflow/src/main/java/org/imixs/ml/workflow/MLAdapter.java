@@ -141,7 +141,7 @@ public class MLAdapter implements SignalAdapter {
         Set<Locale> locals = new HashSet<Locale>();
 
       
-        Map<String, EntityDefinition> enityDefinitions = null;
+        Map<String, EntityDefinition> entityDefinitions = null;
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
 
@@ -155,7 +155,7 @@ public class MLAdapter implements SignalAdapter {
             locals = parseMLLocalesByModel(mlConfig);
 
             // test if the model provides optional entity definitions.
-            enityDefinitions = parseEntityDefinitionsByModel(mlConfig);
+            entityDefinitions = parseEntityDefinitionsByModel(mlConfig);
         } catch (PluginException e) {
             logger.warning("Unable to parse item definitions for 'ml-config', verify model - " + e.getMessage());
         }
@@ -166,14 +166,14 @@ public class MLAdapter implements SignalAdapter {
                     "imixs-ml service endpoint is empty!");
         }
         // add the analyzse/ resource
-        if (mlAPIEndpoint.indexOf("/analyzse")>-1) {
+        if (mlAPIEndpoint.indexOf("/analyse")>-1) {
             throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
                     "imixs-ml wrong service endpoint - should not contain \"/analyzse\" resource!");
         }
         if (!mlAPIEndpoint.endsWith("/")) {
             mlAPIEndpoint=mlAPIEndpoint+"/";
         }
-        mlAPIEndpoint=mlAPIEndpoint+"analyzse/";
+        mlAPIEndpoint=mlAPIEndpoint+"analyse/";
          
         // analyse file content....
         List<FileData> files = document.getFileData();
@@ -194,42 +194,39 @@ public class MLAdapter implements SignalAdapter {
                 Map<String, List<String>> groupedEntityList = groupTextValues(result);
 
                 // analyse the entities....
-                for (Map.Entry<String, List<String>> entity : groupedEntityList.entrySet()) {
+                for (Map.Entry<String, List<String>> mlEntity : groupedEntityList.entrySet()) {
 
-                    String entityName = entity.getKey();
-                    List<String> itemValueList = entity.getValue();
-                    // do we have an entityDefinition for this entity?
-                    EntityDefinition entityDef = enityDefinitions.get(entityName);
-                    if (entityDef == null) {
-                        // create dummy - used for later training
-                        entityDef = new EntityDefinition(entityName, null, entityName);
-                        enityDefinitions.put(entityName, entityDef);
-                    }
+                    String mlEntityName = mlEntity.getKey();
+                    
+                    // is this entity listed in our configuration?
+                    if (entityDefinitions.containsKey(mlEntityName)) {
+                        // Do we have an entityDefinition for this entity?
+                        // If not we do ignore this ml item! issue #34
+                        EntityDefinition entityDef = entityDefinitions.get(mlEntityName);
+                        if (document.isItemEmpty(entityDef.getItemName())) {
+                            List<String> itemValueList = mlEntity.getValue();
+                            // fire entityTextEvents so that an adapter can resolve the text value into a
+                            // object
+                            EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
+                                    entityDef.getItemType());
+                            entityTextEvents.fire(entityTextEvent);
 
-                    // set the item value if the workItem did not have a value for this entity....
-                    if (document.isItemEmpty(entityDef.getItemName())) {
-                        // fire entityTextEvents so that an adapter can resolve the text value into a
-                        // object
-                        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
-                                entityDef.getItemType());
-                        entityTextEvents.fire(entityTextEvent);
-
-                        // test if we found an object
-                        if (entityTextEvent.getItemValue() != null) {
-                            // set the value
-                            if (debug) {
-                                logger.info("Best match=" + entityTextEvent.getItemValue());
+                            // test if we found an object
+                            if (entityTextEvent.getItemValue() != null) {
+                                // set the value
+                                if (debug) {
+                                    logger.info("Best match=" + entityTextEvent.getItemValue());
+                                }
+                                document.setItemValue(entityDef.getItemName(), entityTextEvent.getItemValue());
+                            } else {
+                                // set the first text value as is
+                                document.setItemValue(entityDef.getItemName(), mlEntity.getValue().iterator().next());
                             }
-                            document.setItemValue(entityDef.getItemName(), entityTextEvent.getItemValue());
-                        } else {
-                            // set the first text value as is
-                            document.setItemValue(entityDef.getItemName(), entity.getValue().iterator().next());
                         }
                     }
                 }
-               
-                // update the ml.items list with all items of the entityDef list....
-                document.setItemValue(MLService.ITEM_ML_ITEMES,enityDefinitions.keySet());
+                // update the ml.items list with the items defined in the configuration...
+                document.setItemValue(MLService.ITEM_ML_ITEMES,entityDefinitions.keySet());
             }
 
         } else {
