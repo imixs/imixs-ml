@@ -51,7 +51,7 @@ public class MLController implements Serializable {
     public boolean isMLItem(String name) {
 
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMES);
+            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMS);
             return mlItems.contains(name);
         }
         return false;
@@ -86,7 +86,7 @@ public class MLController implements Serializable {
         String result = "{";
 
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMES);
+            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMS);
 
             // set status
             result = result + "\"status\":\""

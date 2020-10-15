@@ -51,7 +51,7 @@ public class MLService implements Serializable {
     private static final long serialVersionUID = 1L;
     private static Logger logger = Logger.getLogger(MLService.class.getName());
 
-    public static final String ITEM_ML_ITEMES = "ml.items";
+    public static final String ITEM_ML_ITEMS = "ml.items";
     public static final String ITEM_ML_STATUS = "ml.status";
 
     public static final String ML_SERVICE_ENDPOINT = "ml.service.endpoint";
@@ -122,7 +122,7 @@ public class MLService implements Serializable {
         int eventType = processingEvent.getEventType();
 
         // if it was an public event we set the ml.status to 'verified'
-        List<String> mlItems = workitem.getItemValue(ITEM_ML_ITEMES);
+        List<String> mlItems = workitem.getItemValue(ITEM_ML_ITEMS);
 
         // set initial status?
         if (ProcessingEvent.AFTER_PROCESS == eventType) {
@@ -207,7 +207,7 @@ public class MLService implements Serializable {
             MLClient mlClient = new MLClient();
 
             String content = getAllDocumentText(workitem);
-            List<String> itemNames = workitem.getItemValue(ITEM_ML_ITEMES);
+            List<String> itemNames = workitem.getItemValue(ITEM_ML_ITEMS);
 
             // parse locales
             Set<Locale> locales = parseMLLocales();

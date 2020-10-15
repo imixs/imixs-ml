@@ -226,7 +226,7 @@ public class MLAdapter implements SignalAdapter {
                     }
                 }
                 // update the ml.items list with the items defined in the configuration...
-                document.setItemValue(MLService.ITEM_ML_ITEMES,entityDefinitions.keySet());
+                document.setItemValue(MLService.ITEM_ML_ITEMS,entityDefinitions.keySet());
             }
 
         } else {
