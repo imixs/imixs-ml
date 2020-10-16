@@ -1,11 +1,9 @@
 package org.imixs.ml.workflow;
 
 import java.util.List;
-import java.util.logging.Logger;
 
+import org.junit.Assert;
 import org.junit.Test;
-
-import junit.framework.Assert;
 
 /**
  * Test the SnapshotService EJB. The WorkflowArchiveMockEnvironment provides a

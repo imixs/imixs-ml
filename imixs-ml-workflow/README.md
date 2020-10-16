@@ -16,7 +16,7 @@ The adapter 'org.imixs.ml.workflow.MLAdapter' is used for ml analysis against a 
 The MLAdapter can be configured by the imixs.properties  '*ml.service.endpoint*' and '*ml.locales*' 
 
 	ml.service.endpoint=http://imixs-ml-spacy:8000/analyse/
-	ml.locales=DE,UK
+	ml.locales=de_DE,en_GB
 
 Optional the parameters can be set by the environment variables *ML_SERVICE_ENDPOINT* and *ML_LOCALES*.
 
@@ -31,22 +31,22 @@ See the following example:
 	<ml-config name="endpoint">
 	    https://localhost:8111/api/resource/
 	</ml-config>
-	<ml-config name="locales">DE,UK</ml-config>
+	<ml-config name="locales">de_DE,en_GB</ml-config>
 
 
 Per default the MLAdapter takes all entities into the current workitem if an item with the name did not yet exist. 
 To configure the behavior of the entity adaption in a more fine grained way, optional configuration via the workflow
  model is possible with the item 'ml.entity':
 
-	<ml-config name="entity">
+	<ml-entity>
 	    <name>_invoicetotal</name>
 	    <type>currency</type>
-	</ml-config>
-	<ml-config name="entity">
+	</ml-entity>
+	<ml-entity>
 	    <name>_cdtr_bic</name>
 	    <type>text</type>
 	    <mapping>bic</mapping>
-	</ml-config>
+	</ml-entity>
 	
 
 In this example the entity '_invoicetotal' will be adapted by the Currency Adapter. 

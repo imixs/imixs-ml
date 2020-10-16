@@ -40,7 +40,7 @@ public class TestDateAdapter {
 
         List<Locale> locals = new ArrayList<Locale>();
         locals.add(Locale.UK);
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
 
         Set<String> enityVariants = new HashSet<String>();
 
@@ -76,7 +76,7 @@ public class TestDateAdapter {
     public void testGermanLongFomatToDate() {
         List<Locale> locals = new ArrayList<Locale>();
         locals.add(Locale.UK);
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
 
         List<String> itemValueList = new ArrayList<String>();
         itemValueList.add("26. Januar 2017");

@@ -146,8 +146,9 @@ public class CurrencyAdapter {
      * <p>
      * The method verifies the DecimalSeparator and GroupingSeparator to validate if
      * the currency text can be applied to the given locale. If the DecimalSeparator
-     * is missing but a getGroupingSeparator is found, than we assume that this text can not be calculated with the
-     * current locale.  (e.g. 123.44 seems not to be a German currency)
+     * is missing but a getGroupingSeparator is found, than we assume that this text
+     * can not be calculated with the current locale. (e.g. 123.44 seems not to be a
+     * German currency)
      * 
      * @param text   - text representing a number
      * @param locals - list of locales
@@ -157,18 +158,13 @@ public class CurrencyAdapter {
         for (Locale locale : locals) {
 
             DecimalFormatSymbols dfs = new DecimalFormatSymbols(locale);
-            
+
             char d = dfs.getDecimalSeparator();
             char g = dfs.getGroupingSeparator();
-            
-           // int i=g;
-            
-//            if (i==0) {
-//                //
-//            }
-            //String sg=""+g; // groupSeparator can be empty
-            // validate GroupingSeparator...
-            if ( text.indexOf(d)==-1 && (g==160|| text.indexOf(g)>-1)) {
+
+            // validate GroupingSeparator... it may happen that a groupSeperator is not
+            // available in case the locale is only a language locale
+            if (text.indexOf(d) == -1 && (g == 160 || text.indexOf(g) > -1)) {
                 // locale did not match text format
                 continue;
             }

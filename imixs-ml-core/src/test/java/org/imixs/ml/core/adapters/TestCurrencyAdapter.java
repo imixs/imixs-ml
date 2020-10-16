@@ -43,7 +43,7 @@ public class TestCurrencyAdapter {
 
         List<Locale> locals = new ArrayList<Locale>();
         locals.add(Locale.UK);
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
 
         currencyAdapter.onObjectEvent(new EntityObjectEvent(f, enityVariants, locals));
 
@@ -63,7 +63,7 @@ public class TestCurrencyAdapter {
     @Test
     public void testUSCurrency() {
         List<Locale> locals = new ArrayList<Locale>();
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
         locals.add(Locale.UK);
         locals.add(Locale.US);
         
@@ -90,7 +90,7 @@ public class TestCurrencyAdapter {
     public void testGermanCurrency() {
         List<Locale> locals = new ArrayList<Locale>();
         locals.add(Locale.UK); // we switch locales here to see if German locale is detected correctly
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
 
         List<String> itemValueList = new ArrayList<String>();
         itemValueList.add("663,52");

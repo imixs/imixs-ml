@@ -52,6 +52,8 @@ import org.imixs.workflow.exceptions.AdapterException;
 import org.imixs.workflow.exceptions.PluginException;
 import org.imixs.workflow.util.XMLParser;
 
+import util.LocaleHelper;
+
 /**
  * This adapter class is used for ml analysis based on the Imixs-ML project.
  * <p>
@@ -71,7 +73,7 @@ import org.imixs.workflow.util.XMLParser;
  * {@code
 <ml-config>
     <endpoint>https://localhost:8111/api/resource/</endpoint>
-    <locales>DE,UK</locales>
+    <locales>de_DE,en_GB</locales>
 </ml-config>
  * }
  * </pre>
@@ -104,24 +106,19 @@ import org.imixs.workflow.util.XMLParser;
 
 public class MLAdapter implements SignalAdapter {
 
-  
     public static final String ML_ENTITY = "entity";
     public static final String PLUGIN_ERROR = "PLUGIN_ERROR";
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
-    
-   
-    
 
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
     @Inject
     @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT)
     Optional<String> mlDefaultAPIEndpoint;
-    
-   
+
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK,US")
+    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "de_DE,en_GB")
     private String mlDefaultLocales;
 
     @Inject
@@ -138,7 +135,6 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         List<Locale> locals = new ArrayList<Locale>();
 
-      
         Map<String, EntityDefinition> entityDefinitions = null;
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
@@ -159,20 +155,20 @@ public class MLAdapter implements SignalAdapter {
         }
 
         // do we have a valid endpoint?
-        if (mlAPIEndpoint==null || mlAPIEndpoint.isEmpty()) {
+        if (mlAPIEndpoint == null || mlAPIEndpoint.isEmpty()) {
             throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
                     "imixs-ml service endpoint is empty!");
         }
         // add the analyzse/ resource
-        if (mlAPIEndpoint.indexOf("/analyse")>-1) {
+        if (mlAPIEndpoint.indexOf("/analyse") > -1) {
             throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
                     "imixs-ml wrong service endpoint - should not contain \"/analyzse\" resource!");
         }
         if (!mlAPIEndpoint.endsWith("/")) {
-            mlAPIEndpoint=mlAPIEndpoint+"/";
+            mlAPIEndpoint = mlAPIEndpoint + "/";
         }
-        mlAPIEndpoint=mlAPIEndpoint+"analyse/";
-         
+        mlAPIEndpoint = mlAPIEndpoint + "analyse/";
+
         // analyse file content....
         List<FileData> files = document.getFileData();
         if (files != null && files.size() > 0) {
@@ -195,7 +191,7 @@ public class MLAdapter implements SignalAdapter {
                 for (Map.Entry<String, List<String>> mlEntity : groupedEntityList.entrySet()) {
 
                     String mlEntityName = mlEntity.getKey();
-                    
+
                     // is this entity listed in our configuration?
                     if (entityDefinitions.containsKey(mlEntityName)) {
                         // Do we have an entityDefinition for this entity?
@@ -224,13 +220,13 @@ public class MLAdapter implements SignalAdapter {
                     }
                 }
                 // update the ml.items list with the items defined in the configuration...
-                document.setItemValue(MLService.ITEM_ML_ITEMS,entityDefinitions.keySet());
+                document.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
             }
 
         } else {
             logger.finest("......no files found for " + document.getUniqueID());
         }
-        
+
         return document;
     }
 
@@ -252,7 +248,7 @@ public class MLAdapter implements SignalAdapter {
         if (mlConfig != null) {
             mlAPIEndpoint = mlConfig.getItemValueString("endpoint");
         }
-        
+
         // switch to default api endpoint?
         if (mlAPIEndpoint == null || mlAPIEndpoint.isEmpty()) {
             // set defautl api endpoint if defined
@@ -269,17 +265,14 @@ public class MLAdapter implements SignalAdapter {
     }
 
     /**
-     * This helper method parses the locales either provided by a model definition
-     * or a imixs.property or an environment variable
+     * This helper method loads the locale definition form a config workitem. If no
+     * locale definitions are found, the locales provided the imixs.property
+     * 'ML_LOCALES' are taken.
      * 
-     * @param mlConfig
-     * @return
+     * @param mlConfig - configuration workitem with the item 'locales'
+     * @return list of Locale objects
      */
     private List<Locale> parseMLLocalesByModel(ItemCollection mlConfig) {
-        boolean debug = logger.isLoggable(Level.FINE);
-        debug = true;
-        List<Locale> locals = new ArrayList<Locale>();
-
         // test if the model provides locales. If not, the adapter uses the
         // mlDefaultAPILocales
         String mlAPILocales = null;
@@ -290,17 +283,7 @@ public class MLAdapter implements SignalAdapter {
             mlAPILocales = mlDefaultLocales;
         }
 
-        // translate locales..
-        String[] sLocales = mlAPILocales.split(",");
-
-        for (String _locale : sLocales) {
-            Locale aLocale = new Locale(_locale);
-            locals.add(aLocale);
-            if (debug) {
-                logger.info("......suporting locale " + aLocale);
-            }
-        }
-        return locals;
+        return LocaleHelper.parseLocales(mlAPILocales);
     }
 
     /**
@@ -383,7 +366,7 @@ public class MLAdapter implements SignalAdapter {
 
         public EntityDefinition(String name, String itemType, String itemName) {
             super();
-            if (name==null || name.isEmpty()) {
+            if (name == null || name.isEmpty()) {
                 logger.warning("Invalid ml.config entity definition - missing name!");
             }
             this.name = name;

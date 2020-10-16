@@ -1,11 +1,9 @@
 package org.imixs.ml.workflow;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.LocalBean;
@@ -27,6 +25,8 @@ import org.imixs.workflow.engine.ModelService;
 import org.imixs.workflow.engine.ProcessingEvent;
 import org.imixs.workflow.engine.WorkflowService;
 import org.imixs.workflow.exceptions.ModelException;
+
+import util.LocaleHelper;
 
 /**
  * The MLService reacts on Processing events and updates the ml.status item. If
@@ -65,15 +65,14 @@ public class MLService implements Serializable {
     @Inject
     @ConfigProperty(name = ML_SERVICE_ENDPOINT)
     Optional<String> mlAPIEndpoint;
-    
+
     // enabled
     @Inject
     @ConfigProperty(name = MLTrainingScheduler.ML_TRAINING_SCHEDULER_ENABLED, defaultValue = "false")
     boolean trainingSchedulerEnabled;
 
-
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "DE,UK,US")
+    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "de_DE,en_GB")
     String mlDefaultLocales;
 
     @Inject
@@ -106,17 +105,15 @@ public class MLService implements Serializable {
 
         ItemCollection workitem = processingEvent.getDocument();
 
-        
         // skip if not a workItem...
         if (workitem != null && !workitem.getItemValueString("type").startsWith("workitem")) {
             return;
         }
-        
+
         if (!mlAPIEndpoint.isPresent() || mlAPIEndpoint.get().isEmpty()) {
             // ML Module is not present
             return;
         }
-
 
         int eventType = processingEvent.getEventType();
 
@@ -152,8 +149,7 @@ public class MLService implements Serializable {
         }
 
         // set training status?
-        if (ProcessingEvent.AFTER_PROCESS == eventType
-                && trainingSchedulerEnabled
+        if (ProcessingEvent.AFTER_PROCESS == eventType && trainingSchedulerEnabled
                 && ML_STATUS_CONFIRMED.equals(workitem.getItemValueString(ITEM_ML_STATUS))
                 && "workitemarchive".equals(workitem.getType())) {
             // update status...
@@ -163,7 +159,6 @@ public class MLService implements Serializable {
         }
 
     }
-
 
     /**
      * This method returns a string with all the text content of all documents
@@ -209,46 +204,21 @@ public class MLService implements Serializable {
             List<String> itemNames = workitem.getItemValue(ITEM_ML_ITEMS);
 
             // parse locales
-            List<Locale> locales = parseMLLocales();
+            List<Locale> locales = LocaleHelper.parseLocales(mlDefaultLocales);
 
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
-            
+
             // compute URL
-            String url=mlAPIEndpoint.get();
+            String url = mlAPIEndpoint.get();
             if (!url.endsWith("/")) {
-                url=url+"/";
+                url = url + "/";
             }
-            url=url+"training/";
-            mlClient.postTrainingData(trainingData,url);
+            url = url + "training/";
+            mlClient.postTrainingData(trainingData, url);
         }
 
-    }
-
-    /**
-     * This helper method parses the locales provided by the imixs.property or an
-     * environment variable
-     * 
-     * 
-     * @return
-     */
-    private List<Locale> parseMLLocales() {
-        boolean debug = logger.isLoggable(Level.FINE);
-        debug = true;
-        List<Locale> locals = new ArrayList<Locale>();
-
-        // translate locales..
-        String[] sLocales = mlDefaultLocales.split(",");
-
-        for (String _locale : sLocales) {
-            Locale aLocale = new Locale(_locale);
-            locals.add(aLocale);
-            if (debug) {
-                logger.info("......suporting locale " + aLocale);
-            }
-        }
-        return locals;
     }
 
 }

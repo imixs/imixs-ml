@@ -84,7 +84,7 @@ public class TestMLIntegrationTest {
         mlClient = new MLClient();
         locals=new ArrayList<Locale>();
         locals.add(Locale.UK);
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
     }
     
   

@@ -34,7 +34,7 @@ public class TestTrainingDataBuilder {
     public void setup() throws PluginException {
         locals=new ArrayList<Locale>();
         locals.add(Locale.UK);
-        locals.add(Locale.GERMAN);
+        locals.add(Locale.GERMANY);
 
     }
 
