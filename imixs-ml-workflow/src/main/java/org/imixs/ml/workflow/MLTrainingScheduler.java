@@ -46,6 +46,7 @@ import javax.ejb.TimerConfig;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.imixs.ml.core.MLConfig;
 import org.imixs.workflow.engine.EventLogService;
 import org.imixs.workflow.engine.jpa.EventLog;
 
@@ -74,10 +75,6 @@ public class MLTrainingScheduler {
     @ConfigProperty(name = ML_TRAINING_SCHEDULER_ENABLED, defaultValue = "false")
     boolean enabled;
 
-    @Inject
-    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT)
-    Optional<String> mlAPIEndpoint;
-
     // timeout interval in ms - default every 10 minutes
     @Inject
     @ConfigProperty(name = ML_TRAINING_SCHEDULER_INTERVAL, defaultValue = "600000")
@@ -87,6 +84,10 @@ public class MLTrainingScheduler {
     @Inject
     @ConfigProperty(name = ML_TRAINING_SCHEDULER_INITIALDELAY, defaultValue = "60000")
     long initialDelay;
+
+    @Inject
+    @ConfigProperty(name = MLConfig.ML_SERVICE_ENDPOINT)
+    Optional<String> mlAPIEndpoint;
 
     private static Logger logger = Logger.getLogger(MLTrainingScheduler.class.getName());
 

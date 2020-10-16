@@ -42,6 +42,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.events.EntityTextEvent;
 import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.workflow.FileData;
@@ -114,11 +115,11 @@ public class MLAdapter implements SignalAdapter {
     private static Logger logger = Logger.getLogger(MLAdapter.class.getName());
 
     @Inject
-    @ConfigProperty(name = MLService.ML_SERVICE_ENDPOINT)
+    @ConfigProperty(name = MLConfig.ML_SERVICE_ENDPOINT)
     Optional<String> mlDefaultAPIEndpoint;
 
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "de_DE,en_GB")
+    @ConfigProperty(name = MLConfig.ML_LOCALES, defaultValue = "de_DE,en_GB")
     private String mlDefaultLocales;
 
     @Inject
