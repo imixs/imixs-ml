@@ -141,3 +141,8 @@ To activate the Training Scheduler the service need to be enabled (it is disable
 
 This setting will enable the training scheduler with an interval of 30 seconds and an initial delay of 60 seconds. 
   
+The training scheduler will only train data with a training quality level="FULL" per default. It is possible to lower the training quality level with the environment 'ML_TRAINING_QUALITYLEVEL': 
+
+	ML_TRAINING_QUALITYLEVEL=PARTIAL
+	
+**Note:** It is not recommended to lower the training quality level as this may decrease the quality of the whole ml model.

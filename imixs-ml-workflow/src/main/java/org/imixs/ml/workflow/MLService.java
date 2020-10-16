@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -53,9 +54,6 @@ public class MLService implements Serializable {
     public static final String ITEM_ML_ITEMS = "ml.items";
     public static final String ITEM_ML_STATUS = "ml.status";
 
-    public static final String ML_SERVICE_ENDPOINT = "ml.service.endpoint";
-    public static final String ML_LOCALES = "ml.locales";
-
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
     public static final String ML_STATUS_TRAINING = "training";
@@ -63,8 +61,12 @@ public class MLService implements Serializable {
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
 
     @Inject
-    @ConfigProperty(name = ML_SERVICE_ENDPOINT)
+    @ConfigProperty(name = MLConfig.ML_SERVICE_ENDPOINT)
     Optional<String> mlAPIEndpoint;
+
+    @Inject
+    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "FULL")
+    String trainingQualityLevel;
 
     // enabled
     @Inject
@@ -72,7 +74,7 @@ public class MLService implements Serializable {
     boolean trainingSchedulerEnabled;
 
     @Inject
-    @ConfigProperty(name = MLService.ML_LOCALES, defaultValue = "de_DE,en_GB")
+    @ConfigProperty(name = MLConfig.ML_LOCALES, defaultValue = "de_DE,en_GB")
     String mlDefaultLocales;
 
     @Inject
@@ -209,6 +211,14 @@ public class MLService implements Serializable {
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
+
+            // verify the TRAININGDATA_QUALITY_LEVEL
+            if ("FULL".equalsIgnoreCase(trainingQualityLevel)
+                    && trainingData.getQuality() !=XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL ) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL/BAD but FULL is required - document will be ignored for training!");
+                return;
+            }
 
             // compute URL
             String url = mlAPIEndpoint.get();
