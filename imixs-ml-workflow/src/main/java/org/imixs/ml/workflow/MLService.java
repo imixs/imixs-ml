@@ -65,7 +65,7 @@ public class MLService implements Serializable {
     Optional<String> mlAPIEndpoint;
 
     @Inject
-    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "FULL")
+    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
     String trainingQualityLevel;
 
     // enabled
@@ -213,10 +213,14 @@ public class MLService implements Serializable {
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
 
             // verify the TRAININGDATA_QUALITY_LEVEL
-            if ("FULL".equalsIgnoreCase(trainingQualityLevel)
-                    && trainingData.getQuality() !=XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL ) {
-                logger.severe("...document '" + workitem.getUniqueID()
-                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL/BAD but FULL is required - document will be ignored for training!");
+            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
+                logger.warning("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
+                return;
+            } else if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL
+                    && "FULL".equalsIgnoreCase(trainingQualityLevel)) {
+                logger.warning("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
                 return;
             }
 

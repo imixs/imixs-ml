@@ -141,8 +141,17 @@ To activate the Training Scheduler the service need to be enabled (it is disable
 
 This setting will enable the training scheduler with an interval of 30 seconds and an initial delay of 60 seconds. 
   
-The training scheduler will only train data with a training quality level="FULL" per default. It is possible to lower the training quality level with the environment 'ML_TRAINING_QUALITYLEVEL': 
+### The Training Quality Level
+  
+The training scheduler will only train data with a training quality level="PARTIAL" or "FULL". The  training quality level="PARTIAL" is the default setting. 
 
-	ML_TRAINING_QUALITYLEVEL=PARTIAL
-	
-**Note:** It is not recommended to lower the training quality level as this may decrease the quality of the whole ml model.
+ - ML_TRAINING_QUALITYLEVEL=FULL  - all ML Items of a workitem must provide matching values. 
+ - ML_TRAINING_QUALITYLEVEL=PARTIAL -  empty values are allowed (default).
+
+It is possible to force the training quality level "FULL" with the environment 'ML_TRAINING_QUALITYLEVEL': 
+
+	ML_TRAINING_QUALITYLEVEL=FULL
+
+
+
+**Note:** If a workitem provide no value for a item, but the corresponding text is part of the text, this may lead to a decrease of the overall ml model quality. 
