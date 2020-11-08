@@ -81,43 +81,41 @@ The status 'training' indicates that all known entities are filled with data fou
 ## The MLController
 
 The MLController is a request scoped CDI bean used to verify and confirm ML data.
-The method *getJSON()* returns a json object indicating the current status and the list of ml items.
-This method is used in JavaScript to get the ml status information:
+The method *getStatus()* returns  a JSON object containing the current ml result status and the item names collected by the MLAdatper.
+
+	{
+	  "status":"suggest",
+      "items": [
+        "invoice.number",
+        "invoice.total"
+      ]
+    }
+
+
+This method can be called in JSF page to handle the status in JavaScript:
 
 	<ui:fragment rendered="#{mlController!=null}">
-		<!-- imixs-ml -->
-		<script type="text/javascript"
-			src="#{facesContext.externalContext.requestContextPath}/js/imixs-office.ml.js?build=#{app.application_build_timestamp}"></script>
 		<script type="text/javascript">
 			/*<![CDATA[*/
-	
-			// set ml status
-			imixsOfficeWorkflow.ml_json = #{mlController.getJSON()};
-	
+				// get ml status
+				var mlResult = #{mlController.getMLResult()};
 			/*]]>*/
 		</script>
 	</ui:fragment>
 
 
    
-### ML Input
+### UI Integration
 
-With the JavaScrit library 'imixs-offic.ml.js' input fields with a computed value from the ml analysys can be highlighted to give the user a hint that the value of a field comes from the ml engine.
+The project [Imixs-Office-Workflow](https://github.com/imixs/imixs-office-workflow/) provides an example for a UI integration based on the MLCOntroler status and a autocompletion feature.
+The subform *workitem-ml.xhtml* demonstrates a full integration with a highlight and autocompletion feature:	
 
 <img src="ml-input-suggest.png" />
 
-The script library adds a css class named 'imixs-ml' to a input field associated with a ml entity. You can add a custom stile for this css class into your application:
-
-	.imixs-ml {
-		background: url(./idea_16.png) no-repeat scroll right #d6fdd6 !important;
-		background-position: 100% 5px !important;
-	} 
-
 	
-	
-### ML Suggestion
+### ML Autocompletion
 
-Imixs-ML Workflow provides a UI widget that allows the user to search a text phrase within the document content. This helps to generate valid training data, as the text values of input items are part of the document content which is important for later training.
+To support autocompletion teh MLController provides a method to search for a text phrase within the document content. This helps to generate valid training data, as the text values of input items are part of the document content which is important for later training.
 
 
 ## ML Training Scheduler
