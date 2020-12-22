@@ -94,8 +94,8 @@ The following example for a POST request...
 
 # Development
 
-You can use the Eclipse IDE with the Pydev plugin for development.
-To prepare you environment make sure that pyhton 3.7 and pip3 is installed correcty.
+You can use the Eclipse IDE with the [Pydev plugin](https://www.pydev.org/) for development.
+To prepare you environment make sure that pyhton 3.7 and pip3 is installed correctly.
 
 To install pip3 on debian run:
 
@@ -107,11 +107,9 @@ Next you can import the spacy and fastapi dependencys
 	$ pip3 install -r requirements.txt
 
 
-
-
 ## Eclipse Setup
 
-If you use the Eclipse Plugin Pydev make sure you added the spacy lib folder.
+If you use the [Eclipse Plugin Pydev](https://www.pydev.org/) (which is recommended) make sure you added the spacy lib folder.
 In the properties for your pydev project, there's a pane called "PyDev - PYTHONPATH", with a sub-pane called "External Libraries". You can add source folders to the path using that pane. Your project code will then be able to import modules from those source folders. For spacy this may be the folder _~/.local/lib/python3.7/site-packages/spacy_
 
 # Docker Hub

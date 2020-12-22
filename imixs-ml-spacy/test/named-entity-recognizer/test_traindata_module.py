@@ -1,5 +1,5 @@
 import sys 
-sys.path.append('..')
+sys.path.append('../..')
 
 from imixs.core import datamodel, datatrain
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     
    
     
-    TRAIN_DATA = [('what is the price of 11,00. With some mor text.', {'entities': [(21, 26, 'iban'),(0,4,'test')]}), 
+    TRAIN_DATA = [('what is the price of 11,00', {'entities': [(21, 26, 'iban')]}), 
               ('what is the price of 12,50', {'entities': [(21, 26, 'iban')]}), 
               ('what is the price of 20000,00', {'entities': [(21, 29, 'iban')]}), 
               ('what is the price of 10120,00', {'entities': [(21, 29, 'iban')]}), 
@@ -40,10 +40,8 @@ if __name__ == "__main__":
               ('what is the price of 20,00', {'entities': [(21, 26, 'iban')]}), 
               ('what is the price of 11,50', {'entities': [(21, 26, 'iban')]})] 
     
-    d=datamodel.TrainingData(text='what is the price of 11,00. With some mor text.',entities=[])
+    d=datamodel.TrainingData(text='what is the price of 11,00',entities=[])
     e=datamodel.Entity(label='iban',start=21,stop=26) 
-    d.entities.append(e)
-    e=datamodel.Entity(label='test',start=0,stop=4) 
     d.entities.append(e)
     l.append(d)
     d=datamodel.TrainingData(text='what is the price of 12,50',entities=[])
@@ -125,7 +123,7 @@ if __name__ == "__main__":
    
     
     # update model
-    prdnlp = datatrain.updateModelSingle(l,modelfile)
+    prdnlp = datatrain.updateModel(l, 20,modelfile)
    
     
     print("------------finished--------------------")

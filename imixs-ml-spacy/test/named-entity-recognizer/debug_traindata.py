@@ -1,3 +1,6 @@
+import sys 
+sys.path.append('../..')
+
 from pydantic import BaseModel
 import spacy
 import random

@@ -21,7 +21,7 @@ language=os.getenv('MODEL_LANGUAGE', 'en')
 print("   ____      _          ") 
 print("  /  _/_ _  (_)_ __ ___  ") 
 print(" _/ //  ' \/ /\ \ /(_-<  Machine-Learning"  )
-print("/___/_/_/_/_//_\_\/___/  V1.0.a")
+print("/___/_/_/_/_//_\_\/___/  V1.1.")
 print("")                                           
                                            
 print("ENGINE          : https://spacy.io")                                           
