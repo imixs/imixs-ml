@@ -103,9 +103,9 @@ def train(train_data,iterations,modelPath):
 # Startup method
 if __name__ == "__main__":
     #lerne(TRAIN_DATA)
-    prdnlp = train(TRAIN_DATA, 20,"testmodel")
+    prdnlp = train(TRAIN_DATA, 20,"training_model")
     # save the model...
-    prdnlp.to_disk("testmodel")
+    prdnlp.to_disk("training_model")
     
     #Test your text
     #test_text = input("Enter your testing text: ")
