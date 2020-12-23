@@ -17,7 +17,7 @@ target/
 /build/
 
 # Python
-__pycache__/
+__pycache__
 
 
 # Training files
