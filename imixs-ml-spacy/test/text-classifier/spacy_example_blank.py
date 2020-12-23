@@ -15,17 +15,23 @@ from spacy.util import minibatch, compounding
 class Data(BaseModel):
     text: str 
 
-# New entity labels
-# Specify the new entity labels which you want to add here
-LABEL = ['iban', 'bic', 'invoiceno']
+# Specify the  categories
+LABEL = ['invoice', 'offer', 'order']
 
 
-TRAIN_DATA = [('some text about fish', {'cats': {'POSITIVE': 1}}),
-              ('some text about birds', {'cats': {'POSITIVE': 0}}),
-              ('some text about dogs', {'cats': {'POSITIVE': 0}}),
-              ('some text about horses', {'cats': {'POSITIVE': 0}})
+TRAIN_DATA = [('Please see our invoice below.', {'cats': {'invoice': True,'order': False, 'offer': False}}),
+              ('Please pay the total amount of our invoice.', {'cats': {'invoice': True,'order': False, 'offer': False}}),
+              ('We send you an invoice regarding your 47445', {'cats': {'invoice': True,'order': False, 'offer': False}}),
+              
+              ('Please send us an offer.', {'cats': {'offer': True, 'invoice': False, 'order': False}}),
+              ('Please tell us the price for the parts.', {'cats': {'offer': True, 'invoice': False, 'order': False}}),
+              ('Please tell us the price.', {'cats': {'offer': True, 'invoice': False, 'order': False}}),
+              
+              ('As discussed we would like to order the parts. ', {'cats': {'order': True, 'invoice': False, 'offer': False}}),
+              ('We order the parts. ', {'cats': {'order': True, 'invoice': False, 'offer': False}}),
+              ('Please send us the parts. ', {'cats': {'order': True, 'invoice': False, 'offer': False}}),
+              ('We order the following parts. ', {'cats': {'order': True, 'invoice': False, 'offer': False}})
              ]
- 
 
 
 # The learn method should initialize an empty model and add training data.
@@ -52,12 +58,15 @@ def train(train_data,iterations):
     else:
       textcat = nlp.get_pipe("textcat")
 
-    textcat.add_label('POSITIVE')
 
+    for i in LABEL:
+        print("...adding new label '" + i + "'...")
+        textcat.add_label(i)   # Add new  labels to the categorizer
+
+    
 
 
     # Iterate the training examples to optimize the model
-
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe != 'textcat']
 
     # Only train the textcat pipe
@@ -66,7 +75,7 @@ def train(train_data,iterations):
         print("Training model...")
         for i in range(iterations):
             losses = {}
-            batches = minibatch(train_data, size=compounding(4,32,1.001))
+            batches = minibatch(train_data, size=compounding(4.0, 32.0, 1.001))
             for batch in batches:
                 texts, annotations = zip(*batch)
                 nlp.update(texts, annotations, sgd=optimizer,
@@ -86,20 +95,14 @@ if __name__ == "__main__":
     
     #Test your text
     #test_text = input("Enter your testing text: ")
-    test_text = "some text about fish"
+    test_text = "Please see our new invoice below."
     doc = prdnlp(test_text)
     
     for label, score in doc.cats.items():
         print(label, score)
            
            
-    for ent in doc.cats:
-        print(ent)    
-
-    
-    #for ent in doc.cats:
-    #    print(ent.text, ent.start_char, ent.end_char, ent.label_)    
-    
+  
     
     
     print("finished")
