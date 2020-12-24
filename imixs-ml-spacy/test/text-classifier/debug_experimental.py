@@ -17,25 +17,38 @@ class Data(BaseModel):
     text: str 
 
 # Specify the  categories
-LABEL = ['fussball', 'schach']
+LABEL = ['football', 'chess']
 
 
 
 TRAIN_DATA = [
               
-              ('Er schießt mit dem Ball ein Tor', {'cats': {'fussball': True}}),
-              ('Er scheißt den Ball ins Abseits', {'cats': {'fussball': True}}),
-              ('Er scheißt den Ball ins Seitenaus', {'cats': {'fussball': True}}),
-              ('Er scheißt den Ball neben das Tor', {'cats': {'fussball': True}}),
-              ('Er scheißt den Ball über das Tor', {'cats': {'fussball': True}}),
-              ('Er scheißt den Ball an den Balken', {'cats': {'fussball': True}}),
-              ('Er köpft den Ball ins Tor', {'cats': {'fussball': True}}),
+              ('He kicks the ball into the goal', {'cats': {'football': True}}),
+              ('He kicks the ball into the offside', {'cats': {'football': True}}),
+              ('He kicks the ball out of bounds', {'cats': {'football': True}}),
+              ('He shoots the ball next to the goal', {'cats': {'football': True}}),
+              ('He shoots the ball above the goal', {'cats': {'football': True}}),
+              ('He shoots the ball on the beam', {'cats': {'football': True}}),
+              ('He heads the ball into the goal', {'cats': {'football': True}}),
+              ('He heads the ball into the offside', {'cats': {'football': True}}),
+              ('He heads the ball out of bounds', {'cats': {'football': True}}),
+              ('He heads the ball into the goal', {'cats': {'football': True}}),
+              ('He heads the ball above the goal', {'cats': {'football': True}}),
               
-              ('Er zieht die Figur Läufer', {'cats': {'schach': True}}),
-              ('Er zieht die Figur Turm', {'cats': {'schach': True}}),
-              ('Er zieht mit der Figur Bauer', {'cats': {'schach': True}}),
-              ('Er zieht die Figur König', {'cats': {'schach': True}}),
-              ('Er zieht die Figur Dame', {'cats': {'schach': True}})
+              ('He moves with the bishop', {'cats': {'chess': True}}),
+              ('He moves with the rook', {'cats': {'chess': True}}),
+              ('He moves with the king', {'cats': {'chess': True}}),
+              ('He moves with the queen', {'cats': {'chess': True}}),
+              ('He moves with the knight', {'cats': {'chess': True}}),
+              ('He moves with the pawn', {'cats': {'chess': True}}),
+              ('She beats the king', {'cats': {'chess': True}}),
+              ('She beats the bishop', {'cats': {'chess': True}}),
+              ('She beats the rook', {'cats': {'chess': True}}),
+              ('She beats the queen', {'cats': {'chess': True}}),
+              ('She beats the knight', {'cats': {'chess': True}}),
+              ('She beats the king', {'cats': {'chess': True}}),
+              ('She beats the pawn', {'cats': {'chess': True}}),
+              ('He checksmate the king with the queen', {'cats': {'chess': True}})
               
              ]
 
@@ -67,7 +80,8 @@ def train(train_data,iterations,modelPath):
 
     if 'textcat' not in nlp.pipe_names:
       print("create pipe 'textcat'...")
-      textcat = nlp.create_pipe("textcat", config={"exclusive_classes": True})
+      textcat = nlp.create_pipe("textcat", config={"exclusive_classes": False})
+      #textcat = nlp.create_pipe("textcat")
       nlp.add_pipe(textcat, last=True) 
     else:
       textcat = nlp.get_pipe("textcat")
@@ -103,21 +117,8 @@ def train(train_data,iterations,modelPath):
                 texts, annotations = zip(*batch)
                 nlp.update(texts, annotations,
                           #sgd=optimizer,
-                          #drop=0.2, 
+                          #drop=0.5, 
                           losses=losses)
-
-
-
-
-        
-      
-
-
-
-
-
-
-
 
 
 
@@ -136,8 +137,9 @@ if __name__ == "__main__":
     
     #Test your text
     #test_text = input("Enter your testing text: ")
-    print("=== testing Fussball...")
-    test_text = "Er schießt mit dem Ball ein Tor"
+    print("=== testing football...")
+    test_text = "He heads the ball above the goal"
+    #test_text = "Aus dem Abseits rollt der Ball ins Tor"
     doc = prdnlp(test_text)
     
     for label, score in doc.cats.items():
@@ -147,8 +149,9 @@ if __name__ == "__main__":
   
     #Test your text
     #test_text = input("Enter your testing text: ")
-    print("=== testing Schach...")
-    test_text = "Er zieht die Figur Dame"
+    print("=== testing chess...")
+    test_text = "He moves with the queen"
+    #test_text = "Er setzt den König mit der Dame chessmatt"
     doc = prdnlp(test_text)
     
     for label, score in doc.cats.items():
