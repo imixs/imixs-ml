@@ -13,8 +13,11 @@ from builtins import str
 
 app = FastAPI()
 
-modelpath=os.getenv('MODEL_PATH', 'imixs-model')
-language=os.getenv('MODEL_LANGUAGE', 'en')
+modelpath=os.getenv('MODEL_PATH', 'models/')
+if (modelpath.endswith('/') == False) :
+    modelpath=modelpath+"/"
+    
+#language=os.getenv('MODEL_LANGUAGE', 'en')
 
 
 
@@ -26,22 +29,22 @@ print("")
                                            
 print("ENGINE          : https://spacy.io")                                           
 print("MODEL_PATH      : " + modelpath)
-print("MODEL_LANGUAGE  : " + language)
+#print("MODEL_LANGUAGE  : " + language)
 print("")                                           
 
 
-@app.post("/training/")
+@app.post("/training/{model}")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
     # print(">>START trainingdata/")
-    prdnlp = datatrain.updateModel(trainngdata, modelpath)
+    prdnlp = datatrain.updateModel(trainngdata, modelpath+model)
     # print(">>STOP trainingdata/")
     return {"finished"}
 
 
-@app.post("/training-iterations/")
+@app.post("/training-iterations/{model}")
 def extract_entities(trainngdata: List[datamodel.TrainingData]):
     # print(">>START training-single-mode/")
-    prdnlp = datatrain.updateModelWithInteration(trainngdata, 10, modelpath)
+    prdnlp = datatrain.updateModelWithInteration(trainngdata, 10, modelpath+model)
     # print(">>STOP training-single-mode/")
     return {"finished training-single-mode model"}
 
@@ -49,21 +52,23 @@ def extract_entities(trainngdata: List[datamodel.TrainingData]):
 
 # Analyze a text 
 #
-@app.post("/analyse/")
-def train(analyseData: datamodel.AnalyseData):
-    result=datatrain.analyseText(analyseData,modelpath)
+@app.post("/analyse/{model}")
+def train(model: str, analyseData: datamodel.AnalyseData):
+    print(" anaylse by model: " + model)
+    result=datatrain.analyseText(analyseData,modelpath+model)
     return result
 
 
 # Clean the model 
 #
-@app.delete("/model/")
+@app.delete("/{model}")
 def clean():
     try:
-        shutil.rmtree(modelpath)
+        # try if this is a valid directory path
+        shutil.rmtree(modelpath+model)
     except OSError as e:
-        print("Error: %s : %s" % (modelpath, e.strerror))
-    return {"model '" + modelpath + "' deleted"}
+        print("Error: %s : %s" % (modelpath+model, e.strerror))
+    return {"model '" + modelpath + model +"' deleted"}
 
 
 

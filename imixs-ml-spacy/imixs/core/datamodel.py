@@ -3,13 +3,13 @@ from pydantic import BaseModel
 
 """
 The datamodel defines the Data class used for training data
-A data object consists of a text and a list of entity definitions. 
+A data object consists of a text and a list of entity definitions and categories. 
 
 The data object is needed to support the data structure for the Rest API based on the pydantic BaseModel 
 
 
 @author: ralph.soika@imixs.com
-@version:  1.0
+@version:  2.0
 """
 
 
@@ -19,11 +19,16 @@ class Entity(BaseModel):
     start: int
     stop: int
     
+# An Category class defines a category object with its name and a boolean flag indicating if the category is included or excluded
+class Category(BaseModel):
+    label: str
+    included: bool
 
 # The Data class defines an object containing a text and a list of entities within the text
 class TrainingData(BaseModel):
     text: str 
     entities: List[Entity] 
+    categories: List[Category] 
 
 
 
@@ -48,11 +53,19 @@ def convertToTrainingData(dataList):
     
     for _data in dataList:
         entList = []
+        catList = []
         for _entity in _data.entities:
             # append a new tuple for each entity....
             entList.append((_entity.start, _entity.stop, _entity.label))            
+
+        for _category in _data.categories:
+            # append a new tuple for each category....
+            catList.append((_category.label, _category.included))            
+
+        
         # create a dictionary with the entity list. 
-        dict = {"entities" : entList, }
+        #dict = {"entities" : entList, }
+        dict = {"entities" : entList, "cats" : catList }
         result.append((_data.text, dict))
     # now we have the traing data structure
     return result
