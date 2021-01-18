@@ -81,7 +81,7 @@ public class TestMLIntegrationTest {
 
         trainingService = new TrainingService();
 
-        mlClient = new MLClient();
+        mlClient = new MLClient(ML_SERVICE_API);
         locals=new ArrayList<Locale>();
         locals.add(Locale.UK);
         locals.add(Locale.GERMANY);

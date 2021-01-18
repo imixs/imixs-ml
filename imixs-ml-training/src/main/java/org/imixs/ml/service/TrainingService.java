@@ -93,6 +93,7 @@ public class TrainingService {
 
         logger.info("......create new training data for: " + workitem.getUniqueID());
 
+        String model=config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
@@ -188,8 +189,8 @@ public class TrainingService {
                             }
                             String serviceEndpoint = config
                                     .getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
-                            MLClient mlClient = new MLClient();
-                            mlClient.postTrainingData(trainingData, serviceEndpoint);
+                            MLClient mlClient = new MLClient(serviceEndpoint);
+                            mlClient.postTrainingData(trainingData,model);
                         }
 
                     } else {
@@ -255,8 +256,9 @@ public class TrainingService {
                     ItemCollection metadata = new ItemCollection(file.getAttributes());
                     String content = metadata.getItemValueString(OCRService.FILE_ATTRIBUTE_TEXT);
                     String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
-                    MLClient mlClient = new MLClient();
-                    mlClient.postAnalyseData(content, serviceEndpoint);
+                    String model= config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
+                    MLClient mlClient = new MLClient(serviceEndpoint);
+                    mlClient.postAnalyseData(content, model);
                 }
 
             } else {

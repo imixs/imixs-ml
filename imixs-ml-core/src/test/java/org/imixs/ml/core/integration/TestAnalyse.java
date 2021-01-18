@@ -29,7 +29,7 @@ public class TestAnalyse {
         // Assumptions for integration tests
         org.junit.Assume.assumeTrue(integrationTest.connected());
 
-        mlClient = new MLClient();
+        mlClient = new MLClient(SPACY_ENDPOINT);
     }
 
     /**

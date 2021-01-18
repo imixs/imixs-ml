@@ -19,7 +19,7 @@ public class IntegrationTest {
 	private String serviceEndpoint;
 	private final static Logger logger = Logger.getLogger(IntegrationTest.class.getName());
 
-	public IntegrationTest(String uri) {
+	public IntegrationTest(String uri) { 
 		this.serviceEndpoint = uri;
 	}
 
