@@ -44,6 +44,8 @@ import org.imixs.ml.xml.XMLTrainingData;
 /**
  * The MLClient provides a Jax-RS client to post training data and analyse data
  * objects.
+ * <p>
+ * The MLClient can be constructed by a given service endpoint.
  * 
  * 
  * @version 1.0
@@ -52,20 +54,29 @@ import org.imixs.ml.xml.XMLTrainingData;
 public class MLClient {
     private static Logger logger = Logger.getLogger(MLClient.class.getName());
 
+    private String serviceEndpoint = null;
+
+    public MLClient(String serviceEndpoint) {
+        super();
+        // the service endpoint must not end with a /
+        if (!serviceEndpoint.endsWith("/")) {
+            serviceEndpoint = serviceEndpoint.substring(0, serviceEndpoint.length() - 1);
+        }
+        this.serviceEndpoint = serviceEndpoint;
+    }
+
     /**
      * This method posts a spacy json training string to the spacy service endpoint
      * 
      * @param trainingData    - the training data object
      * @param serviceEndpoint - the ml API endpoint
      */
-    public void postTrainingData(XMLTrainingData trainingData, String serviceEndpoint) {
-        // if the serviceEndpoint has no tailing slash we append one....
-        if (!serviceEndpoint.endsWith("/")) {
-            serviceEndpoint= serviceEndpoint+"/";
-        }
+    public void postTrainingData(XMLTrainingData trainingData, String model) {
+
         logger.fine("......sending new training data object...");
         Client client = ClientBuilder.newClient();
-        WebTarget webTarget = client.target(serviceEndpoint);
+        WebTarget webTarget = client.target(serviceEndpoint + "/training/" + model);
+
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
         // build an array with one training data object
@@ -91,21 +102,17 @@ public class MLClient {
      * @param serviceEndpoint - the ml API endpoint
      * @return list of XMLAnalyseEntity
      **/
-    public List<XMLAnalyseEntity> postAnalyseData(String text, String serviceEndpoint) {
-        // if the serviceEndpoint has no tailing slash we append one....
-        if (!serviceEndpoint.endsWith("/")) {
-            serviceEndpoint= serviceEndpoint+"/";
-        }
-        
+    public List<XMLAnalyseEntity> postAnalyseData(String text, String model) {
+
         logger.fine("......sending analyse data object...");
         XMLAnalyseText atext = new XMLAnalyseText(text);
         Client client = ClientBuilder.newClient();
-        //client.register(RedirectFilterWorkAround.class);
-        
-        WebTarget webTarget = client.target(serviceEndpoint);
+        // client.register(RedirectFilterWorkAround.class);
+
+        WebTarget webTarget = client.target(serviceEndpoint + "/analyse/" + model);
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
         Response response = invocationBuilder.post(Entity.entity(atext, MediaType.APPLICATION_JSON));
-        
+
         // in case of successful response we extract the XMLAnalyseEntity objects
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             logger.finest("......POST request successfull (" + response.getStatus() + ")");

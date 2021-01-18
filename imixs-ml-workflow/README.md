@@ -4,9 +4,14 @@ The Imixs-ML Workflow module provides Adapter classes, CDI Beans and Service EJB
 
  - **ML-Adapter**<br/>The Workflow Adapter class 'MLAdapter' is used for *Natural language processing (NLP)* within the processing life cycle on a workflow instance. The adapter can analyse the text of documents and extract relevant business data for a running business process. This includes entity recognition and text classification.  <br/>
 
- - **ML-Controler** <br/> The CDI bean 'MLController' is used for user interaction like data input, data verification and data confirmation.   <br/>
+
+ - **ML-Definition** <br/>A data structure holding the information of a single ml service endpoint  <br/>
+
+ - **ML-Service** <br/>A service EJB reacting on Processing events storing the ml definition object  <br/>
 
  - **ML-TrainingScheduler** <br/>The MLTrainingScheduler is a timer service sending training data to a ML Service endpoint.   <br/>
+
+ - **ML-Controller** <br/> The CDI bean 'MLController' is used for user interaction like data input, data verification and data confirmation.   <br/>
 
 ## The MLAdapter
 
@@ -17,7 +22,7 @@ The adapter *'org.imixs.ml.workflow.MLAdapter'* is used for ml analysis against 
 The MLAdapter can be configured by the following imixs.properties 
 
  - *ml.service.endpoint* - defines the serivce endpoint of tha machine learning framework based on the Imixs-ML-Core API
- - *ml.model* - the default model name to be used
+ - *ml.model* - the default model name to be used (optional)
  - *ml.locales* list of supported language locales
 
 The parameters can be set in the imixs.properties or as environment variables:
@@ -36,12 +41,17 @@ The MLAdapter can also be configured through the model by defining a workflow re
 
 See the following example:
     
+
+	<ml-config name="model">invoice-de-0.0.3</ml-config>
 	<ml-config name="endpoint">
 	    https://localhost:8111/api/resource/
 	</ml-config>
 	<ml-config name="model">invoice-model-1.0.0</ml-config>
 	<ml-config name="locales">de_DE,en_GB</ml-config>
 
+**Note:** The mode name is mandatory. In case not default model is defined by the environment variable 'ML_MODEL' and not model is specified by the BPMN model, the Adapter throws an ProcessingErrorException. 
+
+The model name of a successful text analyses will be stored by the MLAdapter into the item 'ml.model'. This information is used by the ML Training Service later. 
 
 ### Item Mapping
 
@@ -74,16 +84,29 @@ The ML Adapter creates the following items
  - *ml.categories* - all categories from the text classification
  
 
- 
 **Note:** Even if an entity was not found in the document content, but was configured by the bpmn model, the entity name will
 be part of 'ml.items'. With this mechanism, as new entity can later be trained even if the entity is yet not part of the model.
 
 *ml.categories* are optional and will only be provided if text classification was trained before.
 
+
+## The ML Definition
+
+During the processing of a workitem the MLService creates a MLDefinition holding the details of a ml service endpoint. These data is stored in a Map object with the following data
+
+ - ml.endpoint - the service endpoint of a ML Rest Service
+ - ml.model - the model name
+ - ml.locales - a list of locale definitions used for text analysis 
+ - ml.items - list of entities recognized by ml service during text analysis 
+ - ml.categories - list of categories defined in a ml service
+ - ml.status - the current status of a ml.definition (suggest|confirmed|trained)
+
+
+A client implementation can store additional data into ml.definition
+
 ## The MLService
 
-The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status item. If no ml.status item
- exists, and ml.items is not empty, than the status is set to 'suggest'. If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
+The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status for each ml.definition. If no ml.status item  exists, and ml.items is not empty, than the status is set to 'suggest'. If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
  
  The item '*ml.status*' has one of the following options:
 
@@ -93,6 +116,47 @@ The MLService is a stateless EJB reacting on Processing events. The service upda
 
 
 The status 'training' indicates that all known entities are filled with data found in the document content. This means that this worktiem can be used for later training. See the 'ML TrainingScheduler'.
+
+
+
+## ML Training Scheduler
+
+If the ml status of a workitem was already confirmed and the workitem type is 'archive', than the MLService set the ml status to 'training' and a eventLog entry is created to indicate that this workitem can be send to the training service. 
+
+**Note:** the training service can reject the workitem for training if the data is of an insufficient quality.
+
+The service MLTrainingScheduler is an EJB Timer Service sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'. 
+
+The training data will be send to all models defined in the item 'ml.models'. This Item holds a list of model names computed by the MLAdatper class.
+
+The training service can be configured by the following configuration parameters:
+
+ - ML_TRAINING_SCHEDULER_ENABLED - true|false
+ - ML_TRAINING_SCHEDULER_INTERVAL - scheduler interval in milliseconds
+ - ML_TRAINING_SCHEDULER_INITIALDELAY - initial delay during first startup (deployment) 
+ 
+To activate the Training Scheduler the service need to be enabled (it is disabled per default). See the following example configuration:
+
+	ML_TRAINING_SCHEDULER_ENABLED=true
+	ML_TRAINING_SCHEDULER_INTERVAL=30000
+	ML_TRAINING_SCHEDULER_INITIALDELAY=60000
+
+This setting will enable the training scheduler with an interval of 30 seconds and an initial delay of 60 seconds. 
+  
+### The Training Quality Level
+  
+The training scheduler will only train data with a training quality level="PARTIAL" or "FULL". The  training quality level="PARTIAL" is the default setting. 
+
+ - ML_TRAINING_QUALITYLEVEL=FULL  - all ML Items of a workitem must provide matching values. 
+ - ML_TRAINING_QUALITYLEVEL=PARTIAL -  empty values are allowed (default).
+
+It is possible to force the training quality level "FULL" with the environment 'ML_TRAINING_QUALITYLEVEL': 
+
+	ML_TRAINING_QUALITYLEVEL=FULL
+
+
+
+**Note:** If a workitem provide no value for a item, but the corresponding text is part of the text, this may lead to a decrease of the overall ml model quality. 
 
 
 
@@ -136,39 +200,3 @@ The subform *workitem-ml.xhtml* demonstrates a full integration with a highlight
 
 To support autocompletion teh MLController provides a method to search for a text phrase within the document content. This helps to generate valid training data, as the text values of input items are part of the document content which is important for later training.
 
-
-## ML Training Scheduler
-
-If the ml status of a workitem was already confirmed and the workitem type is 'archive', than the MLService set the ml status to 'training' and a eventLog entry is created to indicate that this workitem can be send to the training service. 
-
-**Note:** the training service can reject the workitem for training if the data is of an insufficient quality.
-
-
-The service MLTrainingScheduler is an EJB Timer Service sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'. The service can be configured by the following configuration parameters:
-
- - ML_TRAINING_SCHEDULER_ENABLED - true|false
- - ML_TRAINING_SCHEDULER_INTERVAL - scheduler interval in milliseconds
- - ML_TRAINING_SCHEDULER_INITIALDELAY - initial delay during first startup (deployment) 
- 
-To activate the Training Scheduler the service need to be enabled (it is disabled per default). See the following example configuration:
-
-	ML_TRAINING_SCHEDULER_ENABLED=true
-	ML_TRAINING_SCHEDULER_INTERVAL=30000
-	ML_TRAINING_SCHEDULER_INITIALDELAY=60000
-
-This setting will enable the training scheduler with an interval of 30 seconds and an initial delay of 60 seconds. 
-  
-### The Training Quality Level
-  
-The training scheduler will only train data with a training quality level="PARTIAL" or "FULL". The  training quality level="PARTIAL" is the default setting. 
-
- - ML_TRAINING_QUALITYLEVEL=FULL  - all ML Items of a workitem must provide matching values. 
- - ML_TRAINING_QUALITYLEVEL=PARTIAL -  empty values are allowed (default).
-
-It is possible to force the training quality level "FULL" with the environment 'ML_TRAINING_QUALITYLEVEL': 
-
-	ML_TRAINING_QUALITYLEVEL=FULL
-
-
-
-**Note:** If a workitem provide no value for a item, but the corresponding text is part of the text, this may lead to a decrease of the overall ml model quality. 

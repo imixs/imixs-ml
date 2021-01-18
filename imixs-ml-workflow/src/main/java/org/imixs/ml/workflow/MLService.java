@@ -1,8 +1,11 @@
 package org.imixs.ml.workflow;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -51,8 +54,12 @@ public class MLService implements Serializable {
     private static final long serialVersionUID = 1L;
     private static Logger logger = Logger.getLogger(MLService.class.getName());
 
+    public static final String ITEM_ML_DEFINITIONS = "ml.definitions";
+    public static final String ITEM_ML_ENDPOINT = "ml.endpoint";
     public static final String ITEM_ML_ITEMS = "ml.items";
+    public static final String ITEM_ML_LOCALES = "ml.locales";
     public static final String ITEM_ML_STATUS = "ml.status";
+    public static final String ITEM_ML_MODEL = "ml.model";
 
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
@@ -188,7 +195,9 @@ public class MLService implements Serializable {
     }
 
     /**
-     * This method sends a given workitem to the ML Training Service via Rest API.
+     * This method sends a given workitem to each ML Training Service defined in the
+     * item 'ml.definitions'.
+     * <p>
      * The method is called by the MLTrainingScheduler.
      * 
      * @param uid
@@ -197,16 +206,26 @@ public class MLService implements Serializable {
     public void trainWorkitem(String uid) {
         // load the workitem
         ItemCollection workitem = workflowService.getWorkItem(uid);
+        if (workitem == null) {
+            throw new IllegalArgumentException("Invalid workitem uid '" + uid + "!");
+        }
+        // iterate over all ml definitions....
+        List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
+        for (ItemCollection mlDefinition : mlDefinitionList) {
 
-        if (workitem != null && mlAPIEndpoint.isPresent() && !mlAPIEndpoint.get().isEmpty()) {
+            String mlEndpoint = mlDefinition.getItemValueString(ITEM_ML_ENDPOINT);
+            String mlModel = mlDefinition.getItemValueString(ITEM_ML_MODEL);
+            String mlLocals = mlDefinition.getItemValueString(ITEM_ML_LOCALES);
+            logger.info("...train " + mlEndpoint + " model: " + mlModel);
+
             // send workitem to training service
-            MLClient mlClient = new MLClient();
+            MLClient mlClient = new MLClient(mlEndpoint);
 
             String content = getAllDocumentText(workitem);
-            List<String> itemNames = workitem.getItemValue(ITEM_ML_ITEMS);
+            List<String> itemNames = mlDefinition.getItemValue(ITEM_ML_ITEMS);
 
             // parse locales
-            List<Locale> locales = LocaleHelper.parseLocales(mlDefaultLocales);
+            List<Locale> locales = LocaleHelper.parseLocales(mlLocals);
 
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
@@ -224,15 +243,67 @@ public class MLService implements Serializable {
                 return;
             }
 
-            // compute URL
-            String url = mlAPIEndpoint.get();
-            if (!url.endsWith("/")) {
-                url = url + "/";
-            }
-            url = url + "training/";
-            mlClient.postTrainingData(trainingData, url);
+            // post training data...
+            mlClient.postTrainingData(trainingData, mlModel);
         }
 
+    }
+
+    /**
+     * This method updates the item 'ml.endpoints' of a worktiem holding a list of
+     * ML Endpoint definition. Each endpoint definition is defined by a set of items
+     * stored in a map. The Map can be conferted into a ItemCollection
+     * <p>
+     * If a endpoint definition with the same service endpoint and model name
+     * already exists, the method overwrites this entry.
+     * 
+     * @param workitem              - the workitem holidng a list of existing
+     *                              endpoint definitions
+     * @param newEndpointDefinition - the new Endpoint definition to be stored.
+     */
+    @SuppressWarnings("unchecked")
+    public void updateEndpointDefinitions(ItemCollection workitem, ItemCollection newMLDefinition) {
+
+        if (!newMLDefinition.hasItem(ITEM_ML_ENDPOINT) || !newMLDefinition.hasItem(ITEM_ML_MODEL)) {
+            throw new IllegalArgumentException("A ml definition must contain a least a ml.endpoint and a ml.model!");
+        }
+
+        List<Map<String, List<Object>>> mlServiceEndpoints = workitem.getItemValue(MLService.ITEM_ML_DEFINITIONS);
+
+        // test if the list already have a definition for the current endpoint/model and
+        // remove it....
+        Iterator<Map<String, List<Object>>> iter = mlServiceEndpoints.iterator();
+        while (iter.hasNext()) {
+            ItemCollection aEndpointDev = new ItemCollection(iter.next());
+            // do we have already
+            if (newMLDefinition.getItemValueString(ITEM_ML_ENDPOINT)
+                    .equals(aEndpointDev.getItemValueString(ITEM_ML_ENDPOINT))
+                    && newMLDefinition.getItemValueString(ITEM_ML_MODEL)
+                            .equals(aEndpointDev.getItemValueString(ITEM_ML_MODEL))) {
+                iter.remove();
+            }
+        }
+
+        // now we add the new definition
+        mlServiceEndpoints.add(newMLDefinition.getAllItems());
+
+    }
+
+    /**
+     * This method returns a list of ItemCollection object holding the
+     * ml.definitions stored in a given workitem. Each endpoint definition is
+     * defined by a set of items stored in a map. The Map can be conferted into a
+     * ItemCollection
+     * 
+     **/
+    @SuppressWarnings("unchecked")
+    public List<ItemCollection> getMLDefinitions(ItemCollection workitem) {
+        List<ItemCollection> result = new ArrayList<ItemCollection>();
+        List<Map<String, List<Object>>> mlDefinitions = workitem.getItemValue(MLService.ITEM_ML_DEFINITIONS);
+        for (Map<String, List<Object>> aDef : mlDefinitions) {
+            result.add(new ItemCollection(aDef));
+        }
+        return result;
     }
 
 }

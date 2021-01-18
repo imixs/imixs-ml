@@ -51,6 +51,7 @@ import org.imixs.workflow.SignalAdapter;
 import org.imixs.workflow.engine.WorkflowService;
 import org.imixs.workflow.exceptions.AdapterException;
 import org.imixs.workflow.exceptions.PluginException;
+import org.imixs.workflow.exceptions.ProcessingErrorException;
 import org.imixs.workflow.util.XMLParser;
 
 import util.LocaleHelper;
@@ -73,7 +74,7 @@ import util.LocaleHelper;
  * <pre>
  * {@code
 <ml-config>
-    <endpoint>https://localhost:8111/api/resource/</endpoint>
+    <endpoint>https://localhost:8111/api/training/{model}</endpoint>
     <locales>de_DE,en_GB</locales>
 </ml-config>
  * }
@@ -88,11 +89,11 @@ import util.LocaleHelper;
  * 
  * <pre>
  * {@code
-<ml-entity>
+<ml-config name="entity">
     <name>_invoicetotal</name>
     <type>currency</type>
 </ml-entity>
-<ml-entity>
+<ml-config name="entity">
     <name>_cdtr_bic</name>
     <type>text</type>
     <mapping>bic</mapping>
@@ -108,7 +109,8 @@ import util.LocaleHelper;
 public class MLAdapter implements SignalAdapter {
 
     public static final String ML_ENTITY = "entity";
-    public static final String PLUGIN_ERROR = "PLUGIN_ERROR";
+    public static final String API_ERROR = "API_ERROR";
+
     public static final int API_EVENT_SUCCESS = 110;
     public static final int API_EVENT_FAILURE = 90;
 
@@ -119,11 +121,18 @@ public class MLAdapter implements SignalAdapter {
     Optional<String> mlDefaultAPIEndpoint;
 
     @Inject
+    @ConfigProperty(name = MLConfig.ML_MODEL, defaultValue = "imixs-model")
+    String mlDefaultModel;
+
+    @Inject
     @ConfigProperty(name = MLConfig.ML_LOCALES, defaultValue = "de_DE,en_GB")
     private String mlDefaultLocales;
 
     @Inject
     private WorkflowService workflowService;
+
+    @Inject
+    private MLService mlService;
 
     @Inject
     private Event<EntityTextEvent> entityTextEvents = null;
@@ -134,6 +143,8 @@ public class MLAdapter implements SignalAdapter {
      */
     public ItemCollection execute(ItemCollection document, ItemCollection event) throws AdapterException {
         String mlAPIEndpoint = null;
+        String mlModelName = null;
+        String mlLocals = null;
         List<Locale> locals = new ArrayList<Locale>();
 
         Map<String, EntityDefinition> entityDefinitions = null;
@@ -142,33 +153,31 @@ public class MLAdapter implements SignalAdapter {
 
         logger.finest("...running api adapter...");
 
-        // read configuration either form the model or imixs.properties....
+        // read optional configuration form the model or imixs.properties....
         try {
             ItemCollection mlConfig = workflowService.evalWorkflowResult(event, "ml-config", document, false);
 
-            mlAPIEndpoint = parseMLEndpointByModel(mlConfig);
-            locals = parseMLLocalesByModel(mlConfig);
-
+            mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
+            mlModelName = parseMLModelByBPMN(mlConfig);
+            mlLocals = parseMLLocalesByBPMN(mlConfig);
+            // convert locals definitions into a List of Locales
+            locals = LocaleHelper.parseLocales(mlLocals);
             // test if the model provides optional entity definitions.
-            entityDefinitions = parseEntityDefinitionsByModel(mlConfig);
+            entityDefinitions = parseEntityDefinitionsByBPMN(mlConfig);
         } catch (PluginException e) {
             logger.warning("Unable to parse item definitions for 'ml-config', verify model - " + e.getMessage());
         }
 
         // do we have a valid endpoint?
         if (mlAPIEndpoint == null || mlAPIEndpoint.isEmpty()) {
-            throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
+            throw new ProcessingErrorException(MLAdapter.class.getSimpleName(), API_ERROR,
                     "imixs-ml service endpoint is empty!");
         }
         // add the analyzse/ resource
         if (mlAPIEndpoint.indexOf("/analyse") > -1) {
-            throw new AdapterException(MLAdapter.class.getSimpleName(), PLUGIN_ERROR,
+            throw new AdapterException(MLAdapter.class.getSimpleName(), API_ERROR,
                     "imixs-ml wrong service endpoint - should not contain \"/analyzse\" resource!");
         }
-        if (!mlAPIEndpoint.endsWith("/")) {
-            mlAPIEndpoint = mlAPIEndpoint + "/";
-        }
-        mlAPIEndpoint = mlAPIEndpoint + "analyse/";
 
         // analyse file content....
         List<FileData> files = document.getFileData();
@@ -179,8 +188,9 @@ public class MLAdapter implements SignalAdapter {
                 ItemCollection metadata = new ItemCollection(file.getAttributes());
                 String ocrText = metadata.getItemValueString("text");
 
-                MLClient mlClient = new MLClient();
-                List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlAPIEndpoint);
+                // create a MLClient for the current service endpoint
+                MLClient mlClient = new MLClient(mlAPIEndpoint);
+                List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlModelName);
                 /*
                  * We now have a list of XMLAnalyseEntities possible matching the same item. In
                  * the following we group matching items by itemName and fire a
@@ -220,8 +230,18 @@ public class MLAdapter implements SignalAdapter {
                         }
                     }
                 }
-                // update the ml.items list with the items defined in the configuration...
-                document.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
+
+                // Finally we store the mlItems, the MLModel name and the mlLocale definitions
+                // for each Service endpoint into
+                // the item 'ml.definitions'
+
+                ItemCollection mlDefinition = new ItemCollection();
+                mlDefinition.setItemValue(MLService.ITEM_ML_ENDPOINT, mlAPIEndpoint);
+                mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
+                mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
+                mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
+                mlService.updateEndpointDefinitions(document, mlDefinition);
+
             }
 
         } else {
@@ -238,7 +258,7 @@ public class MLAdapter implements SignalAdapter {
      * @param mlConfig
      * @return
      */
-    private String parseMLEndpointByModel(ItemCollection mlConfig) {
+    private String parseMLEndpointByBPMN(ItemCollection mlConfig) {
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
         String mlAPIEndpoint = null;
@@ -261,7 +281,42 @@ public class MLAdapter implements SignalAdapter {
             logger.info("......ml api endpoint " + mlAPIEndpoint);
         }
 
+        if (!mlAPIEndpoint.endsWith("/")) {
+            mlAPIEndpoint = mlAPIEndpoint + "/";
+        }
+
         return mlAPIEndpoint;
+
+    }
+
+    /**
+     * This helper method parses the ml model name either provided by a model
+     * definition or a imixs.property or an environment variable
+     * 
+     * @param mlConfig
+     * @return
+     */
+    private String parseMLModelByBPMN(ItemCollection mlConfig) {
+        boolean debug = logger.isLoggable(Level.FINE);
+        debug = true;
+        String mlModel = null;
+
+        // test if the model provides a MLModel name. If not, the adapter uses the
+        // mlDefaultAPIEndpoint
+        if (mlConfig != null) {
+            mlModel = mlConfig.getItemValueString("model");
+        }
+
+        // switch to default api endpoint?
+        if (mlModel == null || mlModel.isEmpty()) {
+            // set defautl api endpoint if defined
+            mlModel = mlDefaultModel;
+        }
+        if (debug) {
+            logger.info("......ml model = " + mlModel);
+        }
+
+        return mlModel;
 
     }
 
@@ -271,9 +326,9 @@ public class MLAdapter implements SignalAdapter {
      * 'ML_LOCALES' are taken.
      * 
      * @param mlConfig - configuration workitem with the item 'locales'
-     * @return list of Locale objects
+     * @return comma separated list of Locale definitions
      */
-    private List<Locale> parseMLLocalesByModel(ItemCollection mlConfig) {
+    private String parseMLLocalesByBPMN(ItemCollection mlConfig) {
         // test if the model provides locales. If not, the adapter uses the
         // mlDefaultAPILocales
         String mlAPILocales = null;
@@ -284,16 +339,22 @@ public class MLAdapter implements SignalAdapter {
             mlAPILocales = mlDefaultLocales;
         }
 
-        return LocaleHelper.parseLocales(mlAPILocales);
+        return mlAPILocales;
     }
 
     /**
      * This method parses the workflow result for optional entity definitions
      */
     @SuppressWarnings("unchecked")
-    private Map<String, EntityDefinition> parseEntityDefinitionsByModel(ItemCollection mlConfig) {
+    private Map<String, EntityDefinition> parseEntityDefinitionsByBPMN(ItemCollection mlConfig) {
 
         List<String> entityDevList = mlConfig.getItemValue("entity");
+
+        if (entityDevList.size() == 0) {
+            throw new ProcessingErrorException(MLAdapter.class.getSimpleName(), API_ERROR,
+                    "missing ml-config entity definitions!");
+        }
+
         Map<String, EntityDefinition> result = new HashMap<String, EntityDefinition>();
 
         for (String entityDev : entityDevList) {

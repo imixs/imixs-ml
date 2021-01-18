@@ -14,6 +14,11 @@ For each ml framework a separate Adapter Service implementing the Imixs-ML Core 
 
 For example the [Imixs-ML-spaCy](../imixs-ml-spacy/README.md) module provides a wrapper service for the [spaCy](https://spacy.io/) ml framework written in Python. 
 
+A adapter service must implement the following endpoints:
+
+ - **POST: /analyse/{model}** - send a text to be analysed by a specific model
+ - **POST: /training/{model}** - send a training dataset to train a specific model
+
 
 ## POST a TrainingData Object
 
@@ -83,7 +88,7 @@ An AnaylseData object has the following JSON structure:
 To delete a model remotely you can call a DELETE request to the API resource *model/*
 
 	DELETE
-	/modeo/{model}
+	/{model}
 
 ## The ML-Client
 
