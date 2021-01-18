@@ -17,6 +17,7 @@
 		<org.imixs.workflow.version>5.2.7</org.imixs.workflow.version>
 		<org.imixs.melman.version>1.0.19</org.imixs.melman.version>
 		<org.imixs.archive.version>2.2.8</org.imixs.archive.version>
+		<jakarta.version>8.0</jakarta.version>
 		<microprofile.version>2.2</microprofile.version>
 	</properties>
 	
@@ -65,9 +66,20 @@
 		</license>
 	</licenses>
 
+	<!-- Distributen Management oss.sonatype.org -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<build>
 		<plugins>
-		
 			<!-- release management -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -240,11 +252,12 @@
 	</dependencyManagement>
 
 	<dependencies>
-		<!-- JEE Dependencies -->
+	
+		<!-- Jakarta EE -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
-			<version>8.0</version>
+			<version>${jakarta.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -288,17 +301,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<!-- Distributen Management oss.sonatype.org -->
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 </project>

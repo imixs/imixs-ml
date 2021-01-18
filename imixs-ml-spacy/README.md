@@ -36,16 +36,18 @@ To test the image run the container in an interactive mode:
 
 ### The Model
 
-The default model for the service is set to *imixs-model*. You can of course overwrite the path to provide you own one:
+The default model path for the service is set to *models/*. You can of course overwrite the path to provide you own one:
 
 	$ docker run --rm --name="imixs-ml-spacy" -it \
-	  -e MODEL_PATH="my-model" \
+	  -e MODEL_PATH="my-models" \
 	  -p 8000:8000 \
 	  imixs/imixs-ml-spacy
 
+Each rest API resource expects the name of the model as a parameter. Together with the MODEL_PATH this is the location of the spacy model. 
+
 ### Language Support
 
-The spaCy API provides different language models. The model language is set by ISO code of the language class to load. The default value is *en*. You can overwrite the model by setting the environment variable *MODEL_LANGUAGE*
+The spaCy API provides different language models. The model language is set by ISO code of the language class to load. The default value is *en*. You can overwrite the model language by setting the environment variable *MODEL_LANGUAGE*
 
 	$ docker run --rm --name="imixs-ml-spacy" -it \
 	  -e MODEL_LANGUAGE="de" \
