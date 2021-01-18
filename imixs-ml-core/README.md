@@ -15,11 +15,14 @@ For each ml framework a separate Adapter Service implementing the Imixs-ML Core 
 For example the [Imixs-ML-spaCy](../imixs-ml-spacy/README.md) module provides a wrapper service for the [spaCy](https://spacy.io/) ml framework written in Python. 
 
 
-## The TrainingData Object
+## POST a TrainingData Object
 
-To train a ml-model an array of TraingData objects can be sent to the API resource 
+To train a ml-model an array of TraingData objects can be POST to the API resource */training/*
 
-	/training/
+	POST
+	/training/{model}
+
+The model name is mandatory and specifies the name of the model to be trained. 
 
 A training data object array is defined by the following JSON structure:
 
@@ -59,11 +62,14 @@ Each Training Data object contains a *text* and a list of *entity* objects. A si
   
 
 
-## The AnalyseData Object
+## POST a AnalyseData Object
 
-To analyse a text based on a ml-model a AnalyseData object can be send to the API resource 
+To analyse a text based on a ml-model a AnalyseData object can be POST to the API resource *analyse/*
 
-	/analyse/
+	POST
+	/analyse/{model}
+
+The model name is mandatory and specifies the name of the model to be used for analyse. 
 
 An AnaylseData object has the following JSON structure:
 
@@ -72,7 +78,12 @@ An AnaylseData object has the following JSON structure:
 	}
 
 
+## Delete Model
 
+To delete a model remotely you can call a DELETE request to the API resource *model/*
+
+	DELETE
+	/modeo/{model}
 
 ## The ML-Client
 
@@ -88,7 +99,7 @@ The ML-CLient is a Rest Service Client based on Jax-rs to access an ml framework
 
 # The EntityAdapter
 
-The EntityAdapter can be used to  adapt an entity with alternative fromating values.  This adapter is useful if a string constant can ocure in different formats like a currency. For example the float value 1500.00 can have different presentations in a textfragment:
+The EntityAdapter can be used to  adapt an entity with alternative formating values.  This adapter is useful if a string constant can occur in different formats like a currency. For example the float value 1500.00 can have different presentations in a text fragment:
 
 
 	1500.00

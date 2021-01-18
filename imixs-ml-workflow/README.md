@@ -1,28 +1,36 @@
 # Imixs-ML Workflow
 
-The Imixs-ML Workflow module provides Adapter classes and CDI Beans to integrate machine learning into the workflow processing life cycle.
+The Imixs-ML Workflow module provides Adapter classes, CDI Beans and Service EJBs to integrate the Imixs machine learning framework into the workflow processing life cycle.
 
-The Adapter class 'MLAdapter' is used for *Natural language processing (NLP)* within the processing life cycle on a workflow instance. The adapter can analyse the text of documents and extract relevant business data for a running business process. 
+ - **ML-Adapter**<br/>The Workflow Adapter class 'MLAdapter' is used for *Natural language processing (NLP)* within the processing life cycle on a workflow instance. The adapter can analyse the text of documents and extract relevant business data for a running business process. This includes entity recognition and text classification.  <br/>
 
-The CDI bean 'MLController' is used for user interaction like data input, data verification and data confirmation. 
+ - **ML-Controler** <br/> The CDI bean 'MLController' is used for user interaction like data input, data verification and data confirmation.   <br/>
 
+ - **ML-TrainingScheduler** <br/>The MLTrainingScheduler is a timer service sending training data to a ML Service endpoint.   <br/>
 
 ## The MLAdapter
 
-The adapter 'org.imixs.ml.workflow.MLAdapter' is used for ml analysis against a ML Service endpoint. The MLAdaper automatically analyses the text content of all attached documents, and stores entities found in the text into corresponding items.  
+The adapter *'org.imixs.ml.workflow.MLAdapter'* is used for ml analysis against a ML Service endpoint. The MLAdaper automatically analyses the text content of all attached documents, and stores entities and categories found in the text into corresponding items.  
 
 ### Configuration by Properties
 
-The MLAdapter can be configured by the imixs.properties  '*ml.service.endpoint*' and '*ml.locales*' 
+The MLAdapter can be configured by the following imixs.properties 
 
-	ml.service.endpoint=http://imixs-ml-spacy:8000/analyse/
-	ml.locales=de_DE,en_GB
+ - *ml.service.endpoint* - defines the serivce endpoint of tha machine learning framework based on the Imixs-ML-Core API
+ - *ml.model* - the default model name to be used
+ - *ml.locales* list of supported language locales
 
-Optional the parameters can be set by the environment variables *ML_SERVICE_ENDPOINT* and *ML_LOCALES*.
+The parameters can be set in the imixs.properties or as environment variables:
+
+	ML_SERVICE_ENDPOINT=http://imixs-ml-spacy:8000/
+	ML_MODEL=invoice-model-1.0.0
+	ML_LOCALES=de_DE,en_GB
+
+All these parameters can be overwritten by the model.
 
 ### Configuration by the Model
 
-The MLAdapter can be optional be configured through the model by defining a workflow result item named '*ml.config*'.
+The MLAdapter can also be configured through the model by defining a workflow result item named '*ml-config*'.
 
 <img src="ml-model-configuration.png" />
 
@@ -31,22 +39,25 @@ See the following example:
 	<ml-config name="endpoint">
 	    https://localhost:8111/api/resource/
 	</ml-config>
+	<ml-config name="model">invoice-model-1.0.0</ml-config>
 	<ml-config name="locales">de_DE,en_GB</ml-config>
 
 
+### Item Mapping
+
 Per default the MLAdapter takes all entities into the current workitem if an item with the name did not yet exist. 
 To configure the behavior of the entity adaption in a more fine grained way, optional configuration via the workflow
- model is possible with the item 'ml.entity':
+ model is possible with the item 'ml-entity':
 
-	<ml-entity>
+	<ml-config name="entity">
 	    <name>_invoicetotal</name>
 	    <type>currency</type>
-	</ml-entity>
-	<ml-entity>
+	</ml-config>
+	<ml-config name="entity">
 	    <name>_cdtr_bic</name>
 	    <type>text</type>
 	    <mapping>bic</mapping>
-	</ml-entity>
+	</ml-config>
 	
 
 In this example the entity '_invoicetotal' will be adapted by the Currency Adapter. 
@@ -55,11 +66,19 @@ The entity '_cdtr_bic' will be mapped into the item 'bic'.
 
 ### Named Entity Recognition (NER)
 
-The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER). The results will automatically stored into the current process instance. 
+The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER) and text classification. The results will automatically stored into the current process instance. 
 
-The ML Adapter creates a field 'ml.items' with all item names which are part of the NER.
-This means even if an entity was not found in the document content, but was configured by the bpmn model, the entity name will
-be part of 'ml.items'. With this mechanism, as new entity can later be trained even if the entiy is yet not part of the model.
+The ML Adapter creates the following items
+
+ - *ml.items* - all item names which are part of the NER.
+ - *ml.categories* - all categories from the text classification
+ 
+
+ 
+**Note:** Even if an entity was not found in the document content, but was configured by the bpmn model, the entity name will
+be part of 'ml.items'. With this mechanism, as new entity can later be trained even if the entity is yet not part of the model.
+
+*ml.categories* are optional and will only be provided if text classification was trained before.
 
 ## The MLService
 
