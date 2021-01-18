@@ -3,6 +3,8 @@ FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
+
+RUN pip install -U pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # download a model

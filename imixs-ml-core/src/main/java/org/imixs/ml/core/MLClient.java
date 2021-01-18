@@ -59,7 +59,7 @@ public class MLClient {
     public MLClient(String serviceEndpoint) {
         super();
         // the service endpoint must not end with a /
-        if (!serviceEndpoint.endsWith("/")) {
+        if (serviceEndpoint.endsWith("/")) {
             serviceEndpoint = serviceEndpoint.substring(0, serviceEndpoint.length() - 1);
         }
         this.serviceEndpoint = serviceEndpoint;

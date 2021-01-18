@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.faces.data.WorkflowController;
 
 /**
@@ -25,7 +26,6 @@ import org.imixs.workflow.faces.data.WorkflowController;
  *
  */
 @Named("mlController")
-//@RequestScoped
 @ConversationScoped
 public class MLController implements Serializable {
 
@@ -51,8 +51,12 @@ public class MLController implements Serializable {
     public boolean isMLItem(String name) {
 
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMS);
-            return mlItems.contains(name);
+            // iterate over all mlDefinitions 
+            List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
+            for (ItemCollection mlDefinition : mlDefinitionList) {
+                List<String> mlItems = mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS);
+                return mlItems.contains(name);
+            }
         }
         return false;
     }
@@ -84,13 +88,22 @@ public class MLController implements Serializable {
     @SuppressWarnings("unchecked")
     public String getMLResult() {
         String result = "{";
-
+        String status=MLService.ML_STATUS_CONFIRMED;
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems = workflowController.getWorkitem().getItemValue(MLService.ITEM_ML_ITEMS);
+            List<String> mlItems =new ArrayList<String>();
 
+            // iterate over all mlDefinitions.
+            List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
+            for (ItemCollection mlDefinition : mlDefinitionList) {
+                mlItems.addAll(mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS));
+                if (MLService.ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(MLService.ITEM_ML_STATUS))) {
+                    status=MLService.ML_STATUS_SUGGEST;
+                }
+            }
+            
             // set status
             result = result + "\"status\":\""
-                    + workflowController.getWorkitem().getItemValueString(MLService.ITEM_ML_STATUS) + "\"";
+                    + status + "\"";
 
             if (mlItems != null && mlItems.size() > 0) {
                 result = result + ",\"items\":";

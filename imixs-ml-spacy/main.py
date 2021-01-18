@@ -34,7 +34,7 @@ print("")
 
 
 @app.post("/training/{model}")
-def extract_entities(trainngdata: List[datamodel.TrainingData]):
+def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
     # print(">>START trainingdata/")
     prdnlp = datatrain.updateModel(trainngdata, modelpath+model)
     # print(">>STOP trainingdata/")
@@ -42,7 +42,7 @@ def extract_entities(trainngdata: List[datamodel.TrainingData]):
 
 
 @app.post("/training-iterations/{model}")
-def extract_entities(trainngdata: List[datamodel.TrainingData]):
+def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
     # print(">>START training-single-mode/")
     prdnlp = datatrain.updateModelWithInteration(trainngdata, 10, modelpath+model)
     # print(">>STOP training-single-mode/")
@@ -62,7 +62,7 @@ def train(model: str, analyseData: datamodel.AnalyseData):
 # Clean the model 
 #
 @app.delete("/{model}")
-def clean():
+def clean(model: str):
     try:
         # try if this is a valid directory path
         shutil.rmtree(modelpath+model)

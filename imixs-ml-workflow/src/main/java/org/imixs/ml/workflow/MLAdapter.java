@@ -240,7 +240,7 @@ public class MLAdapter implements SignalAdapter {
                 mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
                 mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
                 mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
-                mlService.updateEndpointDefinitions(document, mlDefinition);
+                mlService.updateMLDefinition(document, mlDefinition);
 
             }
 

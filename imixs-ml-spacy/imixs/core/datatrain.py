@@ -12,7 +12,7 @@ existing model.
 
 
 @author: ralph.soika@imixs.com
-@version:  1.0
+@version:  2.0
 """
 
 
@@ -31,8 +31,18 @@ def updateModel(trainingDataSet, modelPath):
     language=os.getenv('MODEL_LANGUAGE', 'en')
     
     # Analyse the data object ......
+    hasEntities = False
+    hasCategories = False
+    restartTraining = False
     
     for _data in trainingDataSet:
+        
+        if (len(_data.entities)>0):
+            hasEntities = True
+        if (len(_data.categories)>0):
+            hasCategories = True
+             
+        
         print("<<=========== TEXT BEGIN ===========>>")
         print(_data.text)
         print("<<=========== TEXT END   ===========>>")
@@ -51,20 +61,30 @@ def updateModel(trainingDataSet, modelPath):
         # print("Loaded model '%s'" % modelPath)
     else:
         nlp = spacy.blank(language)  # create blank Language class
+        restartTraining = True
         # print("Created blank '" +language + "' model")
     
     
-  
-    
     # 2.) set up the pipeline and entity recognizer.
-    if 'ner' not in nlp.pipe_names:
-        # print("we have no ner so we create an empty one...")
-        ner = nlp.create_pipe('ner')
-        nlp.add_pipe(ner)
-    else:
-        # print("we have a ner so we fetch it...")
-        ner = nlp.get_pipe('ner')
+    if hasEntities :
+        if 'ner' not in nlp.pipe_names:
+            # print("we have no ner so we create an empty one...")
+            ner = nlp.create_pipe('ner')
+            nlp.add_pipe(ner)
+            restartTraining = True
+        else:
+            # print("we have a ner so we fetch it...")
+            ner = nlp.get_pipe('ner')
         
+    if hasCategories: 
+        # 2.a) setup pipeline and categories...
+        if 'textcat' not in nlp.pipe_names:
+            #textcat = nlp.create_pipe("textcat", config={"exclusive_classes": False})
+            textcat = nlp.create_pipe("textcat")
+            nlp.add_pipe(textcat) 
+            restartTraining = True
+        else:
+            textcat = nlp.get_pipe("textcat")
         
         
     # 3.) add the labels contained in the trainingDataSet...
@@ -74,24 +94,46 @@ def updateModel(trainingDataSet, modelPath):
             _labelList = ner.labels
             # We only need to add the label if it is not already part of the entityRecognizer
             if _label not in _labelList:
-                print("...adding new label '" + _label + "'...")
+                print("...adding new entity '" + _label + "'...")
                 ner.add_label(_label)
+
+        # add categories
+        for cat in _data.categories:
+            _label = cat.label
+            _labelList = textcat.labels
+            # We only need to add the label if it is not already part of the categories
+            if _label not in _labelList:
+                print("...adding new category '" + _label + "'...")
+                textcat.add_label(_label)
 
       
     # get names of other pipes to disable them during training
-    pipe_exceptions = ["ner", "trf_wordpiecer", "trf_tok2vec"]
+    #pipe_exceptions = ["ner", "textcat", "trf_wordpiecer", "trf_tok2vec"]
+    #pipe_exceptions = ["trf_wordpiecer", "trf_tok2vec"]
+    pipe_exceptions = []
+    if (hasEntities): 
+        pipe_exceptions.append("ner")
+    if (hasCategories): 
+        pipe_exceptions.append("textcat")
+    
+    pipe_exceptions.append("trf_wordpiecer")
+    pipe_exceptions.append("trf_tok2vec")
+    
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe not in pipe_exceptions]
         
-        
-
+    
     lMilis = int(round(time.time() * 1000))
     with nlp.disable_pipes(*other_pipes):  # only train NER
         # reset and initialize the weights randomly – but only if we're
         # training a new model
-        if not modelExists:
+        #if not modelExists:
+        
+        # CHANGE - We always begin a new training because input categories can change...
+        if restartTraining: 
             print("begin new training!")
             nlp.begin_training()
-
+        #nlp.begin_training()
+        
         # Convert the data list to the Spacy Training Data format
         trainingData=datamodel.convertToTrainingData(trainingDataSet)
         

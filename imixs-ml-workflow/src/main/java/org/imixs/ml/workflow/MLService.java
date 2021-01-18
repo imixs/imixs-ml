@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 
 import javax.ejb.LocalBean;
@@ -67,10 +66,7 @@ public class MLService implements Serializable {
 
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
 
-    @Inject
-    @ConfigProperty(name = MLConfig.ML_SERVICE_ENDPOINT)
-    Optional<String> mlAPIEndpoint;
-
+ 
     @Inject
     @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
     String trainingQualityLevel;
@@ -80,9 +76,6 @@ public class MLService implements Serializable {
     @ConfigProperty(name = MLTrainingScheduler.ML_TRAINING_SCHEDULER_ENABLED, defaultValue = "false")
     boolean trainingSchedulerEnabled;
 
-    @Inject
-    @ConfigProperty(name = MLConfig.ML_LOCALES, defaultValue = "de_DE,en_GB")
-    String mlDefaultLocales;
 
     @Inject
     protected Event<EntityObjectEvent> entityObjectEvents;
@@ -119,56 +112,66 @@ public class MLService implements Serializable {
             return;
         }
 
-        if (!mlAPIEndpoint.isPresent() || mlAPIEndpoint.get().isEmpty()) {
-            // ML Module is not present
-            return;
-        }
-
         int eventType = processingEvent.getEventType();
+        
+        List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
+        boolean bUpdateDefinitions=false;
+        for (ItemCollection mlDefinition: mlDefinitionList) {
+        
 
-        // if it was an public event we set the ml.status to 'verified'
-        List<String> mlItems = workitem.getItemValue(ITEM_ML_ITEMS);
-
-        // set initial status?
-        if (ProcessingEvent.AFTER_PROCESS == eventType) {
-            if (mlItems.size() > 0 && workitem.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
-                workitem.setItemValue(ITEM_ML_STATUS, ML_STATUS_SUGGEST);
-                return;
-            }
-        }
-
-        // set confirmed status?
-        if (ProcessingEvent.BEFORE_PROCESS == eventType) {
-            if (mlItems.size() > 0 && ML_STATUS_SUGGEST.equals(workitem.getItemValueString(ITEM_ML_STATUS))) {
-                // test if we have a public event
-                Model model;
-                try {
-                    model = modelService.getModelByWorkitem(workitem);
-                    ItemCollection event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
-                    // ad only activities with userControlled != No
-                    if (!"0".equals(event.getItemValueString("keypublicresult"))) {
-                        // update status
-                        workitem.setItemValue(ITEM_ML_STATUS, ML_STATUS_CONFIRMED);
-                        return;
-                    }
-                } catch (ModelException e) {
-                    logger.warning("unable to parse current bpmn event: " + e.getMessage());
+            // if it was an public event we set the ml.status to 'verified'
+            List<String> mlItems = mlDefinition.getItemValue(ITEM_ML_ITEMS);
+    
+            // set initial status?
+            if (ProcessingEvent.AFTER_PROCESS == eventType) {
+                if (mlItems.size() > 0 && mlDefinition.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
+                    mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_SUGGEST);
+                    bUpdateDefinitions=true;
+                    continue;
                 }
             }
+    
+            // set confirmed status?
+            if (ProcessingEvent.BEFORE_PROCESS == eventType) {
+                if (mlItems.size() > 0 && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
+                    // test if we have a public event
+                    Model model;
+                    try {
+                        model = modelService.getModelByWorkitem(workitem);
+                        ItemCollection event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
+                        // ad only activities with userControlled != No
+                        if (!"0".equals(event.getItemValueString("keypublicresult"))) {
+                            // update status
+                            mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_CONFIRMED);
+                            bUpdateDefinitions=true;
+                            continue;
+                        }
+                    } catch (ModelException e) {
+                        logger.warning("unable to parse current bpmn event: " + e.getMessage());
+                    }
+                }
+            }
+    
+            // set training status?
+            if (ProcessingEvent.AFTER_PROCESS == eventType && trainingSchedulerEnabled
+                    && ML_STATUS_CONFIRMED.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))
+                    && "workitemarchive".equals(workitem.getType())) {
+                // update status...
+                 mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_TRAINING);
+                // ... and create a eventLog entry
+                eventLogService.createEvent(EVENTLOG_TOPIC_TRAINING, workitem.getUniqueID());
+                bUpdateDefinitions=true;
+                continue;
+            }
         }
-
-        // set training status?
-        if (ProcessingEvent.AFTER_PROCESS == eventType && trainingSchedulerEnabled
-                && ML_STATUS_CONFIRMED.equals(workitem.getItemValueString(ITEM_ML_STATUS))
-                && "workitemarchive".equals(workitem.getType())) {
-            // update status...
-            workitem.setItemValue(ITEM_ML_STATUS, ML_STATUS_TRAINING);
-            // ... and create a eventLog entry
-            eventLogService.createEvent(EVENTLOG_TOPIC_TRAINING, workitem.getUniqueID());
+        
+        // update the ml.definitions?
+        if (bUpdateDefinitions) {
+            updateMLDefinitions(processingEvent.getDocument(),mlDefinitionList);
         }
-
     }
 
+    
     /**
      * This method returns a string with all the text content of all documents
      * attached to a workitem.
@@ -209,10 +212,17 @@ public class MLService implements Serializable {
         if (workitem == null) {
             throw new IllegalArgumentException("Invalid workitem uid '" + uid + "!");
         }
+
+        
         // iterate over all ml definitions....
         List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
         for (ItemCollection mlDefinition : mlDefinitionList) {
 
+            String mlStatus = mlDefinition.getItemValueString(ITEM_ML_STATUS);
+            if (!ML_STATUS_TRAINING.equals(mlStatus)) {
+                // skip this definition
+                continue;
+            }
             String mlEndpoint = mlDefinition.getItemValueString(ITEM_ML_ENDPOINT);
             String mlModel = mlDefinition.getItemValueString(ITEM_ML_MODEL);
             String mlLocals = mlDefinition.getItemValueString(ITEM_ML_LOCALES);
@@ -245,14 +255,16 @@ public class MLService implements Serializable {
 
             // post training data...
             mlClient.postTrainingData(trainingData, mlModel);
+           
         }
-
+        
+     
     }
 
     /**
-     * This method updates the item 'ml.endpoints' of a worktiem holding a list of
-     * ML Endpoint definition. Each endpoint definition is defined by a set of items
-     * stored in a map. The Map can be conferted into a ItemCollection
+     * This method updates the item 'ml.definitions' of a workitem holding a list of
+     * ML Endpoint definitions. Each endpoint definition is defined by a set of items
+     * stored in a map. The Map can be converted into a ItemCollection
      * <p>
      * If a endpoint definition with the same service endpoint and model name
      * already exists, the method overwrites this entry.
@@ -262,17 +274,17 @@ public class MLService implements Serializable {
      * @param newEndpointDefinition - the new Endpoint definition to be stored.
      */
     @SuppressWarnings("unchecked")
-    public void updateEndpointDefinitions(ItemCollection workitem, ItemCollection newMLDefinition) {
+    public void updateMLDefinition(ItemCollection workitem, ItemCollection newMLDefinition) {
 
         if (!newMLDefinition.hasItem(ITEM_ML_ENDPOINT) || !newMLDefinition.hasItem(ITEM_ML_MODEL)) {
             throw new IllegalArgumentException("A ml definition must contain a least a ml.endpoint and a ml.model!");
         }
 
-        List<Map<String, List<Object>>> mlServiceEndpoints = workitem.getItemValue(MLService.ITEM_ML_DEFINITIONS);
+        List<Map<String, List<Object>>> mlDefinitionList = workitem.getItemValue(MLService.ITEM_ML_DEFINITIONS);
 
         // test if the list already have a definition for the current endpoint/model and
         // remove it....
-        Iterator<Map<String, List<Object>>> iter = mlServiceEndpoints.iterator();
+        Iterator<Map<String, List<Object>>> iter = mlDefinitionList.iterator();
         while (iter.hasNext()) {
             ItemCollection aEndpointDev = new ItemCollection(iter.next());
             // do we have already
@@ -285,8 +297,11 @@ public class MLService implements Serializable {
         }
 
         // now we add the new definition
-        mlServiceEndpoints.add(newMLDefinition.getAllItems());
+        mlDefinitionList.add(newMLDefinition.getAllItems());
 
+        // update the ml.definitions..
+        workitem.setItemValue(MLService.ITEM_ML_DEFINITIONS,mlDefinitionList);
+        
     }
 
     /**
@@ -304,6 +319,20 @@ public class MLService implements Serializable {
             result.add(new ItemCollection(aDef));
         }
         return result;
+    }
+
+
+    /**
+     * This helper method converts a list of ItemCollections into a map and updates the ML.definitions item. 
+     * @param workitem
+     * @param mlDefinitionList
+     */
+    private void updateMLDefinitions(ItemCollection workitem, List<ItemCollection> mlDefinitionList) {
+        List<Map<String, List<Object>>> newDefinitionList = new ArrayList<Map<String, List<Object>>>();
+        for (ItemCollection mlDefinition: mlDefinitionList) {
+            newDefinitionList.add(mlDefinition.getAllItems());
+        }
+        workitem.setItemValue(MLService.ITEM_ML_DEFINITIONS,newDefinitionList);
     }
 
 }

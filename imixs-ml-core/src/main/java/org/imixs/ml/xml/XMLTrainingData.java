@@ -65,11 +65,14 @@ public class XMLTrainingData implements Serializable {
 
     private String text;
     private List<XMLTrainingEntity> entities;
+    private List<XMLTrainingCategory> categories;
 
     public XMLTrainingData() {
         super();
         // init entities
         entities = new ArrayList<XMLTrainingEntity>();
+        // init categories
+        categories = new ArrayList<XMLTrainingCategory>();
     }
 
     public String getText() {
@@ -90,7 +93,15 @@ public class XMLTrainingData implements Serializable {
 
     public void setEntities(List<XMLTrainingEntity> entities) {
         this.entities = entities;
+    }
 
+    
+    public List<XMLTrainingCategory> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<XMLTrainingCategory> categories) {
+        this.categories = categories;
     }
 
     public void addTrainingEntity(XMLTrainingEntity trainingEntity) {

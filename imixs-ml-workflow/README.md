@@ -106,28 +106,29 @@ A client implementation can store additional data into ml.definition
 
 ## The MLService
 
-The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status for each ml.definition. If no ml.status item  exists, and ml.items is not empty, than the status is set to 'suggest'. If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
+The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status for each ml.definition of a workitem. 
  
- The item '*ml.status*' has one of the following options:
+The '*ml.status*' of a single mlDefinition can have one of the following values:
 
  - suggest - not yet confirmed by the user
  - confirmed - confirmed by the user
  - training - workitem is ready for a training
 
+If no ml.status item  exists, and ml.items is not empty, than the status of the mlDefintion is set to 'suggest'. 
 
-The status 'training' indicates that all known entities are filled with data found in the document content. This means that this worktiem can be used for later training. See the 'ML TrainingScheduler'.
+If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
 
+If the status is 'confirmed' and the workitem type is 'workitemarchive' than the status is set to 'training'. This status indicates that all known entities of a mlDefinition are filled with data found in the document content. This means that this workitem can be used for later training. The MLService creats the eventlog entry 'ml.training' for this workitem. See the 'ML TrainingScheduler'.
 
 
 ## ML Training Scheduler
 
-If the ml status of a workitem was already confirmed and the workitem type is 'archive', than the MLService set the ml status to 'training' and a eventLog entry is created to indicate that this workitem can be send to the training service. 
+The service MLTrainingScheduler is an EJB Timer Service sending the collected training data of a workitem to the ML training service.
+The service reacts on the  eventlog entry 'ml.training'. If this event log topic was fired, the service verifies the status of all mlDefinitions stored in the corresponding workitem.
+
+If the ml status of a mlDefinition is 'training' then the workitem data is used for training againsed the corresponding ml service endpoint.
 
 **Note:** the training service can reject the workitem for training if the data is of an insufficient quality.
-
-The service MLTrainingScheduler is an EJB Timer Service sending the collected training data of a workitem to the ML training service. A workitem is ready for training, if all entity values are confirmed by the user. This in indicated by the status 'training' stored n the item 'ml.status'. 
-
-The training data will be send to all models defined in the item 'ml.models'. This Item holds a list of model names computed by the MLAdatper class.
 
 The training service can be configured by the following configuration parameters:
 
@@ -155,9 +156,7 @@ It is possible to force the training quality level "FULL" with the environment '
 	ML_TRAINING_QUALITYLEVEL=FULL
 
 
-
 **Note:** If a workitem provide no value for a item, but the corresponding text is part of the text, this may lead to a decrease of the overall ml model quality. 
-
 
 
 
