@@ -15,7 +15,7 @@ if __name__ == "__main__":
     
     modelfile = "training_model"
     # create training objects
-    l=[]
+    training_data=[]
     
    
     
@@ -60,12 +60,12 @@ if __name__ == "__main__":
                 _c=datamodel.Category(label=c[0],included=c[1])
                 _d.categories.append(_c)
             
-        l.append(_d)
+        training_data.append(_d)
         
 
     
     # update model
-    prdnlp = datatrain.updateModel(l,modelfile)
+    prdnlp = datatrain.updateModel(training_data,modelfile)
    
     
     print("------------finished--------------------")

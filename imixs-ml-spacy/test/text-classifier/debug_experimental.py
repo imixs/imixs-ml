@@ -87,9 +87,10 @@ def train(train_data,iterations,modelPath):
       textcat = nlp.get_pipe("textcat")
 
 
-    for i in LABEL:
-        print("...adding new label '" + i + "'...")
-        textcat.add_label(i)   # Add new  labels to the categorizer
+    for i in LABEL:        
+        if i not in textcat.labels:
+            print("...adding new label '" + i + "'...")  
+            textcat.add_label(i)   # Add new  labels to the categorizer
 
     
 

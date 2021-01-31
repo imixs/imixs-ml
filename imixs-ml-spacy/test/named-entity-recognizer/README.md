@@ -1,3 +1,3 @@
-# Testing Text Classifier
+# Testing Entity Recognition
 
-This folder contains different test scripts for text cassification.
+This folder contains different test scripts for entity recognition. 
