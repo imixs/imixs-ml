@@ -14,14 +14,16 @@ The goal of this test program is to demonstrate the usage of the training data m
 if __name__ == "__main__":
     
     modelfile = "training_model"
+                
+    # Test your text
+    test_text = input("Enter your testing text: ")
     
-    #text = "what is the price of 30,99"
-    
-    dinges=datamodel.AnalyseData
-    dinges.text="what is the price of 30,99"
-    
-    result=datatrain.analyseText(dinges,modelfile)
+    anlyseData=datamodel.AnalyseData
+    anlyseData.text=test_text
+    doc=datatrain.analyseText(anlyseData,modelfile)
 
 
-    print("result=" , result)
+    print("result=" , doc)
+    
+   
    
