@@ -104,8 +104,7 @@ public class TrainingDataBuilder {
                         }
                     }
                 } else {
-                    // to traing entites for this workitem value were found
-                    // so the quality level is bad!
+                    // no matching value was found for this entity, so the quality level is bad!
                     trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
                 }
 
@@ -118,6 +117,12 @@ public class TrainingDataBuilder {
             }
         }
 
+        // if the trainingData contains no entities set quality to TRAININGDATA_QUALITY_LEVEL_BAD
+        if (trainingData.getEntities().size()==0) {
+            // no training entities for this workitem value were found
+            trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
+        }
+        
         return trainingData;
     }
 
