@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.imixs.workflow</groupId>
 		<artifactId>imixs-ml</artifactId>
-		<version>1.0.2</version>
+		<version>1.0.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>imixs-ml-core</artifactId>
 	<name>Imixs-ML Core API</name>
