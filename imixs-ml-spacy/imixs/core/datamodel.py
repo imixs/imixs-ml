@@ -5,7 +5,7 @@ A data object consists of a text and a list of entity definitions and categories
 The data object is needed to support the data structure for the Rest API based on the pydantic BaseModel 
 
 
-@author: ralph.soika@imixs.com
+@author: ralph.soika@imixs.com 
 @version:  2.0 
 """
 # An Entity class defines a Entity object with its name and its position in the data objects text.
@@ -66,8 +66,8 @@ def convertToTrainingData(dataList):
         
         # create a dictionary with the entity list. 
         #dict = {"entities" : entList, }
-        dict = {"entities" : entList, "cats" : catList }
-        result.append((_data.text, dict))
+        dict_tmp = {"entities" : entList, "cats" : catList }
+        result.append((_data.text, dict_tmp))
     # now we have the traing data structure
     return result
     

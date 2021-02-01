@@ -21,9 +21,12 @@ if __name__ == "__main__":
     
    
     
-    TRAIN_DATA = [('what is the price of 11,00', {'entities': [(21, 26, 'iban')] , 'cats': [('invoice', True)]}), 
+    TRAIN_DATA = [
+              ('what is the price of 11,00', {'entities': [(21, 26, 'iban')]}), 
+              #('what is the price of 11,00', {'entities': [(21, 26, 'iban')] , 'cats': [('invoice', True)]}), 
               ('what is the price of 12,50', {'entities': [(21, 26, 'iban')]}), 
-              ('what is the price of 20000,00', {'entities': [(21, 29, 'iban')] , 'cats': [('biginvoice', True)]}), 
+              ('what is the price of 20000,00', {'entities': [(21, 29, 'iban')]}), 
+              #('what is the price of 20000,00', {'entities': [(21, 29, 'iban')] , 'cats': [('biginvoice', True)]}), 
               #('what is the price of 20000,00', {'entities': [(21, 29, 'iban')]}), 
               ('what is the price of 10120,00', {'entities': [(21, 29, 'iban')]}), 
               ('what is the price of 333,00', {'entities': [(21, 27, 'iban')]}), 
@@ -89,7 +92,7 @@ if __name__ == "__main__":
         print(label, score)
 
 
-
+    print("Finished ==")
 
 
 

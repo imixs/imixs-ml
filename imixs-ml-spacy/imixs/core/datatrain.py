@@ -12,11 +12,24 @@ existing model.
 #      
 
 import os
-import random
-import time
-
+#import random 
+#import time
+#from typing import Callable, Iterable, Iterator, List
 import spacy
-#from spacy.util import minibatch, compounding
+#
+#from spacy.language import Language
+#from spacy.tokens import Doc
+#from spacy.training import Example
+import random
+
+from spacy.util import minibatch, compounding
+#from spacy.tokens import Doc
+#from spacy import Language
+#from spacy import Example 
+
+
+#from spacy.tokens import Doc 
+from spacy.training import Example
 
 from imixs.core import datamodel
 
@@ -52,7 +65,7 @@ def updateModel(trainingDataSet, modelPath):
     # Test if the model exists
     modelExists=os.path.isdir(modelPath)
     
-     # 1.) load model or create blank Language class
+    # 1.) load model or create blank Language class 
     """Load the model, set up the pipeline and train the entity recognizer."""
     if modelExists:
         nlp = spacy.load(modelPath)  # load existing spaCy model
@@ -107,38 +120,65 @@ def updateModel(trainingDataSet, modelPath):
     # get names of other pipes to disable them during training
     #pipe_exceptions = ["ner", "textcat", "trf_wordpiecer", "trf_tok2vec"]
     #pipe_exceptions = ["trf_wordpiecer", "trf_tok2vec"]
-    pipe_exceptions = []
-    if (hasEntities): 
-        pipe_exceptions.append("ner")
-    if (hasCategories): 
-        pipe_exceptions.append("textcat")
+    #pipe_exceptions = []
+    #if (hasEntities): 
+    #    pipe_exceptions.append("ner")
+    #if (hasCategories): 
+    #    pipe_exceptions.append("textcat")
     
-    pipe_exceptions.append("trf_wordpiecer")
-    pipe_exceptions.append("trf_tok2vec")
+    #pipe_exceptions.append("trf_wordpiecer")
+    #pipe_exceptions.append("trf_tok2vec")
     
-    other_pipes = [pipe for pipe in nlp.pipe_names if pipe not in pipe_exceptions]
+    #other_pipes = [pipe for pipe in nlp.pipe_names if pipe not in pipe_exceptions]
         
     
-    lMilis = int(round(time.time() * 1000))
-    with nlp.disable_pipes(*other_pipes):  # only train NER
+    #lMilis = int(round(time.time() * 1000))
+    #with nlp.disable_pipes(*other_pipes):  # only train NER
         # reset and initialize the weights randomly – but only if we're
         # training a new model
         #if not modelExists:
         
         # CHANGE - We always begin a new training because input categories can change...
-        if restartTraining: 
-            print("begin new training!")
-            nlp.begin_training()
-        #nlp.begin_training()
+    if restartTraining: 
+        print("begin new training!")
+        nlp.begin_training()
+    #nlp.begin_training()
+    
+    # Convert the data list to the Spacy Training Data format
+    trainingData=datamodel.convertToTrainingData(trainingDataSet)
+    
+    
+    # new api 3.0  - see: https://spacy.io/usage/v3
+    examples = []
+    for text, annots in trainingData:
+        print("text=", text)
+        print("annots=", annots)
+        examples.append(Example.from_dict(nlp.make_doc(text), annots))
+    #nlp.initialize(lambda: examples)
+    
+    optimizer = nlp.initialize()
+    #losses = ner.update(examples, sgd=optimizer)
+    
+    #nlp.update(examples)
+    #losses = nlp.update(examples, sgd=optimizer)
+    
+    
+    print("we need to clarify if we need minibatch!")
+    for i in range(20):
+        random.shuffle(examples)
+        for batch in minibatch(examples, size=8):
+            #nlp.update(examples)
+            losses = nlp.update(examples, sgd=optimizer)
         
-        # Convert the data list to the Spacy Training Data format
-        trainingData=datamodel.convertToTrainingData(trainingDataSet)
+            print("losses",losses)
+    
+    
         
-        losses = {}
-        for text, annotations in trainingData:
-            #nlp.update([text], [annotations], drop=0.5,losses=losses)
-            nlp.update([text], [annotations],losses=losses)
-            print("Losses", losses)
+        #losses = {}
+        #for text, annotations in trainingData:
+        #    #nlp.update([text], [annotations], drop=0.5,losses=losses)
+        #    nlp.update([text], [annotations],losses=losses)
+        #    print("Losses", losses)
         
       
     # print("total time = "+str(int(round(time.time() * 1000))-lMilis) + "ms  ")        

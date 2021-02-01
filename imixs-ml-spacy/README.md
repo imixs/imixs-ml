@@ -124,7 +124,9 @@ To verifiy the installed versions run
 ## Eclipse Setup
 
 If you use the [Eclipse Plugin Pydev](https://www.pydev.org/) (which is recommended) make sure you added the spacy lib folder.
-In the properties for your pydev project, there's a pane called "PyDev - PYTHONPATH", with a sub-pane called "External Libraries". You can add source folders to the path using that pane. Your project code will then be able to import modules from those source folders. For spacy this may be the folder _~/.local/lib/python3.7/site-packages/spacy_
+In the properties for your pydev project, there's a pane called "PyDev - PYTHONPATH", with a sub-pane called "External Libraries". You can add source folders to the path using that pane. Your project code will then be able to import modules from those source folders. For spacy this should be the folder 
+
+	~/.local/lib/python3.7/site-packages/spacy
 
 # Docker Hub
 
