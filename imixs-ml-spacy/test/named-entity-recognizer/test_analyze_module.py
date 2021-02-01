@@ -1,7 +1,12 @@
 import sys 
-sys.path.append('../..')
 
 from imixs.core import datamodel, datatrain
+
+sys.path.append('../..')
+
+
+#sys.path.append('../..')
+
 
 
 """

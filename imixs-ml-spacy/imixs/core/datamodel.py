@@ -1,6 +1,3 @@
-from typing import List
-from pydantic import BaseModel
-
 """
 The datamodel defines the Data class used for training data
 A data object consists of a text and a list of entity definitions and categories. 
@@ -9,11 +6,15 @@ The data object is needed to support the data structure for the Rest API based o
 
 
 @author: ralph.soika@imixs.com
-@version:  2.0
+@version:  2.0 
 """
-
-
 # An Entity class defines a Entity object with its name and its position in the data objects text.
+
+from typing import List
+
+from pydantic import BaseModel
+
+
 class Entity(BaseModel):
     label: str
     start: int

@@ -106,7 +106,19 @@ To install pip3 on debian run:
 	
 Next you can import the spacy and fastapi dependencys
 
-	$ pip3 install -r requirements.txt
+	$ pip3 install --no-cache-dir -r requirements.txt
+
+To verifiy the installed versions run
+
+	$ pip3 list
+
+
+**Note:** for testing with the nigly build pre release 3.0 of spacy run:
+
+	$ pip3 install spacy-nightly --pre
+	$ pip3 install -U pip setuptools wheel
+	$ pip3 install -U spacy-nightly --pre
+	$ python3 -m spacy download en_core_web_sm
 
 
 ## Eclipse Setup

@@ -1,14 +1,15 @@
+from builtins import str
 import os
-import spacy
 import random
 import shutil
+from typing import List
 
 from fastapi import FastAPI
-from spacy.util import minibatch, compounding
-from imixs.core import datamodel, datatrain
-from typing import List
 from pydantic import BaseModel
-from builtins import str
+import spacy
+from spacy.util import minibatch, compounding
+
+from imixs.core import datamodel, datatrain
 
 
 app = FastAPI()

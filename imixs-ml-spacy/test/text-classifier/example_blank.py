@@ -1,7 +1,10 @@
+import random
+
 from pydantic import BaseModel
 import spacy
-import random
 from spacy.util import minibatch, compounding
+
+
 #
 # The goal of this test program is to figure out 
 # how we can provide learning data to an empty 
@@ -10,8 +13,6 @@ from spacy.util import minibatch, compounding
 #
 #
 #
-
-
 class Data(BaseModel):
     text: str 
 
