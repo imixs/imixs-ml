@@ -21,7 +21,7 @@ data will be provided in a random way.
 if __name__ == "__main__":
     
     # the test model
-    modelfile = "training_model"
+    modelfile = "models/training_model_invoice"
     
     
     # create training objects
