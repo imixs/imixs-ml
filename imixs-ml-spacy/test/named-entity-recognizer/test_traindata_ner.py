@@ -80,18 +80,12 @@ if __name__ == "__main__":
     print("------------start training--------------------")
     for i in range(10):
         print(" ")
-        print(i,". run....")
+        print(i+1,". run....")
         
         random.shuffle(training_data)
         prdnlp = datatrain.updateModel(training_data,modelfile)
-        
-    # update model
-    #prdnlp = datatrain.updateModel(training_data,modelfile)
-   
     
     print("------------training finished--------------------")
-                
-                
                 
     # Test your text
     test_text = input("Enter your text to be analyzed: ")
