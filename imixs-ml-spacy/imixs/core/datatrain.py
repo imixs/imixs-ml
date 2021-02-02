@@ -2,38 +2,35 @@
 This module provides methods to train a model or to analyse text on an 
 existing model. 
 
+The method 'updateModel expects a training datamodel. The implementation is based on 
+the concept of 'supervised training'. Typically the method expects only one training document,
+but also a list of training objects will be processed.
+
 
 @author: ralph.soika@imixs.com
 @version:  2.0
 """
-#
-# This method expects a single training data set and updates the given model.
-# If no model exists the method will create a new one
-#      
+    
 
 import os
-#import random 
-#import time
-#from typing import Callable, Iterable, Iterator, List
 import spacy
-#
-#from spacy.language import Language
-#from spacy.tokens import Doc
-#from spacy.training import Example
-import random
-
-from spacy.util import minibatch, compounding
-#from spacy.tokens import Doc
-#from spacy import Language
-#from spacy import Example 
-
-
-#from spacy.tokens import Doc 
 from spacy.training import Example
-
 from imixs.core import datamodel
 
+#import random
+#from spacy.util import minibatch, compounding
+#from spacy.tokens import Doc 
 
+
+
+"""
+ This method 'updateModel' expects a training data set containing one or many training objects.
+ The method updates the given model.  If no model exists the method will create a new one.
+ 
+ The method did not use the minibatch algorithm provided by spacy because the assumption is that 
+ only one document is trained in a 'supervised training mode' on each call.
+ 
+""" 
 def updateModel(trainingDataSet, modelPath):
     
     print("updateModel....")
@@ -54,12 +51,12 @@ def updateModel(trainingDataSet, modelPath):
             hasCategories = True
              
         
-        print("<<=========== TEXT BEGIN ===========>>")
-        print(_data.text)
-        print("<<=========== TEXT END   ===========>>")
-        for entity in _data.entities:
-            ausschnitt=_data.text[entity.start:entity.stop]
-            print("entities  ==>>  "+entity.label + "=" + ausschnitt + " ("+ str(entity.start) + "," + str(entity.stop) + ")")
+        #print("<<=========== TEXT BEGIN ===========>>")
+        #print(_data.text)
+        #print("<<=========== TEXT END   ===========>>")
+        #for entity in _data.entities:
+        #    ausschnitt=_data.text[entity.start:entity.stop]
+        #    print("entities  ==>>  "+entity.label + "=" + ausschnitt + " ("+ str(entity.start) + "," + str(entity.stop) + ")")
         
     
     # Test if the model exists
@@ -79,21 +76,21 @@ def updateModel(trainingDataSet, modelPath):
     # 2.) set up the pipeline and entity recognizer.
     if hasEntities :
         if 'ner' not in nlp.pipe_names:
-            # print("we have no ner so we create an empty one...")
-            #ner = nlp.create_pipe('ner')
+            print("...adding new pipe 'ner'...")
             ner = nlp.add_pipe('ner')
             restartTraining = True
         else:
-            # print("we have a ner so we fetch it...")
+            # the pipe 'ner' already exists 
             ner = nlp.get_pipe('ner')
         
     if hasCategories: 
         # 2.a) setup pipeline and categories...
         if 'textcat' not in nlp.pipe_names:
-            #textcat = nlp.create_pipe("textcat", config={"exclusive_classes": False})
+            print("...adding new pipe 'textcat'...")
             textcat = nlp.add_pipe("textcat")
             restartTraining = True
         else:
+            # the pipe 'textcat' already exists
             textcat = nlp.get_pipe("textcat")
         
         
@@ -142,27 +139,37 @@ def updateModel(trainingDataSet, modelPath):
     if restartTraining: 
         print("begin new training!")
         nlp.begin_training()
-    #nlp.begin_training()
     
     # Convert the data list to the Spacy Training Data format
     trainingData=datamodel.convertToTrainingData(trainingDataSet)
     
     
     # new api 3.0  - see: https://spacy.io/usage/v3
+    # We create a Example array with one document and update the model
     examples = []
     for text, annots in trainingData:
         print("text=", text)
         print("annots=", annots)
         examples.append(Example.from_dict(nlp.make_doc(text), annots))
-    #nlp.initialize(lambda: examples)
+        
+        #dinger = []
+        #dinger.append(Example.from_dict(nlp.make_doc(text), annots))
+        #losses=nlp.update(dinger);
+        #print(losses)
     
+    print("------- starte neue methodic ---------")
+    
+    losses=nlp.update(examples);
+    print(losses)
+    
+    print("------- ende neue methodic ---------")
+    
+    
+    
+     
+    """
     optimizer = nlp.initialize()
-    #losses = ner.update(examples, sgd=optimizer)
-    
-    #nlp.update(examples)
-    #losses = nlp.update(examples, sgd=optimizer)
-    
-    
+
     print("we need to clarify if we need minibatch!")
     for i in range(20):
         random.shuffle(examples)
@@ -171,6 +178,12 @@ def updateModel(trainingDataSet, modelPath):
             losses = nlp.update(examples, sgd=optimizer)
         
             print("losses",losses)
+    """
+    
+    # Alternative workflow....
+    #for example in examples:
+    #    losses = nlp.update(example, sgd=optimizer)
+    #    print("losses",losses)
     
     
         
