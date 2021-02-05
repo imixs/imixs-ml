@@ -94,7 +94,7 @@ The following example for a POST request...
 	]
 
 
-# Development
+pip install -U spacy
 
 You can use the Eclipse IDE with the [Pydev plugin](https://www.pydev.org/) for development.
 To prepare you environment make sure that pyhton 3.7 and pip3 is installed correctly.
@@ -115,9 +115,8 @@ To verifiy the installed versions run
 
 **Note:** for testing with the nigly build pre release 3.0 of spacy run:
 
-	$ pip3 install spacy-nightly --pre
-	$ pip3 install -U pip setuptools wheel
-	$ pip3 install -U spacy-nightly --pre
+	$ pip3 install -U spacy
+	$ pip3 install --no-cache-dir -r requirements.txt
 	$ python3 -m spacy download en_core_web_sm
 
 

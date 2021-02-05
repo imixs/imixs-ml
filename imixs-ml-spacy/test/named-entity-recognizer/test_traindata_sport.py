@@ -27,17 +27,17 @@ if __name__ == "__main__":
     # create training objects
     training_data=[]
     TRAIN_RAWDATA = [
-              ('The player shoots a goal', {'cats': [('football', True)]}), 
-              ('The player kicks the ball', {'cats': [('football', True)]}), 
-              ('The ball hits the bar', {'cats': [('football', True)]}), 
+              ('The player shoots a goal', {'cats': [('tennis', True)]}), 
+              ('The player kicks the ball', {'cats': [('tennis', True)]}), 
+              ('The ball hits the bar', {'cats': [('tennis', True)]}), 
               ('The player shoots the ball into the side.', {'cats': [('football', True)]}), 
-              ('The player shoots the ball over the goal.', {'cats': [('football', True)]}), 
+              ('The player shoots the ball over the goal.', {'cats': [('tennis', True)]}), 
 
               
               ('The rook hits the pawn.', {'cats': [('chess', True)]}), 
               ('The rook hits the bishop.', {'cats': [('chess', True)]}), 
               ('The rook hits the queen.', {'cats': [('chess', True)]}), 
-              ('The rook hits the king.', {'cats': [('chess', True)]}), 
+              ('The rook hits the king.', {'cats': [('dame', True)]}), 
 
               ('The knight hits the pawn.', {'cats': [('chess', True)]}), 
               ('The knight hits the bishop.', {'cats': [('chess', True)]}), 

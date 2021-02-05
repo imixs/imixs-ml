@@ -6,7 +6,7 @@ COPY requirements.txt ./
 
 RUN pip install -U pip
 
-RUN pip install spacy-nightly --pre
+RUN pip install -U spacy
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip list
 # download a model

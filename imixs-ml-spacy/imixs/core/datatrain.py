@@ -3,7 +3,7 @@ This module provides methods to train a model or to analyse text on an
 existing model. 
 
 The method 'updateModel expects a training datamodel. The implementation is based on 
-the concept of 'supervised training'. Typically the method expects only one training document,
+the concept of 'incremental training'. Typically the method expects only one training document,
 but also a list of training objects will be processed.
 
 
@@ -23,10 +23,10 @@ from imixs.core import datamodel
 
 """
  This method 'updateModel' expects a training data set containing one or many training objects.
- The method updates the given model.  If no model exists the method will create a new one.
+ The method updates the given model. If no model exists the method will create a new one.
  
  The method did not use the minibatch algorithm provided by spacy because the assumption is that 
- only one document is trained in a 'supervised training mode' on each call.
+ only one document is trained in a 'incremental training mode' on each call.
  
 """ 
 def updateModel(trainingDataSet, modelPath):
@@ -81,6 +81,7 @@ def updateModel(trainingDataSet, modelPath):
         else:
             # the pipe 'textcat' already exists
             textcat = nlp.get_pipe("textcat")
+            #textcat._allow_extra_label()
         
         
     # 3.) add the labels contained in the trainingDataSet...
@@ -99,7 +100,8 @@ def updateModel(trainingDataSet, modelPath):
             _labelList = textcat.labels
             # We only need to add the label if it is not already part of the categories
             if _label not in _labelList:
-                print("...adding new category '" + _label + "'...")
+                print("...NOT adding new category '" + _label + "'...")
+                #optimizer = nlp.initialize()
                 textcat.add_label(_label)
 
     # Convert the data list to the Spacy Training Data format
