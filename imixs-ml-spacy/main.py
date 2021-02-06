@@ -1,14 +1,8 @@
-from builtins import str
 import os
-import random
 import shutil
+from builtins import str
 from typing import List
-
-from fastapi import FastAPI
-from pydantic import BaseModel
-import spacy
-from spacy.util import minibatch, compounding
-
+from fastapi import FastAPI, HTTPException
 from imixs.core import datamodel, datatrain
 
 
@@ -33,21 +27,15 @@ print("MODEL_PATH      : " + modelpath)
 #print("MODEL_LANGUAGE  : " + language)
 print("")                                           
 
-
+# Train a training data set
 @app.post("/training/{model}")
 def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
-    # print(">>START trainingdata/")
-    prdnlp = datatrain.updateModel(trainngdata, modelpath+model)
-    # print(">>STOP trainingdata/")
-    return {"finished"}
-
-
-@app.post("/training-iterations/{model}")
-def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
-    # print(">>START training-single-mode/")
-    prdnlp = datatrain.updateModelWithInteration(trainngdata, 10, modelpath+model)
-    # print(">>STOP training-single-mode/")
-    return {"finished training-single-mode model"}
+    try : 
+        losses = datatrain.updateModel(trainngdata, modelpath+model)
+    except Exception as e:
+        print (e)
+        raise HTTPException(status_code=406, detail="Training Data is not acceptable!") from e    
+    return losses
 
 
 
@@ -56,7 +44,10 @@ def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
 @app.post("/analyse/{model}")
 def train(model: str, analyseData: datamodel.AnalyseData):
     print(" anaylse by model: " + model)
-    result=datatrain.analyseText(analyseData,modelpath+model)
+    try : 
+        result=datatrain.analyseText(analyseData,modelpath+model)
+    except Exception as e:
+        raise HTTPException(status_code=406, detail="failed to analyse data!") from e
     return result
 
 

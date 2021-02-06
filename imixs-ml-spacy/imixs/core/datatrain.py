@@ -81,7 +81,6 @@ def updateModel(trainingDataSet, modelPath):
         else:
             # the pipe 'textcat' already exists
             textcat = nlp.get_pipe("textcat")
-            #textcat._allow_extra_label()
         
         
     # 3.) add the labels contained in the trainingDataSet...
@@ -100,9 +99,12 @@ def updateModel(trainingDataSet, modelPath):
             _labelList = textcat.labels
             # We only need to add the label if it is not already part of the categories
             if _label not in _labelList:
-                print("...NOT adding new category '" + _label + "'...")
-                #optimizer = nlp.initialize()
-                textcat.add_label(_label)
+                if restartTraining : 
+                    print("...NOT adding new category '" + _label + "'...")
+                    #optimizer = nlp.initialize()
+                    textcat.add_label(_label)
+                else :
+                    raise Exception("adding a new category (" + _label + ") to an existing model is not supported by spacy!")
 
     # Convert the data list to the Spacy Training Data format
     trainingData=datamodel.convertToTrainingData(trainingDataSet)
@@ -131,7 +133,7 @@ def updateModel(trainingDataSet, modelPath):
     # print("save model to disk "+modelPath)
     nlp.to_disk(modelPath)
   
-    return nlp
+    return losses
 
 
 
@@ -143,16 +145,12 @@ def analyseText(analyseData, modelPath):
     nlp = spacy.load(modelPath)  # load existing spaCy model
     
     doc = nlp(analyseData.text)
-    print("===============> analyse Text....")
+    print("analyseText started....")
     result = []
     for ent in doc.ents:
         #print(ent.label_, ent.start_char, ent.end_char,ent.text )
         print("    ", ent.label_," = ", ent.text)
         result.append({"label": ent.label_,"text": ent.text})
-        
-    print("===============")
-    print(" ")
-    print(" ")
     return result
 
 
