@@ -15,6 +15,7 @@ but also a list of training objects will be processed.
 
 import os
 import spacy
+from typing import List
 from spacy.training import Example
 from imixs.core import datamodel
 
@@ -117,7 +118,6 @@ def updateModel(trainingDataSet, modelPath):
         print("...resume training!")
         optimizer = nlp.resume_training()
     
-    
     # new api 3.0  - see: https://spacy.io/usage/v3
     examples = []
     for text, annots in trainingData:
@@ -128,7 +128,6 @@ def updateModel(trainingDataSet, modelPath):
     losses=nlp.update(examples, sgd=optimizer);
     print(losses)
     
-    
     # finally we save the updated model to disk
     # print("save model to disk "+modelPath)
     nlp.to_disk(modelPath)
@@ -138,20 +137,51 @@ def updateModel(trainingDataSet, modelPath):
 
 
 
-
-# Analysing entities for a given text
-# The method assumes that a model exists  
+"""
+ Analysing entities for a given text
+ The method assumes that a model exists  
+"""
 def analyseText(analyseData, modelPath):
-    nlp = spacy.load(modelPath)  # load existing spaCy model
-    
+    nlp = spacy.load(modelPath)  # load existing spaCy model    
     doc = nlp(analyseData.text)
     print("analyseText started....")
     result = []
     for ent in doc.ents:
-        #print(ent.label_, ent.start_char, ent.end_char,ent.text )
         print("    ", ent.label_," = ", ent.text)
         result.append({"label": ent.label_,"text": ent.text})
     return result
 
 
+"""
+ This is a helper method to initialize a blank model by a given
+ set of categories. 
+ See: https://github.com/imixs/imixs-ml/issues/46
+"""
+def initModelByCategories (categories: List[str], modelPath):
+    
+    print("init new model ' " + modelPath + "'...")
+    # Read language
+    language=os.getenv('MODEL_LANGUAGE', 'en')
+    # Test if the model exists
+    modelExists=os.path.isdir(modelPath)
+    if modelExists:
+        raise Exception("model '" + modelPath  + "' already exists!")
+    else:
+        nlp = spacy.blank(language)  # create blank Language class
+        if 'textcat' not in nlp.pipe_names:
+            print("...adding new pipe 'textcat'...")
+            textcat = nlp.add_pipe("textcat")
+        # add categories
+        for _cat in categories:
+            _labelList = textcat.labels
+            # We only need to add the label if it is not already part of the categories
+            if _cat not in _labelList:
+                    print("...NOT adding new category '" + _cat + "'...")
+                    textcat.add_label(_cat)
 
+    print ("Model initalized!")
+    nlp.to_disk(modelPath)
+    return categories
+    
+
+   

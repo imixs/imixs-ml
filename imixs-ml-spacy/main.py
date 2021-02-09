@@ -29,7 +29,7 @@ print("")
 
 # Train a training data set
 @app.post("/training/{model}")
-def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
+def train_model(model: str,trainngdata: List[datamodel.TrainingData]):
     try : 
         losses = datatrain.updateModel(trainngdata, modelpath+model)
     except Exception as e:
@@ -42,7 +42,7 @@ def extract_entities(model: str,trainngdata: List[datamodel.TrainingData]):
 # Analyze a text 
 #
 @app.post("/analyse/{model}")
-def train(model: str, analyseData: datamodel.AnalyseData):
+def analyse_text(model: str, analyseData: datamodel.AnalyseData):
     print(" anaylse by model: " + model)
     try : 
         result=datatrain.analyseText(analyseData,modelpath+model)
@@ -51,16 +51,32 @@ def train(model: str, analyseData: datamodel.AnalyseData):
     return result
 
 
-# Clean the model 
+
+
+# Initialize a new model with a given set of categories 
+#
+@app.post("/{model}")
+def init_Model(model: str,categories: List[str] ):
+    try:
+        # try to create a blank model
+        result=datatrain.initModelByCategories(categories, modelpath+model)
+        return result
+    except Exception as e:
+        print("failed to init model '" + modelpath + model +"' ")
+        raise HTTPException(status_code=406, detail="failed to init model '" + modelpath + model +"' ") from e
+    return {}
+
+
+# Deletes an existing model 
 #
 @app.delete("/{model}")
-def clean(model: str):
+def delete_Model(model: str):
     try:
         # try if this is a valid directory path
-        shutil.rmtree(modelpath+model)
+        return shutil.rmtree(modelpath+model)
     except OSError as e:
         print("Error: %s : %s" % (modelpath+model, e.strerror))
-    return {"model '" + modelpath + model +"' deleted"}
+    return {"model '" + modelpath + model +"' created"}
 
 
 

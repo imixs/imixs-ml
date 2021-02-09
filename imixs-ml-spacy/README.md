@@ -72,6 +72,19 @@ Of course you can also test the service with curl:
 
 
 
+## Initialize a New Model with Categories
+
+Because of a restriction an existing SpaCy model can not be extended with new text categories like it is possible with *ner* entities. For that reason the SpaCy wrapper service provides a Rest API call to initialize a new blank model with predefined text categories. This method should be called before an incremental training of text categories. 
+
+	POST
+	http://localhost:8000/model/{modelname}
+	
+	[
+	  "cat", "dog"
+	]
+
+**Note:** For incremental training of new text entities it is not possible to initialize a new model!
+
 ## Testing 
 
 The following example for a POST request...
