@@ -43,7 +43,7 @@ def train_model(model: str,trainngdata: List[datamodel.TrainingData]):
 #
 @app.post("/analyse/{model}")
 def analyse_text(model: str, analyseData: datamodel.AnalyseData):
-    print(" anaylse by model: " + model)
+    print("anaylse by model: " + model)
     try : 
         result=datatrain.analyseText(analyseData,modelpath+model)
     except Exception as e:
