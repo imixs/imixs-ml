@@ -9,7 +9,8 @@ services:
       PYTHONUNBUFFERED: 1
       TZ: "Europe/Berlin"
       MODEL_LANGUAGE: "de"
-      MODEL_PATH: "models/invoice-de-0.0.2/" 
+      #MODEL_PATH: "models/invoice-de-0.0.3/" 
+      MODEL_PATH: "models/invoice-de-1.0.0/" 
 
     ports:
       - "8000:8000"  

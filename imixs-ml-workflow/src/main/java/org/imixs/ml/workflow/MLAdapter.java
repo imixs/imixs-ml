@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -145,6 +146,7 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         String mlModelName = null;
         String mlLocals = null;
+        Pattern mlFilenamePattern = null;
         List<Locale> locals = new ArrayList<Locale>();
 
         Map<String, EntityDefinition> entityDefinitions = null;
@@ -160,6 +162,12 @@ public class MLAdapter implements SignalAdapter {
             mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
+            // parse optional filename regex pattern...
+            String _FilenamePattern=parseMLFilePatternByBPMN(mlConfig);
+            if (_FilenamePattern!=null && !_FilenamePattern.isEmpty()) {
+                mlFilenamePattern = Pattern.compile(_FilenamePattern);
+            }
+
             // convert locals definitions into a List of Locales
             locals = LocaleHelper.parseLocales(mlLocals);
             // test if the model provides optional entity definitions.
@@ -182,12 +190,25 @@ public class MLAdapter implements SignalAdapter {
         // analyse file content....
         List<FileData> files = document.getFileData();
         if (files != null && files.size() > 0) {
+            
+            String ocrText="";
+            // aggregate all text attributes form attached files 
+            // apply an optional regex for filenames
             for (FileData file : files) {
-
-                logger.info("...analyzing content of '" + file.getName() + "'.....");
-                ItemCollection metadata = new ItemCollection(file.getAttributes());
-                String ocrText = metadata.getItemValueString("text");
-
+            
+             // test if the filename matches the pattern or the pattern is null
+                if (mlFilenamePattern == null || mlFilenamePattern.matcher(file.getName()).find()) {
+                    logger.info("...analyzing content of '" + file.getName() + "'.....");
+                    ItemCollection metadata = new ItemCollection(file.getAttributes());
+                    String _text = metadata.getItemValueString("text");
+                    if (!_text.isEmpty()) {
+                    ocrText=ocrText+_text + " ";
+                    }
+                }
+            }
+            
+            // if we have ocr text content than we call the ml api endpoint
+            if (!ocrText.isEmpty()) {
                 // create a MLClient for the current service endpoint
                 MLClient mlClient = new MLClient(mlAPIEndpoint);
                 List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlModelName);
@@ -242,6 +263,8 @@ public class MLAdapter implements SignalAdapter {
                 mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
                 mlService.updateMLDefinition(document, mlDefinition);
 
+            } else {
+                logger.finest("......no file content found matching the filename.pattern for " + document.getUniqueID());
             }
 
         } else {
@@ -309,7 +332,7 @@ public class MLAdapter implements SignalAdapter {
 
         // switch to default api endpoint?
         if (mlModel == null || mlModel.isEmpty()) {
-            // set defautl api endpoint if defined
+            // set defautl model if defined
             mlModel = mlDefaultModel;
         }
         if (debug) {
@@ -317,6 +340,33 @@ public class MLAdapter implements SignalAdapter {
         }
 
         return mlModel;
+
+    }
+    
+    
+    /**
+     * This helper method parses the ml model name either provided by a model
+     * definition or a imixs.property or an environment variable
+     * 
+     * @param mlConfig
+     * @return
+     */
+    private String parseMLFilePatternByBPMN(ItemCollection mlConfig) {
+        boolean debug = logger.isLoggable(Level.FINE);
+        debug = true;
+        String filePattern = null;
+
+        // test if the model provides a MLModel name. If not, the adapter uses the
+        // mlDefaultAPIEndpoint
+        if (mlConfig != null) {
+            filePattern = mlConfig.getItemValueString("filename.pattern");
+        }
+
+        if (debug) {
+            logger.info("......ml file.pattern = " + filePattern);
+        }
+
+        return filePattern;
 
     }
 

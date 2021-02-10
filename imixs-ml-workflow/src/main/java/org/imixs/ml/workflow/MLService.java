@@ -269,7 +269,7 @@ public class MLService implements Serializable {
      * If a endpoint definition with the same service endpoint and model name
      * already exists, the method overwrites this entry.
      * 
-     * @param workitem              - the workitem holidng a list of existing
+     * @param workitem              - the workitem holding a list of existing
      *                              endpoint definitions
      * @param newEndpointDefinition - the new Endpoint definition to be stored.
      */

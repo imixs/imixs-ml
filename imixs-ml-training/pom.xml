@@ -106,11 +106,6 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.imixs.workflow</groupId>
-			<artifactId>imixs-archive-ocr</artifactId>
-			<scope>compile</scope>
-		</dependency>
 
 		<!-- swagger -->
 		<dependency>

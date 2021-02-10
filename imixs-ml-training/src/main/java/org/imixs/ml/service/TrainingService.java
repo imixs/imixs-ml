@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -36,7 +37,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.imixs.archive.ocr.OCRService;
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.api.TrainingApplication;
@@ -67,9 +67,9 @@ import org.imixs.workflow.exceptions.PluginException;
 @Stateless
 public class TrainingService {
     private static Logger logger = Logger.getLogger(TrainingService.class.getName());
-
+    public static final String FILE_ATTRIBUTE_TEXT = "text";
     @Inject
-    OCRService ocrService;
+    TikaHelperService tikaService;
 
     @Inject
     protected Event<EntityObjectEvent> entityObjectEvents;
@@ -90,16 +90,23 @@ public class TrainingService {
     public int trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
         boolean debug = logger.isLoggable(Level.FINE);
         int qualityResult = -1;
+        Pattern mlFilenamePattern = null;
 
         logger.info("......create new training data for: " + workitem.getUniqueID());
 
-        String model=config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
+        String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
         if (qualityLevel.isEmpty()) {
             qualityLevel = "FULL"; // default level!
+        }
+        // parse optional filename regex pattern...
+        String _FilenamePattern = config.getItemValueString("filename.pattern");
+        if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
+            logger.info("......apply filename.pattern=" + _FilenamePattern);
+            mlFilenamePattern = Pattern.compile(_FilenamePattern);
         }
 
         // build locales....
@@ -113,98 +120,60 @@ public class TrainingService {
             }
         }
 
-        ItemCollection snapshot = null;
         try {
-            // first load the snapshot
-            String snapshotID = workitem.getItemValueString("$snapshotid");
-            if (!snapshotID.isEmpty()) {
-                snapshot = workflowClient.getDocument(snapshotID);
-            }
 
-            if (snapshot == null) {
-                logger.warning("Unable to load snapshot for document " + workitem.getUniqueID());
+            String ocrText = getTextContent(workitem, mlFilenamePattern, workflowClient, ocrMode, tikaOptions);
+
+            if (ocrText == null || ocrText.isEmpty()) {
                 return XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
             }
 
-            ocrService.extractText(snapshot, null, ocrMode, tikaOptions);
+            logger.info("extracted text content to be analysed=");
+            logger.info(ocrText);
+            // build training data set...
+            XMLTrainingData trainingData = new TrainingDataBuilder(ocrText, workitem, trainingItemNames, locals)
+                    .setAnalyzerEntityEvents(entityObjectEvents).build();
 
-            // now we load the filedata ...
-            List<FileData> files = snapshot.getFileData();
-            if (files != null && files.size() > 0) {
-                for (FileData file : files) {
+            // compute stats rate for found entities
+            List<String> entitysFound = new ArrayList<String>();
+            for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
+                if (!entitysFound.contains(trainingEntity.getLabel())) {
+                    entitysFound.add(trainingEntity.getLabel());
+                }
+            }
 
-                    if (debug) {
-                        logger.fine("...analyzing content of '" + file.getName() + "'.....");
-                    }
+            // we only send the training data in case of quality level is sufficient
+            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
 
-                    ItemCollection metadata = new ItemCollection(file.getAttributes());
-
-                    String content = metadata.getItemValueString(OCRService.FILE_ATTRIBUTE_TEXT);
-                    // clean content string....
-
-                    if (!content.isEmpty()) {
-                        if (debug) {
-                            logger.fine("extracted text content to be analysed=");
-                            logger.fine(content);
-                        }
-                        // build training data set...
-                        XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, trainingItemNames,
-                                locals).setAnalyzerEntityEvents(entityObjectEvents).build();
-
-                        // compute stats rate for found entities
-                        List<String> entitysFound = new ArrayList<String>();
-                        for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
-                            if (!entitysFound.contains(trainingEntity.getLabel())) {
-                                entitysFound.add(trainingEntity.getLabel());
-                            }
-                        }
-
-                        // we only send the training data in case of quality level is sufficient
-                        if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                            logger.severe("...document '" + workitem.getUniqueID()
-                                    + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-
-                            qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
-                        } else if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
-                                && "FULL".equalsIgnoreCase(qualityLevel)) {
-                            logger.severe("...document '" + workitem.getUniqueID()
-                                    + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
-                            qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
-                        } else {
-                            // trainingData quality level is sufficient
-                            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()) {
-                                logger.warning("...document '" + workitem.getUniqueID()
-                                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL ...");
-                                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL;
-                            }
-                            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL == trainingData.getQuality()) {
-                                logger.info("...document '" + workitem.getUniqueID()
-                                        + "' TRAININGDATA_QUALITY_LEVEL=FULL ...");
-                                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL;
-                            }
-
-                            // log the XMLTrainingData object....
-                            if (debug) {
-                                printXML(trainingData);
-                            }
-                            String serviceEndpoint = config
-                                    .getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
-                            MLClient mlClient = new MLClient(serviceEndpoint);
-                            mlClient.postTrainingData(trainingData,model);
-                        }
-
-                    } else {
-                        logger.severe(
-                                "......no content found in '" + file.getName() + "' (" + workitem.getUniqueID() + ")");
-                        qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
-                    }
-
+                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+            } else if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
+                    && "FULL".equalsIgnoreCase(qualityLevel)) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
+                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+            } else {
+                // trainingData quality level is sufficient
+                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()) {
+                    logger.warning(
+                            "...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL ...");
+                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL;
+                }
+                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL == trainingData.getQuality()) {
+                    logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=FULL ...");
+                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL;
                 }
 
-            } else {
-                logger.severe("......no files found for " + workitem.getUniqueID());
-                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+                // log the XMLTrainingData object....
+                if (debug) {
+                    printXML(trainingData);
+                }
+                String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
+                MLClient mlClient = new MLClient(serviceEndpoint);
+                mlClient.postTrainingData(trainingData, model);
             }
+
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
@@ -225,45 +194,23 @@ public class TrainingService {
      */
     @SuppressWarnings("unchecked")
     public void testWorkitemData(ItemCollection config, ItemCollection doc, WorkflowClient workflowClient) {
-        boolean debug = logger.isLoggable(Level.FINE);
         logger.info("......anaysing: " + doc.getUniqueID());
-
+        Pattern mlFilenamePattern = null;
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
-
-        ItemCollection snapshot = null;
+        String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
+        String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
+        // parse optional filename regex pattern...
+        String _FilenamePattern = config.getItemValueString("filename.pattern");
+        if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
+            logger.info("......apply filename.pattern=" + _FilenamePattern);
+            mlFilenamePattern = Pattern.compile(_FilenamePattern);
+        }
         try {
-            // first load the snapshot
-            String snapshotID = doc.getItemValueString("$snapshotid");
-            if (!snapshotID.isEmpty()) {
-                snapshot = workflowClient.getDocument(snapshotID);
-            }
-
-            if (snapshot == null) {
-                logger.warning("Unable to load snapshot for document " + doc.getUniqueID());
-                return;
-            }
-
-            ocrService.extractText(snapshot, null, ocrMode, tikaOptions);
-
-            // now we load the attachments...
-            List<FileData> files = snapshot.getFileData();
-            if (files != null && files.size() > 0) {
-                for (FileData file : files) {
-                    if (debug) {
-                        logger.fine("...analyzing content of '" + file.getName() + "'.....");
-                    }
-                    ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    String content = metadata.getItemValueString(OCRService.FILE_ATTRIBUTE_TEXT);
-                    String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
-                    String model= config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
-                    MLClient mlClient = new MLClient(serviceEndpoint);
-                    mlClient.postAnalyseData(content, model);
-                }
-
-            } else {
-                logger.severe("......no files found for " + doc.getUniqueID());
-
+            String ocrText = getTextContent(doc, mlFilenamePattern, workflowClient, ocrMode, tikaOptions);
+            if (ocrText != null && !ocrText.isEmpty()) {
+                MLClient mlClient = new MLClient(serviceEndpoint);
+                mlClient.postAnalyseData(ocrText, model);
             }
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
@@ -292,4 +239,61 @@ public class TrainingService {
         }
     }
 
+    /**
+     * Returns the text content form files to be trained or analyzed
+     * 
+     * @param workitem - workitem containing file attachments
+     * @return text to be analyzed
+     * @throws RestAPIException
+     * @throws PluginException
+     */
+    private String getTextContent(ItemCollection workitem, Pattern mlFilenamePattern, WorkflowClient workflowClient,
+            String ocrMode, List<String> tikaOptions) throws RestAPIException, PluginException {
+        // now we load the filedata ...
+        List<FileData> files = workitem.getFileData();
+        if (files != null && files.size() > 0) {
+    
+            String ocrText = "";
+            // aggregate all text attributes form attached files
+            // apply an optional regex for filenames
+            for (FileData file : files) {
+    
+                // test if the filename matches the pattern or the pattern is null
+                if (mlFilenamePattern == null || mlFilenamePattern.matcher(file.getName()).find()) {
+                    logger.info("...analyzing content of '" + file.getName() + "'.....");
+                    ItemCollection metadata = new ItemCollection(file.getAttributes());
+                    String _text = metadata.getItemValueString("text");
+                    if (!_text.isEmpty()) {
+                        ocrText = ocrText + _text + " ";
+                    }
+                }
+            }
+    
+            // we normally expect that the fileData object already has an extracted Text
+            // representation from a previous OCR call.
+            // If this is not the case than we initiate a separate OCR Call via
+            // TikaHelperService here
+            if (ocrText.isEmpty()) {
+                // first load the snapshot
+                ItemCollection snapshot = null;
+                String snapshotID = workitem.getItemValueString("$snapshotid");
+                if (!snapshotID.isEmpty()) {
+                    snapshot = workflowClient.getDocument(snapshotID);
+                }
+    
+                if (snapshot == null) {
+                    logger.warning("Unable to load snapshot for document " + workitem.getUniqueID());
+                    return null;
+    
+                }
+                // now call for each attachment the tika service helper
+                ocrText = tikaService.extractText(snapshot, mlFilenamePattern, ocrMode, tikaOptions);
+            }
+    
+            return ocrText;
+        }
+        return null; // no files attached!
+    }
+
+ 
 }

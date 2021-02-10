@@ -4,7 +4,6 @@ The Imixs-ML Workflow module provides Adapter classes, CDI Beans and Service EJB
 
  - **ML-Adapter**<br/>The Workflow Adapter class 'MLAdapter' is used for *Natural language processing (NLP)* within the processing life cycle on a workflow instance. The adapter can analyse the text of documents and extract relevant business data for a running business process. This includes entity recognition and text classification.  <br/>
 
-
  - **ML-Definition** <br/>A data structure holding the information of a single ml service endpoint  <br/>
 
  - **ML-Service** <br/>A service EJB reacting on Processing events storing the ml definition object  <br/>
@@ -53,28 +52,9 @@ See the following example:
 
 The model name of a successful text analyses will be stored by the MLAdapter into the item 'ml.model'. This information is used by the ML Training Service later. 
 
-### Item Mapping
-
-Per default the MLAdapter takes all entities into the current workitem if an item with the name did not yet exist. 
-To configure the behavior of the entity adaption in a more fine grained way, optional configuration via the workflow
- model is possible with the item 'ml-entity':
-
-	<ml-config name="entity">
-	    <name>_invoicetotal</name>
-	    <type>currency</type>
-	</ml-config>
-	<ml-config name="entity">
-	    <name>_cdtr_bic</name>
-	    <type>text</type>
-	    <mapping>bic</mapping>
-	</ml-config>
-	
-
-In this example the entity '_invoicetotal' will be adapted by the Currency Adapter. 
-The entity '_cdtr_bic' will be mapped into the item 'bic'.
 
 
-### Named Entity Recognition (NER)
+### Natural Language Processing (NLP) 
 
 The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER) and text classification. The results will automatically stored into the current process instance. 
 
@@ -89,6 +69,49 @@ be part of 'ml.items'. With this mechanism, as new entity can later be trained e
 
 *ml.categories* are optional and will only be provided if text classification was trained before.
 
+#### Named Entity Recognition (NER)
+
+Per default the MLAdapter takes all entities into the current workitem if an item with the name did not yet exist. 
+To configure the behavior of the entity adaption in a more fine grained way, optional configuration via the workflow
+ model is possible with the item 'ml-entity':
+
+	<ml-config name="entity">
+	    <name>invoice.total</name>
+	    <type>currency</type>
+	</ml-config>
+	<ml-config name="entity">
+	    <name>cdtr.bic</name>
+	    <type>text</type>
+	    <mapping>bic</mapping>
+	</ml-config>
+	
+
+In this example the entity 'invoice.total' will be adapted by the Currency Adapter. 
+The entity 'cdtr.bic' will be mapped into the item 'bic'.
+
+
+#### Text Classification
+
+For a text classification the MLAdapter expects a configuration specifying the target item:
+
+	<ml-config name="category">
+	    <target>ml.category</target>
+	    <source>$workflowgroup</source>
+	</ml-config>
+
+In this example all categories found by the ML Framework will be listed in the item 'ml.category' (target item).
+
+The tag <source> specifies the text category to be used for a incremental training. The source tag can be empty if a incremental training should not be performed. 
+
+### Filter by File Pattern 
+
+Per default the MLAdapter aggregates the text content from all attached files. If only a subset of files should be applied to the ML Service than an optional
+Filename Pattern can be provided. 
+
+	<ml-config name="filename.pattern">([^\s]+(\.(?i)(pdf|docx))$)</ml-config>
+
+This example will only analyse content from PDF and MS Word files. 
+
 
 ## The ML Definition
 
@@ -98,7 +121,6 @@ During the processing of a workitem the MLService creates a MLDefinition holding
  - ml.model - the model name
  - ml.locales - a list of locale definitions used for text analysis 
  - ml.items - list of entities recognized by ml service during text analysis 
- - ml.categories - list of categories defined in a ml service
  - ml.status - the current status of a ml.definition (suggest|confirmed|trained)
 
 

@@ -1,4 +1,4 @@
-# Imixs-ML - API
+# Imixs-ML - Training API
 
 The Imixs-ML API Service is a microservice to train a ML Model based on the workflow content of an Imixs-Office-Workflow instance. The service provides an OpenAPI-UI to interact with the service from your web browser:
 
