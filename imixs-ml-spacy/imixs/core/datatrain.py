@@ -20,8 +20,6 @@ from spacy.training import Example
 from imixs.core import datamodel
 
 
-
-
 """
  This method 'updateModel' expects a training data set containing one or many training objects.
  The method updates the given model. If no model exists the method will create a new one.
@@ -121,7 +119,7 @@ def updateModel(trainingDataSet, modelPath):
     # new api 3.0  - see: https://spacy.io/usage/v3
     examples = []
     for text, annots in trainingData:
-        print("text=", text)
+        #print("text=", text)
         print("annots=", annots)
         examples.append(Example.from_dict(nlp.make_doc(text), annots))
         
@@ -142,6 +140,11 @@ def updateModel(trainingDataSet, modelPath):
  The method assumes that a model exists  
 """
 def analyseText(analyseData, modelPath):
+    modelExists=os.path.isdir(modelPath)
+    if not modelExists :
+        print("model '" + modelPath  + "' not found!")
+        raise Exception("model '" + modelPath  + "' not found!")
+    
     nlp = spacy.load(modelPath)  # load existing spaCy model    
     doc = nlp(analyseData.text)
     print("analyseText started....")
