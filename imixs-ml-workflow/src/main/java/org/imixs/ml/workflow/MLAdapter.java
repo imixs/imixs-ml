@@ -212,6 +212,13 @@ public class MLAdapter implements SignalAdapter {
                 // create a MLClient for the current service endpoint
                 MLClient mlClient = new MLClient(mlAPIEndpoint);
                 List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlModelName);
+                
+                if (result==null) {
+                    // interrupt current transaction
+                    throw new ProcessingErrorException(
+                            MLAdapter.class.getSimpleName(),API_ERROR,"Failed to call ml api endpoint: " + mlAPIEndpoint + "!");
+                }
+                
                 /*
                  * We now have a list of XMLAnalyseEntities possible matching the same item. In
                  * the following we group matching items by itemName and fire a
