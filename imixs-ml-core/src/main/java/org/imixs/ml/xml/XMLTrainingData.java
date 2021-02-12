@@ -122,7 +122,8 @@ public class XMLTrainingData implements Serializable {
      * Set the trainingData quality leval
      * 
      * @param quality
-     */
+     */ 
+    @XmlTransient
     public void setQuality(int quality) {
         this.quality = quality;
     }

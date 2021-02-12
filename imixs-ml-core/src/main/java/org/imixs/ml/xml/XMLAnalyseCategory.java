@@ -4,34 +4,33 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * The XMLAnalyseEntity defines the Data structure for an entity element
+ * The XMLAnalyseCategory defines the Data structure for an category element
  * contained in a XMLAnalyseResult object.
  * 
  * <pre>
- * { "entity": "label", "text": "some value..." }
+ * { "category": "some cat...", "score": "0.7920878529548645" }
  * </pre>
- * 
  * 
  * @author rsoika
  *
  */
-@XmlRootElement(name = "entity")
-public class XMLAnalyseEntity {
-    
+@XmlRootElement(name = "category")
+public class XMLAnalyseCategory {
+
     @XmlTransient
     private static final long serialVersionUID = 1L;
 
     private String label;
-    private String text;
+    private double score;
 
-    public XMLAnalyseEntity() {
+    public XMLAnalyseCategory() {
         super();
     }
 
-    public XMLAnalyseEntity(String label, String text) {
+    public XMLAnalyseCategory(String label, double score) {
         super();
         this.label = label;
-        this.text = text;
+        this.score = score;
     }
 
     /**
@@ -48,16 +47,16 @@ public class XMLAnalyseEntity {
     }
 
     /**
-     * Returns the text value of the entity
+     * Returns the score value of the category
      * 
-     * @return - text value
+     * @return - score value
      */
-    public String getText() {
-        return text;
+    public double getScore() {
+        return score;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setScore(double score) {
+        this.score = score;
     }
 
 }

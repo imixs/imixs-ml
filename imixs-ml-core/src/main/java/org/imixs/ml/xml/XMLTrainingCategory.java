@@ -49,7 +49,7 @@ public class XMLTrainingCategory implements Serializable {
 
     private String label;
    
-    private boolean included;
+    private boolean enclosed;
     
     
     @XmlElement
@@ -62,11 +62,11 @@ public class XMLTrainingCategory implements Serializable {
     
     
     @XmlElement
-    public boolean isIncluded() {
-        return included;
+    public boolean isEnclosed() {
+        return enclosed;
     }
-    public void setIncluded(boolean included) {
-        this.included = included;
+    public void setEnclosed(boolean enclosed) {
+        this.enclosed = enclosed;
     }
    
    
@@ -77,7 +77,7 @@ public class XMLTrainingCategory implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((label == null) ? 0 : label.hashCode());
-        result = prime * result + (included? 1:0);
+        result = prime * result + (enclosed? 1:0);
         return result;
     }
     @Override
@@ -94,7 +94,7 @@ public class XMLTrainingCategory implements Serializable {
                 return false;
         } else if (!label.equals(other.label))
             return false;
-        if (included != other.included)
+        if (enclosed != other.enclosed)
             return false;
         return true;
     }
