@@ -6,6 +6,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.imixs.ml.xml.XMLTrainingCategory;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
 import org.junit.Assert;
@@ -25,12 +26,17 @@ public class TestTrainingDataXML {
     public void testConvertTrainingDataObject() {
         
         XMLTrainingData xmlObj=new XMLTrainingData();
+        xmlObj.setText("Wayne Rooney is a famous football player!");
         XMLTrainingEntity xmlTe=new XMLTrainingEntity();
-        xmlTe.setLabel("test");
+        xmlTe.setLabel("person");
         xmlTe.setStart(0);
-        xmlTe.setStop(5);
-        xmlTe.setValue("some.");
+        xmlTe.setStop(13);
+        xmlTe.setValue("Wayne Rooney");
         xmlObj.getEntities().add(xmlTe);
+        XMLTrainingCategory xmlCa=new XMLTrainingCategory();
+        xmlCa.setEnclosed(true);
+        xmlCa.setLabel("sports");
+        xmlObj.getCategories().add(xmlCa);
         
         // now write back to file
         File file = null;

@@ -32,13 +32,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import org.imixs.ml.xml.XMLAnalyseEntity;
-import org.imixs.ml.xml.XMLAnalyseText;
+import org.imixs.ml.xml.XMLAnalyseData;
+import org.imixs.ml.xml.XMLAnalyseResult;
 import org.imixs.ml.xml.XMLTrainingData;
 
 /**
@@ -102,10 +101,10 @@ public class MLClient {
      * @param serviceEndpoint - the ml API endpoint
      * @return list of XMLAnalyseEntity
      **/
-    public List<XMLAnalyseEntity> postAnalyseData(String text, String model) {
+    public XMLAnalyseResult postAnalyseData(String text, String model) {
 
         logger.fine("......sending analyse data object...");
-        XMLAnalyseText atext = new XMLAnalyseText(text);
+        XMLAnalyseData atext = new XMLAnalyseData(text);
         Client client = ClientBuilder.newClient();
         // client.register(RedirectFilterWorkAround.class);
 
@@ -117,10 +116,12 @@ public class MLClient {
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             logger.finest("......POST request successfull (" + response.getStatus() + ")");
             // Now extract the List of XMLAnalyseEntity from the response object....
-            List<XMLAnalyseEntity> entities = response.readEntity(new GenericType<List<XMLAnalyseEntity>>() {
-            });
+            // List<XMLAnalyseEntity> entities = response.readEntity(new
+            // GenericType<List<XMLAnalyseEntity>>() {
+            //  });
+            XMLAnalyseResult resultObj = response.readEntity(XMLAnalyseResult.class);
 
-            return entities;
+            return resultObj;
         } else {
             logger.warning("......POST request failed: " + response.getStatus());
             return null;

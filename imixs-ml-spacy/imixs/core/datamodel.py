@@ -1,7 +1,6 @@
 """
-The datamodel defines the Data class used for training data
-A data object consists of a text and a list of entity definitions and categories. 
-
+The trainingmodel defines the Data classes used for training data and analysing text.
+A TrainingData object consists of a text and a list of entity definitions and categories. 
 The data object is needed to support the data structure for the Rest API based on the pydantic BaseModel 
 
 
@@ -11,33 +10,32 @@ The data object is needed to support the data structure for the Rest API based o
 # An Entity class defines a Entity object with its name and its position in the data objects text.
 
 from typing import List
-
 from pydantic import BaseModel
 
 
-class Entity(BaseModel):
+class TrainingEntity(BaseModel):
     label: str
     start: int
     stop: int
     
-# An Category class defines a category object with its name and a boolean flag indicating if the category is included or excluded
-class Category(BaseModel):
+# An Category class defines a category object with its name and a boolean flag indicating if the category is enclosed or not
+class TrainingCategory(BaseModel):
     label: str
-    included: bool
+    enclosed: bool
 
 # The Data class defines an object containing a text and a list of entities within the text
 class TrainingData(BaseModel):
     text: str 
-    entities: List[Entity] 
-    categories: List[Category] 
+    entities: List[TrainingEntity] 
+    categories: List[TrainingCategory] 
 
 
 
-# The Data class defines an object containing a text to be analsed
+
+
+# The AnalyseData class defines an object containing a text to be analysed
 class AnalyseData(BaseModel):
     text: str 
-
-
 
     
 
@@ -61,7 +59,7 @@ def convertToTrainingData(dataList):
 
         for _category in _data.categories:
             # append a new tuple for each category....
-            catList.append((_category.label, _category.included))            
+            catList.append((_category.label, _category.enclosed))            
 
         
         # create a dictionary with the entity list. 

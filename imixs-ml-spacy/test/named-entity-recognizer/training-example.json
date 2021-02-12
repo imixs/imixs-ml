@@ -1,173 +1,300 @@
 [
 	{
-		"text": "what is the price of polo?",
+		"text": "what is the price of 11,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 25
-			}
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
 	},
 	{
-		"text": "what is the price of ball?",
+		"text": "what is the price of 12,50",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 25
-			}
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of jegging?",
+		"text": "what is the price of 10120,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 28
-			}
+			{ "label": "price", "start": 21, "stop": 29 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of t-shirt?",
+		"text": "what is the price of 333,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 28
-			}
+			{ "label": "price", "start": 21, "stop": 27 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of cup?",
+		"text": "what is the price of 0,50",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 24
-			}
+			{ "label": "price", "start": 21, "stop": 25 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of bag?",
+		"text": "what is the price of 10,40",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 24
-			}
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of jug?",
+		"text": "what is the price of 0,49",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 24
-			}
+			{ "label": "price", "start": 21, "stop": 25 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of plate?",
+		"text": "what is the price of 0,10",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 25 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of glass?",
+		"text": "what is the price of 9,50",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 25 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of monitor?",
+		"text": "what is the price of 155,50",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 28
-			}
+			{ "label": "price", "start": 21, "stop": 27 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},	
 	{
-		"text": "what is the price of desktop?",
+		"text": "what is the price of 200,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 28
-			}
+			{ "label": "price", "start": 21, "stop": 25 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of bottle?",
+		"text": "what is the price of 90120,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 27
-			}
+			{ "label": "price", "start": 21, "stop": 29 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of mouse?",
+		"text": "what is the price of 50000,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 29 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of keyboad?",
+		"text": "what is the price of 1600,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 28
-			}
+			{ "label": "price", "start": 21, "stop": 28 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of chair?",
+		"text": "what is the price of 1500,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 28 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of table?",
+		"text": "what is the price of 70000,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 29 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	},
+	},		
 	{
-		"text": "what is the price of watch?",
+		"text": "what is the price of 30,00",
 		"entities": [
-			{
-				"label": "part",
-				"start": 21,
-				"stop": 26
-			}
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
 		]
-	}
+	},		
+	{
+		"text": "what is the price of 20,00",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
+		]
+	},		
+	{
+		"text": "what is the price of 19,00",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+		"categories": [
+			{ "label": "invoice", "enclosed": true }
+		]
+	},		
+			
+	
+	{
+		"text": "football player shoots a goal",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 8 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},				
+	{
+		"text": "football player kicks the ball.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 8 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},				
+	{
+		"text": "football ball hits the bar.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 8 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},				
+	{
+		"text": "football player shoots the ball into the side.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 8 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},				
+	{
+		"text": "football player shoots the ball over the goal.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 8 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},				
+
+	{
+		"text": "chess player rook hits the pawn.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+             
+
+
+	{
+		"text": "chess player rook hits the pawn.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player rook hits the bishop.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player rook hits the queen.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player rook hits the king.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player knight hits the pawn.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player knight hits the bishop.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	},	
+	{
+		"text": "chess player knight hits the queen.",
+		"entities": [
+			{ "label": "game", "start": 0, "stop": 5 }
+		],
+		"categories": [
+			{ "label": "sports", "enclosed": true }
+		]
+	}	
+
+	
+	
 ]
 

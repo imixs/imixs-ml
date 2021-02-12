@@ -2,9 +2,11 @@
 This module provides methods to train a model or to analyse text on an 
 existing model. 
 
-The method 'updateModel expects a training datamodel. The implementation is based on 
+The method 'updateModel' expects a training datamodel. The implementation is based on 
 the concept of 'incremental training'. Typically the method expects only one training document,
 but also a list of training objects will be processed.
+
+The method 'analyseText' is used get the results of a trained model based on a given text.
 
 
 @see https://spacy.io/api/language#update
@@ -18,6 +20,7 @@ import spacy
 from typing import List
 from spacy.training import Example
 from imixs.core import datamodel
+
 
 
 """
@@ -140,18 +143,34 @@ def updateModel(trainingDataSet, modelPath):
  The method assumes that a model exists  
 """
 def analyseText(analyseData, modelPath):
+
+    print("analyseText started....")
     modelExists=os.path.isdir(modelPath)
     if not modelExists :
         print("model '" + modelPath  + "' not found!")
         raise Exception("model '" + modelPath  + "' not found!")
     
     nlp = spacy.load(modelPath)  # load existing spaCy model    
+
+    print(analyseData.text)
     doc = nlp(analyseData.text)
-    print("analyseText started....")
-    result = []
+       
+    # build response data structure based on a dictionary
+    # Example: 
+    # {"entities":[{"label":"person","text":"Wayne Rooney"}],"categories":[{"label":"sports","score":0.999}]}
+    result = {};
+    result['entities'] = []
+    result['categories'] = []
+    # add all entities
     for ent in doc.ents:
-        print("    ", ent.label_," = ", ent.text)
-        result.append({"label": ent.label_,"text": ent.text})
+        print("    entity: ", ent.label_," = ", ent.text)
+        result['entities'].append({"label": ent.label_,"text": ent.text})
+
+    # add all categories
+    for label, score in doc.cats.items():
+        print("  category: ", label, " score=" + str(score))
+        result['categories'].append({"category": label,"score": str(score)})
+
     return result
 
 
@@ -171,6 +190,11 @@ def initModelByCategories (categories: List[str], modelPath):
         raise Exception("model '" + modelPath  + "' already exists!")
     else:
         nlp = spacy.blank(language)  # create blank Language class
+        
+        if 'ner' not in nlp.pipe_names:
+            print("...adding new pipe 'ner'...")
+            nlp.add_pipe('ner')
+        
         if 'textcat' not in nlp.pipe_names:
             print("...adding new pipe 'textcat'...")
             textcat = nlp.add_pipe("textcat")

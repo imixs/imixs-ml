@@ -97,11 +97,11 @@ The following example for a POST request...
 
 	[
 	  {
-	    "label": "person",
+	    "entity": "person",
 	    "text": "Melman"
 	  },
 	  {
-	    "label": "project",
+	    "entity": "project",
 	    "text": "Imixs-Workflow"
 	  }
 	]

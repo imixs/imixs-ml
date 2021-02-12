@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<trainingdata>
+    <categories>
+        <enclosed>true</enclosed>
+        <label>sports</label>
+    </categories>
+    <entities>
+        <label>person</label>
+        <start>0</start>
+        <stop>13</stop>
+    </entities>
+    <text>Wayne Rooney is a famous football player!</text>
+</trainingdata>

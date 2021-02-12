@@ -24,6 +24,7 @@ package org.imixs.ml.service;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -92,7 +93,7 @@ public class TrainingService {
         int qualityResult = -1;
         Pattern mlFilenamePattern = null;
 
-        logger.info("......create new training data for: " + workitem.getUniqueID());
+        logger.info("...create new training data for: " + workitem.getUniqueID());
 
         String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
@@ -119,6 +120,11 @@ public class TrainingService {
                 logger.finest("......suporting locale " + aLocale);
             }
         }
+
+        logger.info("......model="+ model);
+        logger.info("......qualityLevel="+ qualityLevel);
+        logger.info("......ocrMode="+ ocrMode);
+        logger.info("......locales="+  Arrays.toString(sLocales.toArray()));
 
         try {
 

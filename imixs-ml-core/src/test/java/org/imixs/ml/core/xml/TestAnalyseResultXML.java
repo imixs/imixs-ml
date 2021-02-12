@@ -1,17 +1,12 @@
 package org.imixs.ml.core.xml;
 
-import static org.mockito.Mockito.when;
-
 import java.io.File;
-import java.security.Principal;
 
-import javax.ejb.SessionContext;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.imixs.ml.xml.XMLAnalyseCategory;
-import org.imixs.ml.xml.XMLAnalyseData;
 import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.ml.xml.XMLAnalyseResult;
 import org.imixs.workflow.exceptions.ModelException;
@@ -19,8 +14,6 @@ import org.imixs.workflow.exceptions.PluginException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +36,8 @@ public class TestAnalyseResultXML {
     @Before
     public void setup() throws PluginException, ModelException {
 
-         xmlObj = new XMLAnalyseResult();
-        XMLAnalyseEntity xmlentity= new XMLAnalyseEntity("game","football");
+        xmlObj = new XMLAnalyseResult();
+        XMLAnalyseEntity xmlentity= new XMLAnalyseEntity("person","Wayne Rooney");
         XMLAnalyseCategory xmlcategory= new XMLAnalyseCategory("sports",0.999);
 
         xmlObj.getCategories().add(xmlcategory);

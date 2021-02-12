@@ -46,6 +46,7 @@ import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.events.EntityTextEvent;
 import org.imixs.ml.xml.XMLAnalyseEntity;
+import org.imixs.ml.xml.XMLAnalyseResult;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.SignalAdapter;
@@ -211,16 +212,16 @@ public class MLAdapter implements SignalAdapter {
             if (!ocrText.isEmpty()) {
                 // create a MLClient for the current service endpoint
                 MLClient mlClient = new MLClient(mlAPIEndpoint);
-                List<XMLAnalyseEntity> result = mlClient.postAnalyseData(ocrText, mlModelName);
+                 XMLAnalyseResult result = mlClient.postAnalyseData(ocrText, mlModelName);
                 
                 if (result==null) {
                     // interrupt current transaction
                     throw new ProcessingErrorException(
-                            MLAdapter.class.getSimpleName(),API_ERROR,"Failed to call ml api endpoint: " + mlAPIEndpoint + "!");
+                            MLAdapter.class.getSimpleName(),API_ERROR,"imixs-ml api error at endpoint: " + mlAPIEndpoint + "!");
                 }
                 
                 /*
-                 * We now have a list of XMLAnalyseEntities possible matching the same item. In
+                 * We now have a list of XMLAnalyseEntity objects possible matching the same item. In
                  * the following we group matching items by itemName and fire a
                  * EntityObjectEvent to test if an adapter provides a unique value.
                  */
@@ -448,12 +449,12 @@ public class MLAdapter implements SignalAdapter {
      * @param data - list of XMLAnalyseEntity
      * @return grouped text values
      */
-    private Map<String, List<String>> groupTextValues(List<XMLAnalyseEntity> data) {
+    private Map<String, List<String>> groupTextValues(XMLAnalyseResult data) {
 
         HashMap<String, List<String>> result = new HashMap<String, List<String>>();
 
         if (data != null) {
-            for (XMLAnalyseEntity entity : data) {
+            for (XMLAnalyseEntity entity : data.getEntities()) {
                 String itemName = entity.getLabel();
                 String itemValue = entity.getText();
                 // do we have a label and a value?

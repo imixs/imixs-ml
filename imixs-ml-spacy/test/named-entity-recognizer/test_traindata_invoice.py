@@ -1,7 +1,6 @@
 import sys 
 sys.path.append('../..')
-from imixs.core import datamodel, datatrain
-
+from imixs.core import datamodel, modelservice
 import random
 
 
@@ -66,12 +65,12 @@ if __name__ == "__main__":
         _d=datamodel.TrainingData(text=_text,entities=[],categories=[])
         if _entities is not None:
             for e in _entities:
-                _e=datamodel.Entity(label=e[2],start=e[0],stop=e[1])
+                _e=datamodel.TrainingEntity(label=e[2],start=e[0],stop=e[1])
                 _d.entities.append(_e)
         
         if _cats is not None:
             for c in _cats:
-                _c=datamodel.Category(label=c[0],included=c[1])
+                _c=datamodel.TrainingCategory(label=c[0],enclosed=c[1])
                 _d.categories.append(_c)
             
         training_data.append(_d)
@@ -83,24 +82,18 @@ if __name__ == "__main__":
         print(i+1,". run....")
         
         random.shuffle(training_data)
-        prdnlp = datatrain.updateModel(training_data,modelfile)
+        losses = modelservice.updateModel(training_data,modelfile)
     
     print("------------training finished--------------------")
                 
     # Test your text
     test_text = input("Enter your text to be analyzed: ")
-    doc = prdnlp(test_text)
-    for ent in doc.ents:
-        print("Entity: ", ent.label_, ent.text, ent.start_char, ent.end_char )
+    
+    anlyseData=datamodel.AnalyseData
+    anlyseData.text=test_text
+    doc=modelservice.analyseText(anlyseData,modelfile)
 
-    for cat in doc.cats:
-        print("Category: ", cat)
-
-
-
-    for label, score in doc.cats.items():
-        print(label, score)
-
+    print("result=" , doc)
 
    
 

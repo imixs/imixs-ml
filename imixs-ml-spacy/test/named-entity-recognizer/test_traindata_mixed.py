@@ -1,7 +1,6 @@
 import sys 
 sys.path.append('../..')
-from imixs.core import datamodel, datatrain
-
+from imixs.core import datamodel, modelservice
 import random
 
 
@@ -21,35 +20,51 @@ data will be provided in a random way.
 if __name__ == "__main__":
     
     # the test model
-    modelfile = "training_model"
+    modelfile = "models/training_model_mixed"
     
     
     # create training objects
     training_data=[]
     TRAIN_RAWDATA = [
-              #('what is the price of 11,00', {'entities': [(21, 26, 'price')]}), 
+        
+              # invoice cats 
               ('what is the price of 11,00', {'entities': [(21, 26, 'price')] , 'cats': [('invoice', True)]}), 
-              ('what is the price of 12,50', {'entities': [(21, 26, 'price')]}), 
-              #('what is the price of 20000,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 20000,00', {'entities': [(21, 29, 'price')] , 'cats': [('biginvoice', True)]}), 
-              #('what is the price of 20000,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 10120,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 333,00', {'entities': [(21, 27, 'price')]}), 
-              ('what is the price of 0,50', {'entities': [(21, 25, 'price')]}), 
-              ('what is the price of 10,40', {'entities': [(21, 26, 'price')]}), 
-              ('what is the price of 0,49', {'entities': [(21, 25, 'price')]}), 
-              ('what is the price of 0,10', {'entities': [(21, 25, 'price')]}), 
-              ('what is the price of 9,99', {'entities': [(21, 25, 'price')]}), 
-              ('what is the price of 155,55', {'entities': [(21, 27, 'price')]}), 
-              ('what is the price of 200,00', {'entities': [(21, 27, 'price')]}), 
-              ('what is the price of 90120,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 50000,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 1600,00', {'entities': [(21, 28, 'price')]}), 
-              ('what is the price of 1500,00', {'entities': [(21, 28, 'price')]}), 
-              ('what is the price of 70000,00', {'entities': [(21, 29, 'price')]}), 
-              ('what is the price of 30,00', {'entities': [(21, 26, 'price')]}), 
-              ('what is the price of 20,00', {'entities': [(21, 26, 'price')]}), 
-              ('what is the price of 11,50', {'entities': [(21, 26, 'price')]})] 
+              ('what is the price of 12,50', {'entities': [(21, 26, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 10120,00', {'entities': [(21, 29, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 333,00', {'entities': [(21, 27, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 0,50', {'entities': [(21, 25, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 10,40', {'entities': [(21, 26, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 0,49', {'entities': [(21, 25, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 0,10', {'entities': [(21, 25, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 9,99', {'entities': [(21, 25, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 155,55', {'entities': [(21, 27, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 200,00', {'entities': [(21, 27, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 90120,00', {'entities': [(21, 29, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 50000,00', {'entities': [(21, 29, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 1600,00', {'entities': [(21, 28, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 1500,00', {'entities': [(21, 28, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 70000,00', {'entities': [(21, 29, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 30,00', {'entities': [(21, 26, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 20,00', {'entities': [(21, 26, 'price')], 'cats': [('invoice', True)]}), 
+              ('what is the price of 11,50', {'entities': [(21, 26, 'price')], 'cats': [('invoice', True)]}),
+              
+              # sports cats..
+              ('football player shoots a goal', {'entities': [(0,8,'game')], 'cats': [('sports', True)]}), 
+              ('football player kicks the ball', {'entities': [(0,8,'game')], 'cats': [('sports', True)]}), 
+              ('football ball hits the bar',  {'entities': [(0,8,'game')], 'cats': [('sports', True)]}), 
+              ('football player shoots the ball into the side.',  {'entities': [(0,8,'game')], 'cats': [('sports', True)]}),  
+              ('football player shoots the ball over the goal.', {'entities': [(0,8,'game')], 'cats': [('sports', True)]}), 
+              ('chess player rook hits the pawn.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player rook hits the bishop.',{'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player rook hits the queen.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player rook hits the king.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player knight hits the pawn.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player knight hits the bishop.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player knight hits the queen.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
+              ('chess player knight hits the king.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]})
+
+              
+              ] 
     
     
     
@@ -66,12 +81,12 @@ if __name__ == "__main__":
         _d=datamodel.TrainingData(text=_text,entities=[],categories=[])
         if _entities is not None:
             for e in _entities:
-                _e=datamodel.Entity(label=e[2],start=e[0],stop=e[1])
+                _e=datamodel.TrainingEntity(label=e[2],start=e[0],stop=e[1])
                 _d.entities.append(_e)
         
         if _cats is not None:
             for c in _cats:
-                _c=datamodel.Category(label=c[0],included=c[1])
+                _c=datamodel.TrainingCategory(label=c[0],enclosed=c[1])
                 _d.categories.append(_c)
             
         training_data.append(_d)
@@ -83,27 +98,19 @@ if __name__ == "__main__":
         print(i+1,". run....")
         
         random.shuffle(training_data)
-        prdnlp = datatrain.updateModel(training_data,modelfile)
+        losses = modelservice.updateModel(training_data,modelfile)
     
     print("------------training finished--------------------")
                 
     # Test your text
     test_text = input("Enter your text to be analyzed: ")
-    doc = prdnlp(test_text)
-    for ent in doc.ents:
-        print("Entity: ", ent.label_, ent.text, ent.start_char, ent.end_char )
+    
+    
+    anlyseData=datamodel.AnalyseData
+    anlyseData.text=test_text
+    doc=modelservice.analyseText(anlyseData,modelfile)
 
-    for cat in doc.cats:
-        print("Category: ", cat)
-
-
-
-    for label, score in doc.cats.items():
-        print(label, score)
-
-
-   
-
+    print("result=" , doc)
 
 
 

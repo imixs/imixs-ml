@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<analyseresult>
+    <categories>
+        <label>sports</label>
+        <score>0.999</score>
+    </categories>
+    <entities>
+        <label>person</label>
+        <text>Wayne Rooney</text>
+    </entities>
+</analyseresult>

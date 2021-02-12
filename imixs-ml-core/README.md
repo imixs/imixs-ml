@@ -41,31 +41,29 @@ A training data object array is defined by the following JSON structure:
 	        "stop": 0
 	      }
 	    ]
-	  }
-	]
-	
-Each Training Data object contains a *text* and a list of *entity* objects. A single entity object is defined by its label and the start/stop position within the training text. So it is possible to define multiple entity objects for one training text. See the following example:
-
-
-	[
-	  {
-	    "text": "Imixs Workflow in an open source project organized from Munich.",
-	    "entities": [
+	    "categories": [
 	      {
-	        "label": "project",
-	        "start": 0,
-	        "stop": 14
-	      },
-	      {
-	        "label": "city",
-	        "start": 56,
-	        "stop": 62
+	        "label": "string",
+	        "enclosed": true
 	      }
 	    ]
 	  }
 	]
+	
+Each Training Data object contains a *text* and a list of *entity* objects. A single entity object is defined by its label and the start/stop position within the training text. So it is possible to define multiple entity objects for one training text. See the following example:
   
-
+	[
+		{
+			"text": "Imixs Workflow in an open source project organized from Munich.",
+			"entities": [
+				{ "label": "project", "start": 0, "stop": 14 },
+				{ "label": "city", "start": 56, "stop": 62 }
+			],
+			"categories": [
+				{ "label": "open source", "enclosed": true }
+			]
+		}
+	]
 
 ## POST a AnalyseData Object
 
@@ -82,6 +80,17 @@ An AnaylseData object has the following JSON structure:
 	  "text": "string"
 	}
 
+The method returns an array of entities and categories found in the text:
+
+	{
+	 "entities":[
+	              {"label":"game","text":"football"}
+	            ],
+	 "categories":[
+	              {"label":"sports","score":0.999}
+	            ]
+	}
+	
 
 ## Delete Model
 

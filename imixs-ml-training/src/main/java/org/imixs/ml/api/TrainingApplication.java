@@ -1,12 +1,14 @@
 package org.imixs.ml.api;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.WorkflowClient;
+import org.imixs.ml.service.TikaHelperService;
 import org.imixs.workflow.ItemCollection;
 
 @ApplicationPath("api")
@@ -27,11 +29,16 @@ public class TrainingApplication extends Application {
     public static final String ITEM_ML_ANALYSE_MODEL = "ml.analyse.model";
     public static final String ITEM_ML_TRAINING_QUALITYLEVEL = "ml.training.quality";
 
+    private static Logger logger = Logger.getLogger(TrainingApplication.class.getName());
+
+    
     public static WorkflowClient buildWorkflowClient(ItemCollection config) {
 
         // properties.get("target.url");
         String target = config.getItemValueString(ITEM_WORKFLOW_ENDPOINT);
-
+        logger.info("...workflow.endpoint="+target);
+        logger.info("...workflow.userid="+config.getItemValueString(ITEM_WORKFLOW_USER));
+        
         WorkflowClient worklowClient = new WorkflowClient(target);
         // register the authenticator
         FormAuthenticator formAuth = new FormAuthenticator(target, config.getItemValueString(ITEM_WORKFLOW_USER),
