@@ -44,10 +44,10 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
+import org.imixs.ml.core.MLContentBuilder;
 import org.imixs.ml.events.EntityTextEvent;
 import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.ml.xml.XMLAnalyseResult;
-import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.SignalAdapter;
 import org.imixs.workflow.engine.WorkflowService;
@@ -164,8 +164,8 @@ public class MLAdapter implements SignalAdapter {
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
             // parse optional filename regex pattern...
-            String _FilenamePattern=parseMLFilePatternByBPMN(mlConfig);
-            if (_FilenamePattern!=null && !_FilenamePattern.isEmpty()) {
+            String _FilenamePattern = parseMLFilePatternByBPMN(mlConfig);
+            if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
                 mlFilenamePattern = Pattern.compile(_FilenamePattern);
             }
 
@@ -188,95 +188,74 @@ public class MLAdapter implements SignalAdapter {
                     "imixs-ml wrong service endpoint - should not contain \"/analyzse\" resource!");
         }
 
-        // analyse file content....
-        List<FileData> files = document.getFileData();
-        if (files != null && files.size() > 0) {
-            
-            String ocrText="";
-            // aggregate all text attributes form attached files 
-            // apply an optional regex for filenames
-            for (FileData file : files) {
-            
-             // test if the filename matches the pattern or the pattern is null
-                if (mlFilenamePattern == null || mlFilenamePattern.matcher(file.getName()).find()) {
-                    logger.info("...analyzing content of '" + file.getName() + "'.....");
-                    ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    String _text = metadata.getItemValueString("text");
-                    if (!_text.isEmpty()) {
-                    ocrText=ocrText+_text + " ";
-                    }
-                }
+        // build the ml content....
+        String mlContent = new MLContentBuilder(document, null, false, mlFilenamePattern).build();
+
+        // if we have ocr text content than we call the ml api endpoint
+        if (!mlContent.isEmpty()) {
+            // create a MLClient for the current service endpoint
+            MLClient mlClient = new MLClient(mlAPIEndpoint);
+            XMLAnalyseResult result = mlClient.postAnalyseData(mlContent, mlModelName);
+
+            if (result == null) {
+                // interrupt current transaction
+                throw new ProcessingErrorException(MLAdapter.class.getSimpleName(), API_ERROR,
+                        "imixs-ml api error at endpoint: " + mlAPIEndpoint + "!");
             }
-            
-            // if we have ocr text content than we call the ml api endpoint
-            if (!ocrText.isEmpty()) {
-                // create a MLClient for the current service endpoint
-                MLClient mlClient = new MLClient(mlAPIEndpoint);
-                 XMLAnalyseResult result = mlClient.postAnalyseData(ocrText, mlModelName);
-                
-                if (result==null) {
-                    // interrupt current transaction
-                    throw new ProcessingErrorException(
-                            MLAdapter.class.getSimpleName(),API_ERROR,"imixs-ml api error at endpoint: " + mlAPIEndpoint + "!");
-                }
-                
-                /*
-                 * We now have a list of XMLAnalyseEntity objects possible matching the same item. In
-                 * the following we group matching items by itemName and fire a
-                 * EntityObjectEvent to test if an adapter provides a unique value.
-                 */
-                Map<String, List<String>> groupedEntityList = groupTextValues(result);
 
-                // analyse the entities....
-                for (Map.Entry<String, List<String>> mlEntity : groupedEntityList.entrySet()) {
+            /*
+             * We now have a list of XMLAnalyseEntity objects possible matching the same
+             * item. In the following we group matching items by itemName and fire a
+             * EntityObjectEvent to test if an adapter provides a unique value.
+             */
+            Map<String, List<String>> groupedEntityList = groupTextValues(result);
 
-                    String mlEntityName = mlEntity.getKey();
+            // analyse the entities....
+            for (Map.Entry<String, List<String>> mlEntity : groupedEntityList.entrySet()) {
 
-                    // is this entity listed in our configuration?
-                    if (entityDefinitions.containsKey(mlEntityName)) {
-                        // Do we have an entityDefinition for this entity?
-                        // If not we do ignore this ml item! issue #34
-                        EntityDefinition entityDef = entityDefinitions.get(mlEntityName);
-                        if (document.isItemEmpty(entityDef.getItemName())) {
-                            List<String> itemValueList = mlEntity.getValue();
-                            // fire entityTextEvents so that an adapter can resolve the text into a
-                            // object
-                            EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
-                                    entityDef.getItemType());
-                            entityTextEvents.fire(entityTextEvent);
+                String mlEntityName = mlEntity.getKey();
 
-                            // test if we found an object
-                            if (entityTextEvent.getItemValue() != null) {
-                                // set the value
-                                if (debug) {
-                                    logger.info("Best match=" + entityTextEvent.getItemValue());
-                                }
-                                document.setItemValue(entityDef.getItemName(), entityTextEvent.getItemValue());
-                            } else {
-                                // set the first text value as is
-                                document.setItemValue(entityDef.getItemName(), mlEntity.getValue().iterator().next());
+                // is this entity listed in our configuration?
+                if (entityDefinitions.containsKey(mlEntityName)) {
+                    // Do we have an entityDefinition for this entity?
+                    // If not we do ignore this ml item! issue #34
+                    EntityDefinition entityDef = entityDefinitions.get(mlEntityName);
+                    if (document.isItemEmpty(entityDef.getItemName())) {
+                        List<String> itemValueList = mlEntity.getValue();
+                        // fire entityTextEvents so that an adapter can resolve the text into a
+                        // object
+                        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
+                                entityDef.getItemType());
+                        entityTextEvents.fire(entityTextEvent);
+
+                        // test if we found an object
+                        if (entityTextEvent.getItemValue() != null) {
+                            // set the value
+                            if (debug) {
+                                logger.info("Best match=" + entityTextEvent.getItemValue());
                             }
+                            document.setItemValue(entityDef.getItemName(), entityTextEvent.getItemValue());
+                        } else {
+                            // set the first text value as is
+                            document.setItemValue(entityDef.getItemName(), mlEntity.getValue().iterator().next());
                         }
                     }
                 }
-
-                // Finally we store the mlItems, the MLModel name and the mlLocale definitions
-                // for each Service endpoint into
-                // the item 'ml.definitions'
-
-                ItemCollection mlDefinition = new ItemCollection();
-                mlDefinition.setItemValue(MLService.ITEM_ML_ENDPOINT, mlAPIEndpoint);
-                mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
-                mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
-                mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
-                mlService.updateMLDefinition(document, mlDefinition);
-
-            } else {
-                logger.finest("......no file content found matching the filename.pattern for " + document.getUniqueID());
             }
 
+            // Finally we store the mlItems, the MLModel name and the mlLocale definitions
+            // for each Service endpoint into
+            // the item 'ml.definitions'
+
+            ItemCollection mlDefinition = new ItemCollection();
+            mlDefinition.setItemValue(MLService.ITEM_ML_ENDPOINT, mlAPIEndpoint);
+            mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
+            mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
+            mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
+            mlService.updateMLDefinition(document, mlDefinition);
+
         } else {
-            logger.finest("......no files found for " + document.getUniqueID());
+            logger.finest("......no ml content found to be analysed for " + document.getUniqueID());
         }
 
         return document;
@@ -350,8 +329,7 @@ public class MLAdapter implements SignalAdapter {
         return mlModel;
 
     }
-    
-    
+
     /**
      * This helper method parses the ml model name either provided by a model
      * definition or a imixs.property or an environment variable

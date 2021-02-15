@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # create training objects
     training_data=[]
     TRAIN_RAWDATA = [
-              ('what is the price of 11,00', {'entities': [(21, 26, 'iban')]}), 
+              ('what is the price of 11,00', {'entities': [(21, 26, 'price')]}), 
               #('what is the price of 11,00', {'entities': [(21, 26, 'price')] , 'cats': [('invoice', True)]}), 
               ('what is the price of 12,50', {'entities': [(21, 26, 'price')]}), 
               ('what is the price of 20000,00', {'entities': [(21, 29, 'price')]}), 

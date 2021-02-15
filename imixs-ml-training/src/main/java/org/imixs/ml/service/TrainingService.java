@@ -22,6 +22,7 @@
  *******************************************************************************/
 package org.imixs.ml.service;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.api.TrainingApplication;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLContentBuilder;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -121,14 +123,21 @@ public class TrainingService {
             }
         }
 
-        logger.info("......model="+ model);
-        logger.info("......qualityLevel="+ qualityLevel);
-        logger.info("......ocrMode="+ ocrMode);
-        logger.info("......locales="+  Arrays.toString(sLocales.toArray()));
+        logger.info("......model=" + model);
+        logger.info("......qualityLevel=" + qualityLevel);
+        logger.info("......ocrMode=" + ocrMode);
+        logger.info("......locales=" + Arrays.toString(sLocales.toArray()));
 
         try {
 
-            String ocrText = getTextContent(workitem, mlFilenamePattern, workflowClient, ocrMode, tikaOptions);
+            // update ocr information if needed....
+            workitem = doVerifyOCRContent(workitem, mlFilenamePattern, workflowClient, tikaOptions);
+
+            // build the ml content....
+            String ocrText = new MLContentBuilder(workitem, null, false, mlFilenamePattern).build();
+
+            // String ocrText = getTextContent(workitem, mlFilenamePattern, workflowClient,
+            // ocrMode, tikaOptions);
 
             if (ocrText == null || ocrText.isEmpty()) {
                 return XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
@@ -203,7 +212,6 @@ public class TrainingService {
         logger.info("......anaysing: " + doc.getUniqueID());
         Pattern mlFilenamePattern = null;
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
-        String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
         String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
         // parse optional filename regex pattern...
@@ -213,7 +221,15 @@ public class TrainingService {
             mlFilenamePattern = Pattern.compile(_FilenamePattern);
         }
         try {
-            String ocrText = getTextContent(doc, mlFilenamePattern, workflowClient, ocrMode, tikaOptions);
+
+            // update ocr information if needed....
+            doc = doVerifyOCRContent(doc, mlFilenamePattern, workflowClient, tikaOptions);
+
+            // build the ml content....
+            String ocrText = new MLContentBuilder(doc, null, false, mlFilenamePattern).build();
+
+            // String ocrText = getTextContent(doc, mlFilenamePattern, workflowClient,
+            // ocrMode, tikaOptions);
             if (ocrText != null && !ocrText.isEmpty()) {
                 MLClient mlClient = new MLClient(serviceEndpoint);
                 mlClient.postAnalyseData(ocrText, model);
@@ -246,60 +262,72 @@ public class TrainingService {
     }
 
     /**
-     * Returns the text content form files to be trained or analyzed
+     * This method tests if we already have OCR text in the workitem. If not we load
+     * the snapshot and post the files first to the tika service. In a normal setup
+     * of Imixs-Office-Workfow this task should not be necessary here. But we need
+     * to be abel to parse old data.
+     * 
      * 
      * @param workitem - workitem containing file attachments
      * @return text to be analyzed
      * @throws RestAPIException
      * @throws PluginException
      */
-    private String getTextContent(ItemCollection workitem, Pattern mlFilenamePattern, WorkflowClient workflowClient,
-            String ocrMode, List<String> tikaOptions) throws RestAPIException, PluginException {
-        // now we load the filedata ...
+    private ItemCollection doVerifyOCRContent(ItemCollection workitem, Pattern mlFilenamePattern,
+            WorkflowClient workflowClient, List<String> tikaOptions) throws RestAPIException, PluginException {
+
+        // do we have file data?
         List<FileData> files = workitem.getFileData();
-        if (files != null && files.size() > 0) {
-    
-            String ocrText = "";
-            // aggregate all text attributes form attached files
-            // apply an optional regex for filenames
-            for (FileData file : files) {
-    
-                // test if the filename matches the pattern or the pattern is null
-                if (mlFilenamePattern == null || mlFilenamePattern.matcher(file.getName()).find()) {
-                    logger.info("...analyzing content of '" + file.getName() + "'.....");
-                    ItemCollection metadata = new ItemCollection(file.getAttributes());
-                    String _text = metadata.getItemValueString("text");
-                    if (!_text.isEmpty()) {
-                        ocrText = ocrText + _text + " ";
-                    }
-                }
-            }
-    
-            // we normally expect that the fileData object already has an extracted Text
-            // representation from a previous OCR call.
-            // If this is not the case than we initiate a separate OCR Call via
-            // TikaHelperService here
-            if (ocrText.isEmpty()) {
-                // first load the snapshot
-                ItemCollection snapshot = null;
-                String snapshotID = workitem.getItemValueString("$snapshotid");
-                if (!snapshotID.isEmpty()) {
-                    snapshot = workflowClient.getDocument(snapshotID);
-                }
-    
-                if (snapshot == null) {
-                    logger.warning("Unable to load snapshot for document " + workitem.getUniqueID());
-                    return null;
-    
-                }
-                // now call for each attachment the tika service helper
-                ocrText = tikaService.extractText(snapshot, mlFilenamePattern, ocrMode, tikaOptions);
-            }
-    
-            return ocrText;
+
+        if (files == null || files.size() == 0) {
+            // no op
+            return workitem;
         }
-        return null; // no files attached!
+
+        // test if the workitem already have ocr content
+        for (FileData file : files) {
+            ItemCollection metadata = new ItemCollection(file.getAttributes());
+            String _text = metadata.getItemValueString("text");
+            if (!_text.isEmpty()) {
+                // ocr contentent already exists
+                return workitem;
+            }
+        }
+
+        // no existing content - we need to ocr .....
+        // first load the snapshot
+        ItemCollection snapshot = null;
+        String snapshotID = workitem.getItemValueString("$snapshotid");
+        if (!snapshotID.isEmpty()) {
+            snapshot = workflowClient.getDocument(snapshotID);
+        }
+
+        if (snapshot == null) {
+            logger.warning("Unable to load snapshot for document " + workitem.getUniqueID());
+            return workitem;
+
+        }
+
+        workitem=snapshot;
+        files = workitem.getFileData();
+
+        for (FileData fileData : files) {
+            // add ocr content to each filedata ...
+            try {
+                String ocrContent;
+                ocrContent = tikaService.doORCProcessing(fileData, tikaOptions);
+                // store the ocrContent....
+                List<Object> list = new ArrayList<Object>();
+                list.add(ocrContent);
+                fileData.setAttribute(FILE_ATTRIBUTE_TEXT, list);
+
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+        }
+
+        return workitem;
     }
 
- 
 }

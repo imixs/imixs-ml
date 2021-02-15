@@ -194,18 +194,21 @@ def initModelByCategories (categories: List[str], modelPath):
         if 'ner' not in nlp.pipe_names:
             print("...adding new pipe 'ner'...")
             nlp.add_pipe('ner')
-        
-        if 'textcat' not in nlp.pipe_names:
-            print("...adding new pipe 'textcat'...")
-            textcat = nlp.add_pipe("textcat")
-        # add categories
-        for _cat in categories:
-            _labelList = textcat.labels
-            # We only need to add the label if it is not already part of the categories
-            if _cat not in _labelList:
-                    print("...NOT adding new category '" + _cat + "'...")
-                    textcat.add_label(_cat)
 
+        
+        if categories:
+            if 'textcat' not in nlp.pipe_names:
+                print("...adding new pipe 'textcat'...")
+                textcat = nlp.add_pipe("textcat")
+            # add categories
+            for _cat in categories:
+                _labelList = textcat.labels
+                # We only need to add the label if it is not already part of the categories
+                if _cat not in _labelList:
+                        print("...NOT adding new category '" + _cat + "'...")
+                        textcat.add_label(_cat)        
+
+    nlp.initialize()
     print ("Model initalized!")
     nlp.to_disk(modelPath)
     return categories
