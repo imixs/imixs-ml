@@ -51,7 +51,7 @@ public class MLController implements Serializable {
     public boolean isMLItem(String name) {
 
         if (workflowController.getWorkitem() != null) {
-            // iterate over all mlDefinitions 
+            // iterate over all mlDefinitions
             List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
             for (ItemCollection mlDefinition : mlDefinitionList) {
                 List<String> mlItems = mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS);
@@ -88,22 +88,21 @@ public class MLController implements Serializable {
     @SuppressWarnings("unchecked")
     public String getMLResult() {
         String result = "{";
-        String status=MLService.ML_STATUS_CONFIRMED;
+        String status = MLService.ML_STATUS_CONFIRMED;
         if (workflowController.getWorkitem() != null) {
-            List<String> mlItems =new ArrayList<String>();
+            List<String> mlItems = new ArrayList<String>();
 
             // iterate over all mlDefinitions.
             List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
             for (ItemCollection mlDefinition : mlDefinitionList) {
                 mlItems.addAll(mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS));
                 if (MLService.ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(MLService.ITEM_ML_STATUS))) {
-                    status=MLService.ML_STATUS_SUGGEST;
+                    status = MLService.ML_STATUS_SUGGEST;
                 }
             }
-            
+
             // set status
-            result = result + "\"status\":\""
-                    + status + "\"";
+            result = result + "\"status\":\"" + status + "\"";
 
             if (mlItems != null && mlItems.size() > 0) {
                 result = result + ",\"items\":";
@@ -172,6 +171,105 @@ public class MLController implements Serializable {
      * <p>
      * e.g. 'cat' is found in 'Catalog'
      * <p>
+     * The method also searches for computed phrases based on the first hit with
+     * spaces.
+     * 
+     * @param data
+     * @return
+     */
+    public static List<String> findMatches(String phrase, final String _text) {
+
+        List<String> result = new ArrayList<String>();
+
+        String text = _text + " "; // we add a tailing space for later extracting..
+
+        // search text is lower case!
+        String searchText = text.toLowerCase();
+
+        String searchPhrase = phrase.toLowerCase();
+        String originSearchPhrase = searchPhrase;
+
+        // find start pos...
+        int index = 0;
+        while (true) {
+            int found = searchText.indexOf(searchPhrase, index);
+            if (found > -1) {
+                String hit = null;
+                boolean tailingSpace = false;
+                int endPos = -1;
+                // test if the text ends with a space or a newline
+                int nextSpacePos = searchText.indexOf(" ", found + searchPhrase.length() + 1);
+                int nextNewLine = searchText.indexOf("\n", found + searchPhrase.length() + 1);
+
+                if (nextNewLine > -1) {
+                    // there is a newline so this may be the best match...
+                    endPos = nextNewLine;
+                    if (nextSpacePos > -1 && nextSpacePos < nextNewLine) {
+                        // there is a newline before a possible newLIne...
+                        endPos = nextSpacePos;
+                        tailingSpace = true;
+                    }
+                } else {
+                    if (nextSpacePos > -1) {
+                        endPos = nextSpacePos;
+                        tailingSpace = true;
+                    }
+                }
+
+                if (endPos > -1) {
+                    hit = text.substring(found, endPos).trim();
+                }
+
+                if (hit == null) {
+                    break;
+                }
+                // if the hit is longer than 64 chars - we cut it....
+                if (hit.length() > 64) {
+                    hit = hit.substring(0, 64).trim();
+                }
+
+                if (!result.contains(hit)) {
+                    result.add(hit);
+
+                    // lets see if it makes sense to search for variant with spaces
+                    if (tailingSpace) {
+                        searchPhrase = hit.toLowerCase() + " ";
+                    } else {
+                        // reset to origin search phrase
+                        searchPhrase = originSearchPhrase;
+                        index = found + hit.length();
+                    }
+                } else {
+                    index = found + hit.length();
+                }
+
+            } else {
+                // do we still work with the originSearchPhrase?
+                if (searchPhrase.equals(originSearchPhrase)) {
+                    // no more matches
+                    break;
+                } else {
+                    // reset origin phrase
+                    index = index + searchPhrase.length();
+                    searchPhrase = originSearchPhrase;
+                }
+
+            }
+
+            // if max count of 12 matches is reached we break;
+            if (result.size() >= 12) {
+                break;
+            }
+
+        }
+        return result;
+    }
+
+    /**
+     * Returns a matching text sequence form a search phrase
+     * <p>
+     * e.g. 'cat' is found in 'Catalog'
+     * <p>
      * The method also searches for computed phrases based on the first hit.
      * <p>
      * It seems that this kind of problem can not be solved with regex.
@@ -179,18 +277,18 @@ public class MLController implements Serializable {
      * @param data
      * @return
      */
-    public static List<String> findMatches(String phrase,final String _text) {
+    @Deprecated
+    public static List<String> findMatchesOld(String phrase, final String _text) {
 
         List<String> result = new ArrayList<String>();
 
-        String text=_text;
+        String text = _text;
         // replace \n with space
-        text=text.replace("\n", " ");
-        
+        text = text.replace("\n", " ");
+
         // search text is lower case!
         String searchText = text.toLowerCase();
-       
-        
+
         String searchPhrase = phrase.toLowerCase();
         String originSearchPhrase = searchPhrase;
 
@@ -201,12 +299,17 @@ public class MLController implements Serializable {
             if (found > -1) {
                 String hit = null;
 
-                // take the phrase up to the space
+                // take the phrase up to the 1st space
                 int endPos = searchText.indexOf(" ", found + searchPhrase.length() + 1);
                 // if we do not found a space, we search for a .
                 if (endPos == -1) {
                     endPos = searchText.indexOf(".", found + searchPhrase.length() + 1);
                 }
+                // if we do not found a ., we search for a \n
+                if (endPos == -1) {
+                    endPos = searchText.indexOf("\n", found + searchPhrase.length() + 1);
+                }
+
                 if (endPos > -1) {
                     hit = text.substring(found, endPos).trim();
                 } else {
@@ -215,9 +318,9 @@ public class MLController implements Serializable {
 
                 }
 
-                // if the hit is longer than 32 chars - we cut it....
-                if (hit.length() > 32) {
-                    hit = hit.substring(0, 32).trim();
+                // if the hit is longer than 64 chars - we cut it....
+                if (hit.length() > 64) {
+                    hit = hit.substring(0, 64).trim();
                 }
 
                 if (!result.contains(hit)) {
@@ -240,8 +343,8 @@ public class MLController implements Serializable {
                 break;
             }
 
-            // if max count of 7 matches is reached we break;
-            if (result.size() >= 7) {
+            // if max count of 12 matches is reached we break;
+            if (result.size() >= 12) {
                 break;
             }
 
