@@ -75,5 +75,16 @@ def delete_Model(model: str):
     return {"model '" + modelpath + model +"' created"}
 
 
-
+# Health endpoint returns status:UP in case models are defined.
+# The method returns status:DOWN of no models exists or a IO error occurred  
+#
+@app.get("/health")
+def health_Check():
+    try:
+        directory_contents = os.listdir(modelpath)
+        return {"status":"UP","models":directory_contents}
+    except Exception as e:
+        result={"status":"DOWN","exception":format(e)}
+        raise HTTPException(status_code=503, detail=result) from e
+    return {"status":"DOWN"}
 
