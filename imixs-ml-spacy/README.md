@@ -133,6 +133,45 @@ To verifiy the installed versions run
 	$ python3 -m spacy download en_core_web_sm
 
 
+## Health Check
+
+The Rest API provides the HealthCheck endpoint /health.
+
+The Health Check returns the status 'UP' and the list of models available in the current instance. 
+
+	{
+	  "status": "UP",
+	  "models": [
+	    "invoice-de-0.1.0"
+	  ]
+	}
+
+The Health Check returns the status 'DOWN' if an IO error with the model path occurs. 
+
+	{
+	  "status":"DOWN",
+	  "exception":"..."
+	}
+
+
+### Kubernetes
+
+To validate the health status in Kubernetes you can do a livenessProbe:
+
+	spec:
+	  containers:
+	    ...
+	    livenessProbe:
+	      httpGet:
+	        path: /health
+	        port: 8000
+	      initialDelaySeconds: 30
+	      periodSeconds: 10
+	      failureThreshold: 3
+		...
+
+# Development 
+
 ## Eclipse Setup
 
 If you use the [Eclipse Plugin Pydev](https://www.pydev.org/) (which is recommended) make sure you added the spacy lib folder.
@@ -140,7 +179,7 @@ In the properties for your pydev project, there's a pane called "PyDev - PYTHONP
 
 	~/.local/lib/python3.7/site-packages/spacy
 
-# Docker Hub
+## Docker Hub
 
 To push the latest image to a repository run:
 
