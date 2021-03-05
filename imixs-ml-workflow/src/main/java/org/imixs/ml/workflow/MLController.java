@@ -2,6 +2,7 @@ package org.imixs.ml.workflow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,6 +32,8 @@ public class MLController implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private static Logger logger = Logger.getLogger(MLController.class.getName());
+
+    public static List<String> STOP_PHRASE_LIST = Arrays.asList("\n", "  ", ", ", ". ");
 
     @Inject
     protected WorkflowController workflowController;
@@ -147,14 +150,13 @@ public class MLController implements Serializable {
         FacesContext fc = FacesContext.getCurrentInstance();
         String phrase = fc.getExternalContext().getRequestParameterMap().get("phrase");
 
-        logger.info("search prase '" + phrase + "'");
+        logger.finest("search prase '" + phrase + "'");
 
         // String input =workflowController.getWorkitem().getItemValueString(itemName);
         if (phrase == null || phrase.length() < 2) {
             return;
         }
 
-        logger.finest(".......triger search...");
         logger.fine("search for=" + phrase);
         searchResult = new ArrayList<String>();
 
@@ -167,12 +169,15 @@ public class MLController implements Serializable {
     }
 
     /**
-     * Returns a matching text sequence form a search phrase
+     * Returns a matching text sequences form a search phrase
      * <p>
      * e.g. 'cat' is found in 'Catalog'
      * <p>
      * The method also searches for computed phrases based on the first hit with
-     * spaces.
+     * spaces. The method combines words separated by spaces.
+     * <p>
+     * A so called stop-character-phrase indicates the end for a computed phrase.
+     * For example more than one space, \n, '. ' or ', '
      * 
      * @param data
      * @return
@@ -198,14 +203,16 @@ public class MLController implements Serializable {
                 boolean tailingSpace = false;
                 int endPos = -1;
                 // test if the text ends with a space or a newline
-                int nextSpacePos = searchText.indexOf(" ", found + searchPhrase.length() + 1);
-                int nextNewLine = searchText.indexOf("\n", found + searchPhrase.length() + 1);
+                int nextSpacePos = searchText.indexOf(" ", found + searchPhrase.length() + 0);
+                // int nextStopPhrase = searchText.indexOf("\n", found + searchPhrase.length() +
+                // 1);
+                int nextStopPhrase = indexOfStopPhrase(searchText, found + searchPhrase.length() + 0);
 
-                if (nextNewLine > -1) {
-                    // there is a newline so this may be the best match...
-                    endPos = nextNewLine;
-                    if (nextSpacePos > -1 && nextSpacePos < nextNewLine) {
-                        // there is a newline before a possible newLIne...
+                if (nextStopPhrase > -1) {
+                    // there was a stopPhrase, so this may be the best match...
+                    endPos = nextStopPhrase;
+                    if (nextSpacePos > -1 && nextSpacePos < nextStopPhrase) {
+                        // there is a space before a possible stopPhrase...
                         endPos = nextSpacePos;
                         tailingSpace = true;
                     }
@@ -229,18 +236,22 @@ public class MLController implements Serializable {
                 }
 
                 if (!result.contains(hit)) {
-                    result.add(hit);
 
-                    // lets see if it makes sense to search for variant with spaces
-                    if (tailingSpace) {
-                        searchPhrase = hit.toLowerCase() + " ";
-                    } else {
-                        // reset to origin search phrase
-                        searchPhrase = originSearchPhrase;
-                        index = found + hit.length();
+                    // We are cleaning the hit from tailing special characters
+                    // hits like "Software &" should not be returned
+                    // hits like "Software & Hardware" are ok
+                    // so we look for special characters to block bad looking results
+                    if (!endsWithSpecialCharacter(hit)) {
+                        result.add(hit);
                     }
+                }
+                // lets see if it makes sense to search for variant with spaces
+                if (tailingSpace && !searchPhrase.equals(hit.toLowerCase() + " ")) {
+                    searchPhrase = hit.toLowerCase() + " ";
                 } else {
-                    index = found + hit.length();
+                    // reset to origin search phrase
+                    searchPhrase = originSearchPhrase;
+                    index = found + hit.length() + 1;
                 }
 
             } else {
@@ -250,7 +261,7 @@ public class MLController implements Serializable {
                     break;
                 } else {
                     // reset origin phrase
-                    index = index + searchPhrase.length();
+                    index = index + searchPhrase.length() + 1;
                     searchPhrase = originSearchPhrase;
                 }
 
@@ -262,7 +273,67 @@ public class MLController implements Serializable {
             }
 
         }
+
+        // Finally clean the result set entries with tailing special characters
+        // hits like "Software &" should not be returned
+        // hits like "Software & Hardware" are ok
+        // so we look for special characters to filter bad looking results
+        // List<String> cleanedResult = result.stream().filter(c ->
+        // endsWithSpecialCharacter(c)==false).collect(Collectors.toList());
+
+        // return cleanedResult;
         return result;
+    }
+
+    /**
+     * This helper method tests if a given string ends with a special character like
+     * '&', '.', ',', ...
+     * 
+     * @param s
+     * @return true if a special character was found at the end of the string.
+     */
+    public static boolean endsWithSpecialCharacter(String s) {
+
+        char c = s.charAt(s.length() - 1);
+
+        if ((c >= 34 && c <= 47) || (c >= 58 && c <= 64) || (c == '\n') || (c == '\t')) {
+            return true;
+        }
+
+        // U+0083 - U+00BF
+        if ((c >= 161 && c <= 191)) {
+            return true;
+        }
+
+        if ((c >= '\u2000')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * This method finds the earliest stop phrase in a given string.
+     * <p>
+     * Stop phrases are more than one space, '. ', ', ', '\n'
+     * 
+     * @return
+     */
+    public static int indexOfStopPhrase(String searchText, int fromIndex) {
+        int stopPhrasePos = -1;
+        int bestMatch = 99999999;
+
+        for (String stopPhrase : STOP_PHRASE_LIST) {
+            int match = searchText.indexOf(stopPhrase, fromIndex);
+
+            if (match > -1) {
+                if (match < bestMatch) {
+                    bestMatch = match;
+                    stopPhrasePos = bestMatch;
+                }
+            }
+        }
+        return stopPhrasePos;
     }
 
     /**
