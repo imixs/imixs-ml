@@ -152,7 +152,7 @@ def analyseText(analyseData, modelPath):
     
     nlp = spacy.load(modelPath)  # load existing spaCy model    
 
-    print(analyseData.text)
+    # print(analyseData.text)
     doc = nlp(analyseData.text)
        
     # build response data structure based on a dictionary
