@@ -142,6 +142,13 @@ If the status is 'suggest' and the current event is 'public' than the status is 
 
 If the status is 'confirmed' and the workitem type is 'workitemarchive' than the status is set to 'training'. This status indicates that all known entities of a mlDefinition are filled with data found in the document content. This means that this workitem can be used for later training. The MLService creats the eventlog entry 'ml.training' for this workitem. See the 'ML TrainingScheduler'.
 
+### Overwriting the ML Status flag
+
+You can overwrite the ML-Status flag in a BPMN event by providing a ml-config tag with the name 'status':
+
+	<ml-config name="status">suggest</ml-config>
+
+This example reset the ML-Status to 'suggest'.
 
 ## ML Training Scheduler
 
