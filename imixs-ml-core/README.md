@@ -120,10 +120,15 @@ The EntityAdapter can be used to  adapt an entity with alternative formating val
 	1500,00
 	1.500,00
 	1,500.00
-	
-The TrainingService implements an Observer Pattern based on CDI Events to call registered EntityAdapters
-The Event is defined by the class:
 
-	org.imixs.ml.service.AnalyzeEntityEvent
+See the [Imixs-ML Workflow section](../imixs-ml-workflow/README.md) for further details.
 
+## CDI Events
 
+All entity adapters are triggered by CDI events send from the Service implementations.
+
+The Events are defined by the classes:
+
+ - **EntityObjectEvent** -  a CDI event fired by the TrainingService. This even can be used in a observer pattern to provide alternative text representation for a given object value.
+ 
+ - **EntityTextEvent** - a CDI event fired by the MLAdapter. This event can be used in a observer pattern to find the best Object value representation for a given set of text values.

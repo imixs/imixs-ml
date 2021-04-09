@@ -11,9 +11,9 @@ Imixs-ML adapts this concept in its core API and provides classes to integrate N
 The project consists of the following modules:
 
  * [Imixs-ML Core](./imixs-ml-core/README.md) - java core libraries to be used to access different machine learning frameworks
- * [Imixs-ML API](./imixs-ml-api/README.md) - a microservice to be integrated into a Imixs-Workflow environment
- * [Imixs-ML spaCy](./imixs-ml-spacy/README.md) - a wrapper service for [spacy.io](https://spacy.io/)
  * [Imixs-ML Workflow](./imixs-ml-workflow/README.md) - Adapter classes to integrate machine learning into the workflow processing life cycle
+ * [Imixs-ML spaCy](./imixs-ml-spacy/README.md) - a Rest API for [spacy.io](https://spacy.io/)
+ * [Imixs-ML Training](./imixs-ml-training/README.md) - a external training service to train models from existing workflow data
  
 # Imixs-ML Core
 
@@ -21,13 +21,11 @@ The module Imixs-ML Core defines the core interface to access a machine learning
 
 Learn more in the section [Imixs-ML Core](./imixs-ml-core/README.md).  
 
-# Imixs-ML API
+# Imixs-ML Workflow
 
-The Imixs-ML API defines a generic API to exchange business data with a machine learning framework. This api defines an object class to train a ml-model as also an obejct class to analyse business data.
+The Imixs-ML Workflow defines Adapter Classes to be used in a Imixs BPMN workflow model.
 
-Learn more in the section [Imixs-ML API](./imixs-ml-api/README.md).  
-
-
+Learn more in the section [Imixs-ML API](./imixs-ml-workflow/README.md).  
 
 
 # Imixs-ML spaCy
@@ -35,6 +33,14 @@ Learn more in the section [Imixs-ML API](./imixs-ml-api/README.md).
 Imixs-ML-spaCy is a wrapper service to adapt the [spaCy API](https://spacy.io/) for the Imixs-ML framework. 
 
 Learn more in the section [Imixs-ML spaCy](./imixs-ml-spacy/README.md). 
+
+
+# Imixs-ML Training
+
+Imixs-ML-Training is separate training microserve to be use to train existing wokflow data. 
+
+Learn more in the section [Imixs-ML spaCy](./imixs-ml-training/README.md). 
+
 
 # Contribute
 

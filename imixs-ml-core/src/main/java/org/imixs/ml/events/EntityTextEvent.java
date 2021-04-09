@@ -47,16 +47,21 @@ import java.util.Locale;
  * @see org.imixs.workflow.engine.WorkflowService
  */
 public class EntityTextEvent {
-
+    public static final int TEXT_DEFAULT_MAXLENGTH=128;
     private List<String> textVariants;
     private Object itemValue;
     private String itemType;
     private List<Locale> locals;
+    private int length;
 
-    public EntityTextEvent(List<String> textVariants, List<Locale> locals, String itemType) {
+    public EntityTextEvent(List<String> textVariants, List<Locale> locals, String itemType, int length) {
         this.textVariants = textVariants;
         this.locals = locals;
         this.itemType = itemType;
+        this.length=length;
+        if (this.length<=0) {
+            this.length=TEXT_DEFAULT_MAXLENGTH;
+        }
     }
 
     public List<String> getTextVariants() {

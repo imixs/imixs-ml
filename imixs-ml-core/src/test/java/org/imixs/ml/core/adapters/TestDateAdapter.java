@@ -82,7 +82,7 @@ public class TestDateAdapter {
         itemValueList.add("26. Januar 2017");
         DateAdapter dateAdapter = new DateAdapter();
 
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date");
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
 
         dateAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();

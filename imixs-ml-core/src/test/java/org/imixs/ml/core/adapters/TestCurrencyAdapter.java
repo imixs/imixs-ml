@@ -71,7 +71,7 @@ public class TestCurrencyAdapter {
         itemValueList.add("663.52");
         CurrencyAdapter currencyAdapter = new CurrencyAdapter();
 
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency");
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency",0);
         currencyAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();
 
@@ -96,7 +96,7 @@ public class TestCurrencyAdapter {
         itemValueList.add("663,52");
         CurrencyAdapter currencyAdapter = new CurrencyAdapter();
 
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency");
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency",0);
         currencyAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();
 

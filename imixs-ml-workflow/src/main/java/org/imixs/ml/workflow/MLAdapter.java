@@ -163,6 +163,7 @@ public class MLAdapter implements SignalAdapter {
             mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
+            mlLocals = parseMLLocalesByBPMN(mlConfig);
             // parse optional filename regex pattern...
             String _FilenamePattern = parseMLFilePatternByBPMN(mlConfig);
             if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
@@ -225,20 +226,29 @@ public class MLAdapter implements SignalAdapter {
                         // fire entityTextEvents so that an adapter can resolve the text into a
                         // object
                         EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals,
-                                entityDef.getItemType());
+                                entityDef.getItemType(), entityDef.getLength());
                         entityTextEvents.fire(entityTextEvent);
 
+                        Object _resultValueObject = null;
                         // test if we found an object
                         if (entityTextEvent.getItemValue() != null) {
                             // set the value
                             if (debug) {
                                 logger.info("Best match=" + entityTextEvent.getItemValue());
                             }
-                            document.setItemValue(entityDef.getItemName(), entityTextEvent.getItemValue());
+                            _resultValueObject = entityTextEvent.getItemValue();
                         } else {
                             // set the first text value as is
-                            document.setItemValue(entityDef.getItemName(), mlEntity.getValue().iterator().next());
+                            _resultValueObject = mlEntity.getValue().iterator().next();
                         }
+                        // if it is a text string than cut the length to the allowed maxium text length
+                        if (_resultValueObject instanceof String) {
+                            if (_resultValueObject.toString().length() > entityDef.getLength()) {
+                                _resultValueObject = _resultValueObject.toString().substring(0, entityDef.getLength())
+                                        .trim();
+                            }
+                        }
+                        document.setItemValue(entityDef.getItemName(), _resultValueObject);
                     }
                 }
             }
@@ -407,8 +417,9 @@ public class MLAdapter implements SignalAdapter {
                     String name = entityData.getItemValueString("name");
                     String type = entityData.getItemValueString("type");
                     String mapping = entityData.getItemValueString("mapping");
+                    int length = entityData.getItemValueInteger("length");
                     // add definition into the definition map...
-                    result.put(name, new EntityDefinition(name, type, mapping));
+                    result.put(name, new EntityDefinition(name, type, mapping, length));
                 }
             } catch (PluginException e) {
                 logger.warning("Invalid ml.config definition with unexpected entity element - verify model!");
@@ -461,8 +472,9 @@ public class MLAdapter implements SignalAdapter {
         private String name;
         private String itemType;
         private String itemName;
+        private int length;
 
-        public EntityDefinition(String name, String itemType, String itemName) {
+        public EntityDefinition(String name, String itemType, String itemName, int length) {
             super();
             if (name == null || name.isEmpty()) {
                 logger.warning("Invalid ml.config entity definition - missing name!");
@@ -470,6 +482,10 @@ public class MLAdapter implements SignalAdapter {
             this.name = name;
             this.itemType = itemType;
             this.itemName = itemName;
+            this.length = length;
+            if (this.length <= 0) {
+                this.length = EntityTextEvent.TEXT_DEFAULT_MAXLENGTH;
+            }
         }
 
         public String getName() {
@@ -478,6 +494,14 @@ public class MLAdapter implements SignalAdapter {
 
         public String getItemType() {
             return itemType;
+        }
+
+        public int getLength() {
+            return length;
+        }
+
+        public void setLength(int length) {
+            this.length = length;
         }
 
         public String getItemName() {

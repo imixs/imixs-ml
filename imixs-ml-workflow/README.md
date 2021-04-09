@@ -89,6 +89,48 @@ To configure the behavior of the entity adaption in a more fine grained way, opt
 In this example the entity 'invoice.total' will be adapted by the Currency Adapter. 
 The entity 'cdtr.bic' will be mapped into the item 'bic'.
 
+##### Data Types
+
+The following ml types are supported for the Named Entity Recognition:
+
+**text**
+
+A plain text string
+
+**currency**
+
+A text representing a currency in one of the defined locales. See the following examples:
+
+	1.700.411,00
+	100,-
+	663.52
+
+**date**
+
+A text representing a date formated in one of the defined locales. See the following examples:
+
+	3 May 2020
+	3. May 2020
+	03.05.2020
+	
+**iban**
+
+A text representing a IBAN. See the following examples:
+
+	DE69 5095 1469 0005 0111 11
+	DE69509514690005011111	
+
+##### Text length
+
+A text entity has a predefined maximum length of 128 characters. The length can be overwritten with the tag 'length'
+
+	<ml-config name="entity">
+	    <name>cdtr.bic</name>
+	    <type>text</type>
+	    <length>8</length>
+	</ml-config>
+
+In this example the returned text entity for the item 'cdtr.bic' will have a maximum length of 8 characters. 
 
 #### Text Classification
 
@@ -98,10 +140,12 @@ For a text classification the MLAdapter expects a configuration specifying the t
 	    <target>ml.category</target>
 	    <source>$workflowgroup</source>
 	</ml-config>
-
+	
 In this example all categories found by the ML Framework will be listed in the item 'ml.category' (target item).
 
 The tag <source> specifies the text category to be used for a incremental training. The source tag can be empty if a incremental training should not be performed. 
+
+
 
 ### Filter by File Pattern 
 
