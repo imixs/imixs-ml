@@ -238,8 +238,10 @@ public class MLAdapter implements SignalAdapter {
                             }
                             _resultValueObject = entityTextEvent.getItemValue();
                         } else {
-                            // set the first text value as is
-                            _resultValueObject = mlEntity.getValue().iterator().next();
+                            // if type=text or type="" then  set the first text value as is
+                            if (entityDef.getItemType().isEmpty() || "text".equals(entityDef.getItemType())) {
+                                _resultValueObject = mlEntity.getValue().iterator().next();
+                            }
                         }
                         // if it is a text string than cut the length to the allowed maxium text length
                         if (_resultValueObject instanceof String) {

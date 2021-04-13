@@ -97,5 +97,32 @@ public class TestDateAdapter {
         Assert.assertEquals(26, cal.get(Calendar.DAY_OF_MONTH));
 
     }
+    
+    
+    
+    
+    /**
+     * Test invalid date string
+     * 
+     * 
+     */
+    @Test
+    public void testInvalidDateString() {
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.GERMANY);
+
+        List<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("1005.55");
+        DateAdapter dateAdapter = new DateAdapter();
+
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
+
+        dateAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+
+        Assert.assertNull(o);
+
+    }
 
 }
