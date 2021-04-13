@@ -16,7 +16,6 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
-import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -60,6 +59,7 @@ public class MLService implements Serializable {
     public static final String ITEM_ML_LOCALES = "ml.locales";
     public static final String ITEM_ML_STATUS = "ml.status";
     public static final String ITEM_ML_MODEL = "ml.model";
+    public static final String ITEM_ML_QUALITY = "ml.quality";
 
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
@@ -67,9 +67,9 @@ public class MLService implements Serializable {
 
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
 
-    @Inject
-    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
-    String trainingQualityLevel;
+//    @Inject
+//    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
+//    String trainingQualityLevel;
 
     // enabled
     @Inject
@@ -237,6 +237,7 @@ public class MLService implements Serializable {
             String mlEndpoint = mlDefinition.getItemValueString(ITEM_ML_ENDPOINT);
             String mlModel = mlDefinition.getItemValueString(ITEM_ML_MODEL);
             String mlLocals = mlDefinition.getItemValueString(ITEM_ML_LOCALES);
+            String mlQuality = mlDefinition.getItemValueString(ITEM_ML_QUALITY);
             logger.info("...train " + mlEndpoint + " model: " + mlModel);
 
             // send workitem to training service
@@ -254,11 +255,16 @@ public class MLService implements Serializable {
 
             // verify the TRAININGDATA_QUALITY_LEVEL
             if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                logger.warning("...document '" + workitem.getUniqueID()
-                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                return;
+                if  ("REDUCED".equalsIgnoreCase(mlQuality)) {
+                    logger.info("...document '" + workitem.getUniqueID()
+                    + "' TRAININGDATA_QUALITY_LEVEL=BAD but REDUCED is accepted - document will be trained...");
+                } else {
+                    logger.warning("...document '" + workitem.getUniqueID()
+                    + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
+                    return;
+                }
             } else if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL
-                    && "FULL".equalsIgnoreCase(trainingQualityLevel)) {
+                    && "FULL".equalsIgnoreCase(mlQuality)) {
                 logger.warning("...document '" + workitem.getUniqueID()
                         + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
                 return;
@@ -266,7 +272,6 @@ public class MLService implements Serializable {
 
             // post training data...
             mlClient.postTrainingData(trainingData, mlModel);
-
         }
 
     }

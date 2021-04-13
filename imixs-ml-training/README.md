@@ -93,9 +93,11 @@ This example maps the item '_capacity' to the entity 'invoice.total'.
 
 The training data quality depends on the entities found in the content of a workitem.  There are the following training data quality levels defined:
 
- - FULL - all training items in the workitem have a value and all values are part of the traingData. This means a 100% match.
- - PARTIAL - not all training items in the workitem have a value, but all values are part of the  traingData. This means the workitem data has a partial  match.
- - BAD - not all training item values of the workitem are part of the traingData.  This means the training object has a bad quality and can not be used for training
+ - FULL - all training items in the workitem have a value and all values are part of the training text. This means a 100% match.
+ - PARTIAL - not all training items in the workitem have a value, but all values are part of the training text. This means the workitem data has a partial match.
+ - BAD - not all training item values are part of the training text.  This means the training object has a bad quality and can not be used for training
+ 
+
 
 The requested quality level for a training data set can be defined with the config item "ml.training.quality"
 

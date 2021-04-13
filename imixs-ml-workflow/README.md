@@ -45,7 +45,7 @@ See the following example:
 	<ml-config name="endpoint">
 	    https://localhost:8111/api/resource/
 	</ml-config>
-	<ml-config name="model">invoice-model-1.0.0</ml-config>
+	<ml-config name="quality">REDUCED</ml-config>
 	<ml-config name="locales">de_DE,en_GB</ml-config>
 
 **Note:** The mode name is mandatory. In case not default model is defined by the environment variable 'ML_MODEL' and not model is specified by the BPMN model, the Adapter throws an ProcessingErrorException. 
@@ -157,6 +157,15 @@ Filename Pattern can be provided.
 This example will only analyse content from PDF and MS Word files. 
 
 
+### Training Quality
+
+Per default the required training data quality is set to 'PARTIAL' which means that not all Items must contain a value to be acceptable for the training service. 
+You can overwrite the Training quality level to 'FULL' or 'REDUCED' to accept a different quality level.
+
+	<ml-config name="ml.training.quality">REDUCED</ml-config>
+
+
+
 ## The ML Definition
 
 During the processing of a workitem the MLService creates a MLDefinition holding the details of a ml service endpoint. These data is stored in a Map object with the following data
@@ -223,6 +232,7 @@ The training scheduler will only train data with a training quality level="PARTI
 
  - ML_TRAINING_QUALITYLEVEL=FULL  - all ML Items of a workitem must provide matching values. 
  - ML_TRAINING_QUALITYLEVEL=PARTIAL -  empty values are allowed (default).
+ - ML_TRAINING_QUALITYLEVEL=REDUCED
 
 It is possible to force the training quality level "FULL" with the environment 'ML_TRAINING_QUALITYLEVEL': 
 
