@@ -255,7 +255,7 @@ public class MLService implements Serializable {
 
             // verify the TRAININGDATA_QUALITY_LEVEL
             if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                if  ("REDUCED".equalsIgnoreCase(mlQuality)) {
+                if  ("REDUCED".equalsIgnoreCase(mlQuality) ) {
                     logger.info("...document '" + workitem.getUniqueID()
                     + "' TRAININGDATA_QUALITY_LEVEL=BAD but REDUCED is accepted - document will be trained...");
                 } else {
@@ -271,7 +271,10 @@ public class MLService implements Serializable {
             }
 
             // post training data...
-            mlClient.postTrainingData(trainingData, mlModel);
+            // validate if usefull data
+            if (!trainingData.isEmpty()) {
+                mlClient.postTrainingData(trainingData, mlModel);
+            }
         }
 
     }

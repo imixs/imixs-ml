@@ -95,7 +95,6 @@ public class XMLTrainingData implements Serializable {
         this.entities = entities;
     }
 
-    
     public List<XMLTrainingCategory> getCategories() {
         return categories;
     }
@@ -122,10 +121,29 @@ public class XMLTrainingData implements Serializable {
      * Set the trainingData quality leval
      * 
      * @param quality
-     */ 
+     */
     @XmlTransient
     public void setQuality(int quality) {
         this.quality = quality;
+    }
+
+    /**
+     * This method returns true if no text is defined, or no entities and no
+     * categories are contained
+     * 
+     * @return
+     */
+    @XmlTransient
+    public boolean isEmpty() {
+        if (text == null || text.isEmpty()) {
+            return true;
+        }
+
+        if ((entities == null || entities.size() == 0) && (categories == null || categories.size() == 0)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -143,7 +161,7 @@ public class XMLTrainingData implements Serializable {
      */
     public static String cleanTextdata(String text) {
         String result = text;
-        // strip control characters but prevent newline and tab  
+        // strip control characters but prevent newline and tab
         result = stripChars(result, c -> (c > '\u001F' && c != '\u007F') || (c == '\n') || (c == '\t'));
         // replace JSON structure characters with spaces
         result = result.replaceAll("[{}\"]", " ");
@@ -151,7 +169,8 @@ public class XMLTrainingData implements Serializable {
     }
 
     /**
-     * Helper method to strip Chars form a string. 
+     * Helper method to strip Chars form a string.
+     * 
      * @param s
      * @param include
      * @return

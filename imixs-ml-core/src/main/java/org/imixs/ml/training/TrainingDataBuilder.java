@@ -94,7 +94,7 @@ public class TrainingDataBuilder {
                 List<XMLTrainingEntity> trainingEntities = createTrainingEntities(trainingData.getText(), value,
                         itemName, locals);
 
-                if (trainingEntities.size()>0) {
+                if (trainingEntities!=null && trainingEntities.size()>0) {
                     for (XMLTrainingEntity trainingEntity : trainingEntities) {
                         trainingData.addTrainingEntity(trainingEntity);
                         if (debug) {
@@ -104,7 +104,7 @@ public class TrainingDataBuilder {
                         }
                     }
                 } else {
-                    // no matching value was found for this entity, so the quality level is bad!
+                    // no matching value was found for this entity, the quality level is bad!
                     trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
                 }
 
