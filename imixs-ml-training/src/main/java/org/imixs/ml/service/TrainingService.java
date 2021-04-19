@@ -143,8 +143,8 @@ public class TrainingService {
                 return XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
             }
 
-            logger.info("extracted text content to be analysed=");
-            logger.info(ocrText);
+            logger.fine("extracted text content to be analysed=");
+            logger.fine(ocrText);
             // build training data set...
             XMLTrainingData trainingData = new TrainingDataBuilder(ocrText, workitem, trainingItemNames, locals)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
@@ -157,28 +157,31 @@ public class TrainingService {
                 }
             }
 
+            qualityResult = trainingData.getQuality();
             // we only send the training data in case of quality level is sufficient
             if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                logger.severe("...document '" + workitem.getUniqueID()
-                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-
-                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
-            } else if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
-                    && "FULL".equalsIgnoreCase(qualityLevel)) {
-                logger.severe("...document '" + workitem.getUniqueID()
-                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
-                qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
-            } else {
-                // trainingData quality level is sufficient
-                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()) {
-                    logger.warning(
-                            "...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL ...");
+                if ("REDUCED".equalsIgnoreCase(qualityLevel)) {
+                    logger.info("...document '" + workitem.getUniqueID()
+                            + "' TRAININGDATA_QUALITY_LEVEL=BAD but REDUCED is accepted - document will be trained...");
                     qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL;
+                } else {
+                    logger.severe("...document '" + workitem.getUniqueID()
+                            + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
                 }
-                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL == trainingData.getQuality()) {
-                    logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=FULL ...");
-                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL;
+            } else {
+                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
+                        && "FULL".equalsIgnoreCase(qualityLevel)) {
+                    logger.severe("...document '" + workitem.getUniqueID()
+                            + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
+                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+                } else {
+                    logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=" + qualityResult +"...");
                 }
+            }
+
+            // trainingData if quality level is sufficient
+            if (qualityResult == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL
+                    || qualityResult == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL) {
 
                 // log the XMLTrainingData object....
                 if (debug) {
@@ -308,7 +311,7 @@ public class TrainingService {
 
         }
 
-        workitem=snapshot;
+        workitem = snapshot;
         files = workitem.getFileData();
 
         for (FileData fileData : files) {
