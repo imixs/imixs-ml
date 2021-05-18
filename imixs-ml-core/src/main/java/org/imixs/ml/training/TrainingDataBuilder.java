@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Event;
 
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
@@ -37,15 +38,15 @@ public class TrainingDataBuilder {
 
     private static Logger logger = Logger.getLogger(TrainingDataBuilder.class.getName());
 
-    private List<String> itemNames = null;
+    private List<MLEntity> mlEntities = null;
     private ItemCollection workitem = null;
     private Event<EntityObjectEvent> entityObjectEvents = null;
     private XMLTrainingData trainingData = null;
     private List<Locale> locals = null;
 
-    public TrainingDataBuilder(String text, ItemCollection workitem, List<String> itemNames, List<Locale> locals) {
+    public TrainingDataBuilder(String text, ItemCollection workitem, List<MLEntity> mlEntities, List<Locale> locals) {
         super();
-        this.itemNames = itemNames;
+        this.mlEntities = mlEntities;
         if (workitem != null) {
             this.workitem = (ItemCollection) workitem.clone();
         } else {
@@ -75,10 +76,9 @@ public class TrainingDataBuilder {
 
         // set quality level to full and reduce the level during the build process
         trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL);
-
         // now lets see if we find some of our item values....
-        for (String itemName : itemNames) {
-            itemName = itemName.toLowerCase().trim();
+        for (MLEntity mlEntity:  mlEntities) {
+            String itemName = mlEntity.getItemName().toLowerCase().trim();
             // if the itemName contains a | character than we do a mapping here.....
             if (itemName.contains("|")) {
                 String entityName = itemName.substring(itemName.indexOf('|') + 1).trim();
@@ -104,8 +104,11 @@ public class TrainingDataBuilder {
                         }
                     }
                 } else {
-                    // no matching value was found for this entity, the quality level is bad!
-                    trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
+                    // no matching value was found for this entity, the quality level is bad if the entity has
+                    // the required flag.
+                    if (mlEntity.isRequired()) {
+                        trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
+                    }
                 }
 
             } else {

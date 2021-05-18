@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.imixs.ml.core.MLConfig;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.faces.data.WorkflowController;
 
@@ -57,7 +60,9 @@ public class MLController implements Serializable {
             // iterate over all mlDefinitions
             List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
             for (ItemCollection mlDefinition : mlDefinitionList) {
-                List<String> mlItems = mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS);
+                List<Map<String,Object>> definitionMap=mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS);
+                List<MLEntity>  mlEntities = MLConfig.explodeMLEntityList(definitionMap);
+                List<String> mlItems=MLConfig.getAllEntityNames(mlEntities);
                 return mlItems.contains(name);
             }
         }
@@ -98,7 +103,11 @@ public class MLController implements Serializable {
             // iterate over all mlDefinitions.
             List<ItemCollection> mlDefinitionList = mlService.getMLDefinitions(workflowController.getWorkitem());
             for (ItemCollection mlDefinition : mlDefinitionList) {
-                mlItems.addAll(mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS));
+                
+                List<Map<String,Object>> definitionMap=mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS);
+                List<MLEntity>  mlEntities = MLConfig.explodeMLEntityList(definitionMap);
+                mlItems.addAll(MLConfig.getAllEntityNames(mlEntities));
+                //mlItems.addAll(mlDefinition.getItemValue(MLService.ITEM_ML_ITEMS));
                 if (MLService.ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(MLService.ITEM_ML_STATUS))) {
                     status = MLService.ML_STATUS_SUGGEST;
                 }

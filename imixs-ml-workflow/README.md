@@ -132,6 +132,34 @@ A text entity has a predefined maximum length of 128 characters. The length can 
 
 In this example the returned text entity for the item 'cdtr.bic' will have a maximum length of 8 characters. 
 
+##### Required
+
+Per default each  entity is marked as 'required=true' for later training. 
+This means if a workitem does not provide a value for a ml-config entity, than the workitem is classified with TRAININGDATA_QUALITY_LEVEL_BAD and will not be included for later training.
+
+Specially for Date and Currency values this requirement can often not be fulfilled. For example the Date Text representation
+
+	APR. 14, 2021
+
+can hardly be accociated with the date ISO Date 2021-04-14.
+
+To avoid that a workitem is excluded from training because of a not matching text representation in the training text the optional attribute 'required' can be set to false. 
+
+
+	<ml-config name="entity">
+	    <name>invoice.total</name>
+	    <type>currency</type>
+	    <required>false</required>
+	</ml-config>
+	<ml-config name="entity">
+	    <name>invoice.date</name>
+	    <type>date</type>
+	    <required>false</required>
+	</ml-config>
+
+In this case a not matching text representation does not lead to the TRAININGDATA_QUALITY_LEVEL_BAD.
+
+
 #### Text Classification
 
 For a text classification the MLAdapter expects a configuration specifying the target item:

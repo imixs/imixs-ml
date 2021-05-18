@@ -68,6 +68,40 @@ public class TestDateAdapter {
     }
 
     /**
+     * test variants of  "APR. 14, 2021"
+     */
+    @Test
+    public void testVariantsUSDate() {
+    
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.GERMANY);
+    
+        Set<String> enityVariants = new HashSet<String>();
+    
+        Date date = null;
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.MONTH, 3);
+        cal.set(Calendar.DAY_OF_MONTH, 14);
+        cal.set(Calendar.YEAR, 2021);
+        date = cal.getTime();
+    
+        dateAdapter.onEvent(new EntityObjectEvent(date, enityVariants, locals));
+    
+        for (String variant : enityVariants) {
+            logger.info(variant);
+    
+        }
+    
+      
+        Assert.assertTrue(enityVariants.contains("14. April 2021"));
+        Assert.assertTrue(enityVariants.contains("14 April 2021"));
+        Assert.assertTrue(enityVariants.contains("14. April 2021"));
+        Assert.assertTrue(enityVariants.contains("14.04.2021"));
+        Assert.assertTrue(enityVariants.contains("APR. 14, 2021"));
+    }
+
+    /**
      * Test conversion of German long date "26. Januar 2017" to Date object
      * 
      * 
@@ -80,6 +114,43 @@ public class TestDateAdapter {
 
         List<String> itemValueList = new ArrayList<String>();
         itemValueList.add("26. Januar 2017");
+        DateAdapter dateAdapter = new DateAdapter();
+
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
+
+        dateAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+
+        Assert.assertTrue(o instanceof Date);
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+
+        Assert.assertEquals(2017, cal.get(Calendar.YEAR));
+        Assert.assertEquals(0, cal.get(Calendar.MONTH));
+        Assert.assertEquals(26, cal.get(Calendar.DAY_OF_MONTH));
+
+    }
+    
+    
+
+    /**
+     * Test conversion of UK Date long date "APR. 14, 2021" to Date object
+     * 
+     * 
+     * Wed Apr 14 00:00:00 CEST 2021
+     * 
+     * 
+     */
+    @Test
+    public void testUKLongFomatToDate() {
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.US);
+        locals.add(Locale.GERMANY);
+
+        List<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("APR. 14, 2021");
         DateAdapter dateAdapter = new DateAdapter();
 
         EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);

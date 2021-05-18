@@ -1,7 +1,6 @@
 package org.imixs.ml.training;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.imixs.ml.adapters.DateAdapter;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.ml.xml.XMLTrainingEntity;
@@ -114,11 +114,12 @@ public class TestTrainingDataBuilder {
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("test", "{some text}");
 
-        List<String> items = Arrays.asList(new String[] { "test" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("test",null,null,0,true));
 
         String text = "some text in a special textblock.\nWith line\nAnd with \tsome text{END}";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities,locals).build();
 
         Assert.assertEquals("some text in a special textblock.\nWith line\nAnd with \tsome text END ",
                 trainingData.getText());
@@ -159,11 +160,14 @@ public class TestTrainingDataBuilder {
         doc.replaceItemValue("gpe", "U.K.");
         doc.replaceItemValue("money", "$1 billion");
 
-        List<String> items = Arrays.asList(new String[] { "org", "gpe", "money" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("org",null,null,0,true));
+        mlEntities.add(new MLEntity("gpe",null,null,0,true));
+        mlEntities.add(new MLEntity("money",null,null,0,true));
 
         String text = "Apple is looking at buying U.K. startup for $1 billion";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities,locals).build();
 
         List<XMLTrainingEntity> trainingEntities = trainingData.getEntities();
         Assert.assertEquals(3, trainingEntities.size());
@@ -220,7 +224,9 @@ public class TestTrainingDataBuilder {
         DateAdapter dateAdapter = new DateAdapter();
         String text = "Invoice Date: 02.06.2020";
 
-        List<String> items = Arrays.asList(new String[] { "_invoicedate" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("_invoicedate","date",null,0,true));
+    
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_MONTH, 2);
@@ -233,7 +239,7 @@ public class TestTrainingDataBuilder {
         ItemCollection doc = new ItemCollection();
         doc.setItemValue("_invoicedate", cal.getTime());
 
-        TrainingDataBuilder builder = new TrainingDataBuilder(text, doc, items,locals);
+        TrainingDataBuilder builder = new TrainingDataBuilder(text, doc, mlEntities,locals);
 
         // Here we simulate a XML training entity list....
         List<XMLTrainingEntity> trainingEntites = builder.collectTrainingEntities(text, enityVariants, "_invoice");

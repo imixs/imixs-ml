@@ -45,6 +45,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLContentBuilder;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityTextEvent;
 import org.imixs.ml.xml.XMLAnalyseEntity;
 import org.imixs.ml.xml.XMLAnalyseResult;
@@ -154,8 +155,7 @@ public class MLAdapter implements SignalAdapter {
         String mlQuality = null;
         Pattern mlFilenamePattern = null;
         List<Locale> locals = new ArrayList<Locale>();
-
-        Map<String, EntityDefinition> entityDefinitions = null;
+        List<MLEntity> mlEntities = null;
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
 
@@ -178,7 +178,7 @@ public class MLAdapter implements SignalAdapter {
             // convert locals definitions into a List of Locales
             locals = LocaleHelper.parseLocales(mlLocals);
             // test if the model provides optional entity definitions.
-            entityDefinitions = parseEntityDefinitionsByBPMN(mlConfig);
+            mlEntities = parseMLEntitiesByBPMN(mlConfig);
         } catch (PluginException e) {
             logger.warning("Unable to parse item definitions for 'ml-config', verify model - " + e.getMessage());
         }
@@ -222,10 +222,10 @@ public class MLAdapter implements SignalAdapter {
                 String mlEntityName = mlEntity.getKey();
 
                 // is this entity listed in our configuration?
-                if (entityDefinitions.containsKey(mlEntityName)) {
+                MLEntity entityDef= MLConfig.findMLEntityByName(mlEntityName,mlEntities);
+                if (entityDef!=null) {
                     // Do we have an entityDefinition for this entity?
-                    // If not we do ignore this ml item! issue #34
-                    EntityDefinition entityDef = entityDefinitions.get(mlEntityName);
+                    // If not we do ignore this ml item! issue #34                    
                     if (document.isItemEmpty(entityDef.getItemName())) {
                         List<String> itemValueList = mlEntity.getValue();
                         // fire entityTextEvents so that an adapter can resolve the text into a
@@ -267,7 +267,8 @@ public class MLAdapter implements SignalAdapter {
             ItemCollection mlDefinition = new ItemCollection();
             mlDefinition.setItemValue(MLService.ITEM_ML_ENDPOINT, mlAPIEndpoint);
             mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
-            mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
+            //mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
+            mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS,MLConfig.implodeMLEntityList(mlEntities) );
             mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
             mlDefinition.setItemValue(MLService.ITEM_ML_QUALITY, mlQuality);
             mlService.updateMLDefinition(document, mlDefinition);
@@ -433,7 +434,7 @@ public class MLAdapter implements SignalAdapter {
      * This method parses the workflow result for optional entity definitions
      */
     @SuppressWarnings("unchecked")
-    private Map<String, EntityDefinition> parseEntityDefinitionsByBPMN(ItemCollection mlConfig) {
+    private List<MLEntity> parseMLEntitiesByBPMN(ItemCollection mlConfig) {
 
         List<String> entityDevList = mlConfig.getItemValue("entity");
 
@@ -442,7 +443,8 @@ public class MLAdapter implements SignalAdapter {
                     "missing ml-config entity definitions!");
         }
 
-        Map<String, EntityDefinition> result = new HashMap<String, EntityDefinition>();
+       // Map<String, EntityDefinition> result = new HashMap<String, EntityDefinition>();
+        List<MLEntity> result = new ArrayList<MLEntity>();
 
         for (String entityDev : entityDevList) {
 
@@ -459,8 +461,13 @@ public class MLAdapter implements SignalAdapter {
                     String type = entityData.getItemValueString("type");
                     String mapping = entityData.getItemValueString("mapping");
                     int length = entityData.getItemValueInteger("length");
+                    boolean forceTraining=true;
+                    if (entityData.hasItem("required")) {
+                        forceTraining=entityData.getItemValueBoolean("required");
+                    }
                     // add definition into the definition map...
-                    result.put(name, new EntityDefinition(name, type, mapping, length));
+                    //result.put(name, new EntityDefinition(name, type, mapping, length,forceTraining));
+                    result.add(new MLEntity(name, type, mapping, length,forceTraining));
                 }
             } catch (PluginException e) {
                 logger.warning("Invalid ml.config definition with unexpected entity element - verify model!");
@@ -503,55 +510,6 @@ public class MLAdapter implements SignalAdapter {
         return result;
     }
 
-    /**
-     * Helper class providing properties of a entity definition
-     * 
-     * @author rsoika
-     *
-     */
-    class EntityDefinition {
-        private String name;
-        private String itemType;
-        private String itemName;
-        private int length;
-
-        public EntityDefinition(String name, String itemType, String itemName, int length) {
-            super();
-            if (name == null || name.isEmpty()) {
-                logger.warning("Invalid ml.config entity definition - missing name!");
-            }
-            this.name = name;
-            this.itemType = itemType;
-            this.itemName = itemName;
-            this.length = length;
-            if (this.length <= 0) {
-                this.length = EntityTextEvent.TEXT_DEFAULT_MAXLENGTH;
-            }
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getItemType() {
-            return itemType;
-        }
-
-        public int getLength() {
-            return length;
-        }
-
-        public void setLength(int length) {
-            this.length = length;
-        }
-
-        public String getItemName() {
-            if (itemName == null || itemName.isEmpty()) {
-                return name;
-            } else {
-                return itemName;
-            }
-        }
-
-    }
+  
+   
 }

@@ -1,5 +1,6 @@
 package org.imixs.ml.core.adapters;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +56,26 @@ public class TestCurrencyAdapter {
         Assert.assertEquals(4, enityVariants.size());
 
         Assert.assertTrue(enityVariants.contains("1.700.411,00"));
+    }
+    
+    
+    /**
+     * test variants
+     */
+    @Test
+    public void testBigDecimalVariants() {
+        Set<String> variants = new HashSet<String>();
+        BigDecimal d = new BigDecimal(17.00);
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.GERMANY);
+        currencyAdapter.onObjectEvent(new EntityObjectEvent(d, variants, locals));
+        for (String variant : variants) {
+            logger.info(variant);
+
+        }
+        Assert.assertEquals(2, variants.size());
+        Assert.assertTrue(variants.contains("17.00"));
     }
 
     /**

@@ -1,10 +1,10 @@
 package org.imixs.ml.training;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.exceptions.PluginException;
@@ -45,11 +45,14 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("city", "munich");
         doc.replaceItemValue("company", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "city", "company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("city", null, null, 0, true));
+        mlEntities.add(new MLEntity("company", null, null, 0, true));
 
         String text = "anna is working at IBM in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL, trainingData.getQuality());
     }
 
@@ -70,11 +73,14 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("city", "munich");
         // no company - doc.replaceItemValue("company", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "city", "company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("city", null, null, 0, true));
+        mlEntities.add(new MLEntity("company", null, null, 0, true));
 
         String text = "anna is working at IBM in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
 
         // ##########################################################
@@ -86,11 +92,9 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("city", "munich");
         // no company - doc.replaceItemValue("company", "IBM");
 
-        items = Arrays.asList(new String[] { "name", "city", "company" });
-
         text = "anna is working in munich";
 
-        trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
     }
 
@@ -111,12 +115,15 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("city", "munich");
         doc.replaceItemValue("company", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "city", "company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("city", null, null, 0, true));
+        mlEntities.add(new MLEntity("company", null, null, 0, true));
 
         /* no company in traing data */
         String text = "anna is working at RedHat in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD, trainingData.getQuality());
     }
 
@@ -136,11 +143,14 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("city", "munich");
         doc.replaceItemValue("firma", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "city", "firma|company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("city", null, null, 0, true));
+        mlEntities.add(new MLEntity("firma|company", null, null, 0, true));
 
         String text = "anna is working at IBM in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL, trainingData.getQuality());
     }
 
@@ -161,11 +171,14 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("stadt", "munich");
         // no company - doc.replaceItemValue("company", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "stadt|city", "company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("stadt|city", null, null, 0, true));
+        mlEntities.add(new MLEntity("company", null, null, 0, true));
 
         String text = "anna is working at IBM in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
     }
 
@@ -186,12 +199,15 @@ public class TestTrainingDataQuality {
         doc.replaceItemValue("stadt", "munich");
         doc.replaceItemValue("firma", "IBM");
 
-        List<String> items = Arrays.asList(new String[] { "name", "stadt | city", "firma|company" });
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        mlEntities.add(new MLEntity("name", null, null, 0, true));
+        mlEntities.add(new MLEntity("stadt | city", null, null, 0, true));
+        mlEntities.add(new MLEntity("firma|company", null, null, 0, true));
 
         /* no company in traing data */
         String text = "anna is working at RedHat in munich";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items, locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
         Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD, trainingData.getQuality());
     }
 }

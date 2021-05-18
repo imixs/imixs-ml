@@ -16,6 +16,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLConfig;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -99,7 +101,6 @@ public class MLService implements Serializable {
      * 
      * @param processingEvent
      */
-    @SuppressWarnings("unchecked")
     public void onWorkflowEvent(@Observes ProcessingEvent processingEvent) {
         if (processingEvent == null)
             return;
@@ -116,13 +117,10 @@ public class MLService implements Serializable {
         List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
         boolean bUpdateDefinitions = false;
         for (ItemCollection mlDefinition : mlDefinitionList) {
-
-            // if it was an public event we set the ml.status to 'verified'
-            List<String> mlItems = mlDefinition.getItemValue(ITEM_ML_ITEMS);
-
+            List<MLEntity> mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
             // set initial status?
             if (ProcessingEvent.AFTER_PROCESS == eventType) {
-                if (mlItems.size() > 0 && mlDefinition.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
+                if (mlEntities.size() > 0 && mlDefinition.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
                     mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_SUGGEST);
                     bUpdateDefinitions = true;
                     continue;
@@ -131,7 +129,7 @@ public class MLService implements Serializable {
 
             // set confirmed status?
             if (ProcessingEvent.BEFORE_PROCESS == eventType) {
-                if (mlItems.size() > 0 && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
+                if (mlEntities.size() > 0 && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
                     // test if we have a public event
                     Model model;
                     try {
@@ -217,7 +215,6 @@ public class MLService implements Serializable {
      * 
      * @param uid
      */
-    @SuppressWarnings("unchecked")
     public void trainWorkitem(String uid) {
         // load the workitem
         ItemCollection workitem = workflowService.getWorkItem(uid);
@@ -242,15 +239,13 @@ public class MLService implements Serializable {
 
             // send workitem to training service
             MLClient mlClient = new MLClient(mlEndpoint);
-
             String content = getAllDocumentText(workitem);
-            List<String> itemNames = mlDefinition.getItemValue(ITEM_ML_ITEMS);
-
+            List<MLEntity> mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
             // parse locales
             List<Locale> locales = LocaleHelper.parseLocales(mlLocals);
 
             // build training data set...
-            XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, itemNames, locales)
+            XMLTrainingData trainingData = new TrainingDataBuilder(content, workitem, mlEntities, locales)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
 
             // verify the TRAININGDATA_QUALITY_LEVEL

@@ -115,6 +115,11 @@ public class DateAdapter {
                     event.getEnityTextVariants().add(dateFormat.format(date));
                     dateFormat = new SimpleDateFormat("d. MMMMM yyyy", locale);
                     event.getEnityTextVariants().add(dateFormat.format(date));
+
+                    // APR. 14, 2021
+                    dateFormat = new SimpleDateFormat("MMM. d, yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date));
+
                 }
             }
 
