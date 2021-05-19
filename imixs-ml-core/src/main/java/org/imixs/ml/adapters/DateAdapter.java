@@ -97,6 +97,9 @@ public class DateAdapter {
             dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             event.getEnityTextVariants().add(dateFormat.format(date));
 
+            dateFormat = new SimpleDateFormat("dd/MM/yy");
+            event.getEnityTextVariants().add(dateFormat.format(date));
+
             dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             event.getEnityTextVariants().add(dateFormat.format(date));
 
@@ -109,6 +112,9 @@ public class DateAdapter {
             dateFormat = new SimpleDateFormat("d.M.yy");
             event.getEnityTextVariants().add(dateFormat.format(date));
 
+            dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            event.getEnityTextVariants().add(dateFormat.format(date));
+
             if (event.getLocals() == null || event.getLocals().size() == 0) {
                 logger.warning("missing locals - adapter can not applied locale formats!");
 
@@ -118,6 +124,12 @@ public class DateAdapter {
                     event.getEnityTextVariants().add(dateFormat.format(date));
                     dateFormat = new SimpleDateFormat("d. MMMMM yyyy", locale);
                     event.getEnityTextVariants().add(dateFormat.format(date));
+                    dateFormat = new SimpleDateFormat("d. MMMMM yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date));
+                    dateFormat = new SimpleDateFormat("dd.MMM.yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date));
+                    dateFormat = new SimpleDateFormat("dd.MMM.yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
 
                     // APR. 14, 2021 (special use case (maybe IBM AS400)
                     dateFormat = new SimpleDateFormat("MMM. dd, yyyy", locale);
@@ -126,6 +138,19 @@ public class DateAdapter {
                     // 14/APR/2021  - dd/mm/yyyy
                     dateFormat = new SimpleDateFormat("dd/MMM/yyyy", locale);
                     event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
+                    
+                    // 05 MAY 2021
+                    dateFormat = new SimpleDateFormat("dd MMM yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
+                    
+                    // 05-MAY-2021
+                    dateFormat = new SimpleDateFormat("dd-MMM-yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
+                    
+                    // 05-May-2021
+                    dateFormat = new SimpleDateFormat("dd-MMM-yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date));
+                    
                 }
             }
 
@@ -142,8 +167,8 @@ public class DateAdapter {
      */
     public void onTextEvent(@Observes EntityTextEvent event) {
 
-        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" , "dd/MM/yyyy" };
-        String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy", "MMM. dd, yyyy", "dd/MMM/yyyy" };
+        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" , "dd/MM/yyyy", "dd/MM/yy"  , "dd-MM-yyyy" };
+        String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy", "MMM. dd, yyyy", "dd/MMM/yyyy", "dd.MMM.yyyy", "dd MMM yyyy","dd-MMM-yyyy" };
 
         // if the event already has a object then we return
         if (event.getItemValue() != null) {

@@ -57,7 +57,7 @@ public class TestDateAdapter {
             logger.info(variant);
         }
 
-        Assert.assertEquals(14, enityVariants.size());
+        Assert.assertTrue(enityVariants.size()>16);
 
         Assert.assertTrue(enityVariants.contains("3 May 2020"));
         Assert.assertTrue(enityVariants.contains("3. May 2020"));
@@ -68,8 +68,14 @@ public class TestDateAdapter {
         Assert.assertTrue(enityVariants.contains("MAY. 03, 2020"));
         Assert.assertTrue(enityVariants.contains("03/MAY/2020"));
         Assert.assertTrue(enityVariants.contains("03/05/2020"));
+        Assert.assertTrue(enityVariants.contains("03 MAY 2020"));
+        Assert.assertTrue(enityVariants.contains("03-MAY-2020"));
+        
 
     }
+    
+  
+
 
     /**
      * Test conversion of German long date "26. Januar 2017" to Date object
