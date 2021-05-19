@@ -53,7 +53,7 @@ public class TestTrainingDataQuality {
         String text = "anna is working at IBM in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_GOOD, trainingData.getQuality());
     }
 
     /**
@@ -81,7 +81,7 @@ public class TestTrainingDataQuality {
         String text = "anna is working at IBM in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LOW, trainingData.getQuality());
 
         // ##########################################################
         // second variant also the text does not contain a company
@@ -95,7 +95,7 @@ public class TestTrainingDataQuality {
         text = "anna is working in munich";
 
         trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LOW, trainingData.getQuality());
     }
 
     /**
@@ -124,7 +124,7 @@ public class TestTrainingDataQuality {
         String text = "anna is working at RedHat in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_BAD, trainingData.getQuality());
     }
 
     /**
@@ -151,7 +151,7 @@ public class TestTrainingDataQuality {
         String text = "anna is working at IBM in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_GOOD, trainingData.getQuality());
     }
 
     /**
@@ -179,7 +179,7 @@ public class TestTrainingDataQuality {
         String text = "anna is working at IBM in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LOW, trainingData.getQuality());
     }
 
     /**
@@ -208,6 +208,6 @@ public class TestTrainingDataQuality {
         String text = "anna is working at RedHat in munich";
 
         XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, mlEntities, locals).build();
-        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD, trainingData.getQuality());
+        Assert.assertEquals(XMLTrainingData.TRAININGDATA_QUALITY_BAD, trainingData.getQuality());
     }
 }

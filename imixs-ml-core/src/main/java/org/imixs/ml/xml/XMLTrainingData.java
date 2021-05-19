@@ -51,11 +51,11 @@ import javax.xml.bind.annotation.XmlTransient;
 public class XMLTrainingData implements Serializable {
 
     @XmlTransient
-    public static final int TRAININGDATA_QUALITY_LEVEL_FULL = 1;
+    public static final byte TRAININGDATA_QUALITY_GOOD = 10;
     @XmlTransient
-    public static final int TRAININGDATA_QUALITY_LEVEL_PARTIAL = 2;
+    public static final byte TRAININGDATA_QUALITY_LOW = 4;
     @XmlTransient
-    public static final int TRAININGDATA_QUALITY_LEVEL_BAD = 0;
+    public static final byte TRAININGDATA_QUALITY_BAD = 0;
 
     @XmlTransient
     private static final long serialVersionUID = 1L;

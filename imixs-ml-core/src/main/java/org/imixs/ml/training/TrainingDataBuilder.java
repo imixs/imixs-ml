@@ -75,7 +75,7 @@ public class TrainingDataBuilder {
         debug = true;
 
         // set quality level to full and reduce the level during the build process
-        trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL);
+        trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_GOOD);
         // now lets see if we find some of our item values....
         for (MLEntity mlEntity:  mlEntities) {
             String itemName = mlEntity.getItemName().toLowerCase().trim();
@@ -107,15 +107,15 @@ public class TrainingDataBuilder {
                     // no matching value was found for this entity, the quality level is bad if the entity has
                     // the required flag.
                     if (mlEntity.isRequired()) {
-                        trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
+                        trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_BAD);
                     }
                 }
 
             } else {
                 // workitem does not have a value for this entity!
                 // if the quality level is still FULL, than we downgrade the level to PARTIAL
-                if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL) {
-                    trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL);
+                if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_GOOD) {
+                    trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LOW);
                 }
             }
         }
@@ -123,7 +123,7 @@ public class TrainingDataBuilder {
         // if the trainingData contains no entities set quality to TRAININGDATA_QUALITY_LEVEL_BAD
         if (trainingData.getEntities().size()==0) {
             // no training entities for this workitem value were found
-            trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD);
+            trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_BAD);
         }
         
         return trainingData;

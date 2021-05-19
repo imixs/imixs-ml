@@ -61,7 +61,7 @@ public class MLService implements Serializable {
     public static final String ITEM_ML_LOCALES = "ml.locales";
     public static final String ITEM_ML_STATUS = "ml.status";
     public static final String ITEM_ML_MODEL = "ml.model";
-    public static final String ITEM_ML_QUALITY = "ml.quality";
+    // public static final String ITEM_ML_QUALITY = "ml.quality";
 
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
@@ -129,7 +129,8 @@ public class MLService implements Serializable {
 
             // set confirmed status?
             if (ProcessingEvent.BEFORE_PROCESS == eventType) {
-                if (mlEntities.size() > 0 && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
+                if (mlEntities.size() > 0
+                        && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
                     // test if we have a public event
                     Model model;
                     try {
@@ -234,7 +235,7 @@ public class MLService implements Serializable {
             String mlEndpoint = mlDefinition.getItemValueString(ITEM_ML_ENDPOINT);
             String mlModel = mlDefinition.getItemValueString(ITEM_ML_MODEL);
             String mlLocals = mlDefinition.getItemValueString(ITEM_ML_LOCALES);
-            String mlQuality = mlDefinition.getItemValueString(ITEM_ML_QUALITY);
+            // String mlQuality = mlDefinition.getItemValueString(ITEM_ML_QUALITY);
             logger.info("...train " + mlEndpoint + " model: " + mlModel);
 
             // send workitem to training service
@@ -249,19 +250,9 @@ public class MLService implements Serializable {
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
 
             // verify the TRAININGDATA_QUALITY_LEVEL
-            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                if  ("REDUCED".equalsIgnoreCase(mlQuality) ) {
-                    logger.info("...document '" + workitem.getUniqueID()
-                    + "' TRAININGDATA_QUALITY_LEVEL=BAD but REDUCED is accepted - document will be trained...");
-                } else {
-                    logger.warning("...document '" + workitem.getUniqueID()
-                    + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                    return;
-                }
-            } else if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL
-                    && "FULL".equalsIgnoreCase(mlQuality)) {
+            if (XMLTrainingData.TRAININGDATA_QUALITY_BAD == trainingData.getQuality()) {
                 logger.warning("...document '" + workitem.getUniqueID()
-                        + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
+                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
                 return;
             }
 

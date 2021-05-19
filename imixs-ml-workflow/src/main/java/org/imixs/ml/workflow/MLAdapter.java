@@ -152,7 +152,7 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         String mlModelName = null;
         String mlLocals = null;
-        String mlQuality = null;
+        //String mlQuality = null;
         Pattern mlFilenamePattern = null;
         List<Locale> locals = new ArrayList<Locale>();
         List<MLEntity> mlEntities = null;
@@ -168,7 +168,7 @@ public class MLAdapter implements SignalAdapter {
             mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
-            mlQuality = parseMLQualityByBPMN(mlConfig);
+            //mlQuality = parseMLQualityByBPMN(mlConfig);
             // parse optional filename regex pattern...
             String _FilenamePattern = parseMLFilePatternByBPMN(mlConfig);
             if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
@@ -270,7 +270,7 @@ public class MLAdapter implements SignalAdapter {
             //mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, entityDefinitions.keySet());
             mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS,MLConfig.implodeMLEntityList(mlEntities) );
             mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
-            mlDefinition.setItemValue(MLService.ITEM_ML_QUALITY, mlQuality);
+            //mlDefinition.setItemValue(MLService.ITEM_ML_QUALITY, mlQuality);
             mlService.updateMLDefinition(document, mlDefinition);
 
         } else {
@@ -358,29 +358,29 @@ public class MLAdapter implements SignalAdapter {
      * @param mlConfig
      * @return
      */
-    private String parseMLQualityByBPMN(ItemCollection mlConfig) {
-        boolean debug = logger.isLoggable(Level.FINE);
-        debug = true;
-        String mlQuality = null;
-
-        // test if the model provides a MLModel name. If not, the adapter uses the
-        // mlDefaultAPIEndpoint
-        if (mlConfig != null) {
-            mlQuality = mlConfig.getItemValueString("quality");
-        }
-
-        // switch to default api endpoint?
-        if (mlQuality == null || mlQuality.isEmpty()) {
-            // set defautl model if defined
-            mlQuality = mlDefaultQualityLevel;
-        }
-        if (debug) {
-            logger.info("......ml quality = " + mlQuality);
-        }
-
-        return mlQuality;
-
-    }
+//    private String parseMLQualityByBPMN(ItemCollection mlConfig) {
+//        boolean debug = logger.isLoggable(Level.FINE);
+//        debug = true;
+//        String mlQuality = null;
+//
+//        // test if the model provides a MLModel name. If not, the adapter uses the
+//        // mlDefaultAPIEndpoint
+//        if (mlConfig != null) {
+//            mlQuality = mlConfig.getItemValueString("quality");
+//        }
+//
+//        // switch to default api endpoint?
+//        if (mlQuality == null || mlQuality.isEmpty()) {
+//            // set defautl model if defined
+//            mlQuality = mlDefaultQualityLevel;
+//        }
+//        if (debug) {
+//            logger.info("......ml quality = " + mlQuality);
+//        }
+//
+//        return mlQuality;
+//
+//    }
 
     /**
      * This helper method parses the ml model name either provided by a model
