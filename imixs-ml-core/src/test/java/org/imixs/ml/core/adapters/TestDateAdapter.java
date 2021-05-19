@@ -55,50 +55,20 @@ public class TestDateAdapter {
 
         for (String variant : enityVariants) {
             logger.info(variant);
-
         }
 
-        Assert.assertEquals(9, enityVariants.size());
+        Assert.assertEquals(14, enityVariants.size());
 
         Assert.assertTrue(enityVariants.contains("3 May 2020"));
         Assert.assertTrue(enityVariants.contains("3. May 2020"));
         Assert.assertTrue(enityVariants.contains("3 Mai 2020"));
         Assert.assertTrue(enityVariants.contains("3. Mai 2020"));
         Assert.assertTrue(enityVariants.contains("03.05.2020"));
-    }
+        // special formats
+        Assert.assertTrue(enityVariants.contains("MAY. 03, 2020"));
+        Assert.assertTrue(enityVariants.contains("03/MAY/2020"));
+        Assert.assertTrue(enityVariants.contains("03/05/2020"));
 
-    /**
-     * test variants of  "APR. 14, 2021"
-     */
-    @Test
-    public void testVariantsUSDate() {
-    
-        List<Locale> locals = new ArrayList<Locale>();
-        locals.add(Locale.UK);
-        locals.add(Locale.GERMANY);
-    
-        Set<String> enityVariants = new HashSet<String>();
-    
-        Date date = null;
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.MONTH, 3);
-        cal.set(Calendar.DAY_OF_MONTH, 14);
-        cal.set(Calendar.YEAR, 2021);
-        date = cal.getTime();
-    
-        dateAdapter.onEvent(new EntityObjectEvent(date, enityVariants, locals));
-    
-        for (String variant : enityVariants) {
-            logger.info(variant);
-    
-        }
-    
-      
-        Assert.assertTrue(enityVariants.contains("14. April 2021"));
-        Assert.assertTrue(enityVariants.contains("14 April 2021"));
-        Assert.assertTrue(enityVariants.contains("14. April 2021"));
-        Assert.assertTrue(enityVariants.contains("14.04.2021"));
-        Assert.assertTrue(enityVariants.contains("APR. 14, 2021"));
     }
 
     /**
@@ -115,24 +85,17 @@ public class TestDateAdapter {
         List<String> itemValueList = new ArrayList<String>();
         itemValueList.add("26. Januar 2017");
         DateAdapter dateAdapter = new DateAdapter();
-
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
-
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
         dateAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();
-
         Assert.assertTrue(o instanceof Date);
-
         Calendar cal = Calendar.getInstance();
         cal.setTime((Date) o);
-
         Assert.assertEquals(2017, cal.get(Calendar.YEAR));
         Assert.assertEquals(0, cal.get(Calendar.MONTH));
         Assert.assertEquals(26, cal.get(Calendar.DAY_OF_MONTH));
 
     }
-    
-    
 
     /**
      * Test conversion of UK Date long date "APR. 14, 2021" to Date object
@@ -143,7 +106,7 @@ public class TestDateAdapter {
      * 
      */
     @Test
-    public void testUKLongFomatToDate() {
+    public void testUKSpecialFomatToDate() {
         List<Locale> locals = new ArrayList<Locale>();
         locals.add(Locale.UK);
         locals.add(Locale.US);
@@ -152,26 +115,32 @@ public class TestDateAdapter {
         List<String> itemValueList = new ArrayList<String>();
         itemValueList.add("APR. 14, 2021");
         DateAdapter dateAdapter = new DateAdapter();
-
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
-
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
         dateAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();
-
         Assert.assertTrue(o instanceof Date);
-
         Calendar cal = Calendar.getInstance();
         cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
 
-        Assert.assertEquals(2017, cal.get(Calendar.YEAR));
-        Assert.assertEquals(0, cal.get(Calendar.MONTH));
-        Assert.assertEquals(26, cal.get(Calendar.DAY_OF_MONTH));
+        // 14/APR/2021
+        itemValueList = new ArrayList<String>();
+        itemValueList.add("14/APR/2021");
+        dateAdapter = new DateAdapter();
+        entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
 
     }
-    
-    
-    
-    
+
     /**
      * Test invalid date string
      * 
@@ -187,7 +156,7 @@ public class TestDateAdapter {
         itemValueList.add("1005.55");
         DateAdapter dateAdapter = new DateAdapter();
 
-        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date",0);
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
 
         dateAdapter.onTextEvent(entityTextEvent);
         Object o = entityTextEvent.getItemValue();

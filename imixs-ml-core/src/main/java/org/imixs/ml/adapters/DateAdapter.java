@@ -94,6 +94,9 @@ public class DateAdapter {
             dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             event.getEnityTextVariants().add(dateFormat.format(date));
 
+            dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            event.getEnityTextVariants().add(dateFormat.format(date));
+
             dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             event.getEnityTextVariants().add(dateFormat.format(date));
 
@@ -116,10 +119,13 @@ public class DateAdapter {
                     dateFormat = new SimpleDateFormat("d. MMMMM yyyy", locale);
                     event.getEnityTextVariants().add(dateFormat.format(date));
 
-                    // APR. 14, 2021
-                    dateFormat = new SimpleDateFormat("MMM. d, yyyy", locale);
-                    event.getEnityTextVariants().add(dateFormat.format(date));
-
+                    // APR. 14, 2021 (special use case (maybe IBM AS400)
+                    dateFormat = new SimpleDateFormat("MMM. dd, yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
+                    
+                    // 14/APR/2021  - dd/mm/yyyy
+                    dateFormat = new SimpleDateFormat("dd/MMM/yyyy", locale);
+                    event.getEnityTextVariants().add(dateFormat.format(date).toUpperCase());
                 }
             }
 
@@ -136,8 +142,8 @@ public class DateAdapter {
      */
     public void onTextEvent(@Observes EntityTextEvent event) {
 
-        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" };
-        String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy" };
+        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" , "dd/MM/yyyy" };
+        String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy", "MMM. dd, yyyy", "dd/MMM/yyyy" };
 
         // if the event already has a object then we return
         if (event.getItemValue() != null) {
