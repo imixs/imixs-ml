@@ -8,7 +8,6 @@ import javax.ws.rs.core.Application;
 
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.WorkflowClient;
-import org.imixs.ml.service.TikaHelperService;
 import org.imixs.workflow.ItemCollection;
 
 @ApplicationPath("api")

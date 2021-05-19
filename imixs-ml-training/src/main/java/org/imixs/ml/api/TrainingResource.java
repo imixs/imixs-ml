@@ -88,8 +88,8 @@ public class TrainingResource {
     public Response trainData(XMLDocument xmlConfig) {
 
         int countTotal = 0;
-        int countQualityFull = 0;
-        int countQualityPartial = 0;
+        int countQualityGood = 0;
+        int countQualityLow = 0;
         int countQualityBad = 0;
 
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
@@ -124,11 +124,11 @@ public class TrainingResource {
 
                 // compute quality statistic
                 switch (qualityResult) {
-                case XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL:
-                    countQualityFull++;
+                case XMLTrainingData.TRAININGDATA_QUALITY_GOOD:
+                    countQualityGood++;
                     break;
-                case XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL:
-                    countQualityPartial++;
+                case XMLTrainingData.TRAININGDATA_QUALITY_LOW:
+                    countQualityLow++;
                     break;
                 default:
                     countQualityBad++;
@@ -146,17 +146,17 @@ public class TrainingResource {
         ItemCollection stats = new ItemCollection();
 
         stats.setItemValue("workitems.total", countTotal);
-        stats.setItemValue("workitems.quality.full", countQualityFull);
-        stats.setItemValue("workitems.quality.partial", countQualityPartial);
+        stats.setItemValue("workitems.quality.good", countQualityGood);
+        stats.setItemValue("workitems.quality.low", countQualityLow);
         stats.setItemValue("workitems.quality.bad", countQualityBad);
 
         DecimalFormat df = new DecimalFormat("###.##");
         String log = "......workitems read in total = " + countTotal + "\n";
-        log = log + "  ......           full quality = "
-                + df.format(((double) countQualityFull / (double) countTotal) * 100) + "%  (" + countQualityFull + ")"
+        log = log + "  ......           good quality = "
+                + df.format(((double) countQualityGood / (double) countTotal) * 100) + "%  (" + countQualityGood + ")"
                 + "\n";
-        log = log + "  ......        partial quality = "
-                + df.format(((double) countQualityPartial / (double) countTotal) * 100) + "%  (" + countQualityPartial
+        log = log + "  ......        low quality = "
+                + df.format(((double) countQualityLow / (double) countTotal) * 100) + "%  (" + countQualityLow
                 + ")" + "\n";
         log = log + "  ......            bad quality = "
                 + df.format(((double) countQualityBad / (double) countTotal) * 100) + "%  (" + countQualityBad + ")"

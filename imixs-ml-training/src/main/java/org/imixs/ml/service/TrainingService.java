@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -43,7 +44,9 @@ import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
 import org.imixs.ml.api.TrainingApplication;
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLContentBuilder;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -63,7 +66,7 @@ import org.imixs.workflow.exceptions.PluginException;
  * XMLTraingData object is send to the Imixs-ML service to train a ml-model.
  * 
  * 
- * @version 1.0
+ * @version 2.0
  * @author rsoika
  */
 
@@ -71,6 +74,9 @@ import org.imixs.workflow.exceptions.PluginException;
 public class TrainingService {
     private static Logger logger = Logger.getLogger(TrainingService.class.getName());
     public static final String FILE_ATTRIBUTE_TEXT = "text";
+    public static final String ITEM_ML_ITEMS = "ml.items";
+    public static final String ITEM_ML_DEFINITIONS = "ml.definitions";
+
     @Inject
     TikaHelperService tikaService;
 
@@ -103,7 +109,7 @@ public class TrainingService {
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
         if (qualityLevel.isEmpty()) {
-            qualityLevel = "FULL"; // default level!
+            qualityLevel = "LOW"; // default level!
         }
         // parse optional filename regex pattern...
         String _FilenamePattern = config.getItemValueString("filename.pattern");
@@ -116,10 +122,26 @@ public class TrainingService {
         List<String> sLocales = config.getItemValue(TrainingApplication.ITEM_LOCALES);
         List<Locale> locals = new ArrayList<Locale>();
         for (String _locale : sLocales) {
-            Locale aLocale = new Locale(_locale);
-            locals.add(aLocale);
-            if (debug) {
-                logger.finest("......suporting locale " + aLocale);
+            Locale aLocale = null;
+            // split parts?
+            if (_locale.contains("_")) {
+                String[] localParts = _locale.split("_");
+                // language country?
+                if (localParts.length >= 1) {
+                    aLocale = new Locale(localParts[0], localParts[1]);
+                } else {
+                    logger.warning("Wrong Locale Configuration: " + _locale);
+                }
+            } else {
+                // simple language locale
+                aLocale = new Locale(_locale);
+            }
+
+            if (aLocale != null) {
+                locals.add(aLocale);
+                if (debug) {
+                    logger.finest("......suporting locale " + aLocale);
+                }
             }
         }
 
@@ -140,13 +162,31 @@ public class TrainingService {
             // ocrMode, tikaOptions);
 
             if (ocrText == null || ocrText.isEmpty()) {
-                return XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+                return XMLTrainingData.TRAININGDATA_QUALITY_BAD;
             }
 
             logger.fine("extracted text content to be analysed=");
             logger.fine(ocrText);
+
+            // we try to extract the mlEntities from the workitem
+            // if this is not possible we take the data form the XML configuraiton
+            List<MLEntity> mlEntities = null;
+            List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
+            if (mlDefinitionList != null && mlDefinitionList.size() > 0) {
+                ItemCollection mlDefinition = mlDefinitionList.get(0);
+                mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
+            }
+            if (mlEntities == null || mlEntities.size() == 0) {
+                logger.info("migrating to dummy mlEntity definition set from XML configuration!");
+                mlEntities = new ArrayList<MLEntity>();
+                // build a dummy mlEntity list form the xml config..
+                for (String aname : trainingItemNames) {
+                    mlEntities.add(new MLEntity(aname, null, null, 0, false));
+                }
+            }
+
             // build training data set...
-            XMLTrainingData trainingData = new TrainingDataBuilder(ocrText, workitem, trainingItemNames, locals)
+            XMLTrainingData trainingData = new TrainingDataBuilder(ocrText, workitem, mlEntities, locals)
                     .setAnalyzerEntityEvents(entityObjectEvents).build();
 
             // compute stats rate for found entities
@@ -159,30 +199,24 @@ public class TrainingService {
 
             qualityResult = trainingData.getQuality();
             // we only send the training data in case of quality level is sufficient
-            if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD == trainingData.getQuality()) {
-                if ("REDUCED".equalsIgnoreCase(qualityLevel)) {
-                    logger.info("...document '" + workitem.getUniqueID()
-                            + "' TRAININGDATA_QUALITY_LEVEL=BAD but REDUCED is accepted - document will be trained...");
-                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL;
-                } else {
-                    logger.severe("...document '" + workitem.getUniqueID()
-                            + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                }
+            if (XMLTrainingData.TRAININGDATA_QUALITY_BAD == trainingData.getQuality()) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                        + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
+
             } else {
-                if (XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL == trainingData.getQuality()
+                if (XMLTrainingData.TRAININGDATA_QUALITY_LOW == trainingData.getQuality()
                         && "FULL".equalsIgnoreCase(qualityLevel)) {
                     logger.severe("...document '" + workitem.getUniqueID()
-                            + "' TRAININGDATA_QUALITY_LEVEL=PARTIAL but FULL is required - document will be ignored!");
-                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_BAD;
+                            + "' TRAININGDATA_QUALITY_LOW but FULL is required - document will be ignored!");
+                    qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_BAD;
                 } else {
-                    logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL=" + qualityResult +"...");
+                    logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL="
+                            + qualityResult + "...");
                 }
             }
 
             // trainingData if quality level is sufficient
-            if (qualityResult == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_PARTIAL
-                    || qualityResult == XMLTrainingData.TRAININGDATA_QUALITY_LEVEL_FULL) {
-
+            if (qualityResult != XMLTrainingData.TRAININGDATA_QUALITY_BAD) {
                 // log the XMLTrainingData object....
                 if (debug) {
                     printXML(trainingData);
@@ -333,4 +367,24 @@ public class TrainingService {
         return workitem;
     }
 
+    /**
+     * This method returns a list of ItemCollection object holding the
+     * ml.definitions stored in a given workitem. Each endpoint definition is
+     * defined by a set of items stored in a map. The Map can be conferted into a
+     * ItemCollection
+     * 
+     **/
+    @SuppressWarnings("unchecked")
+    public List<ItemCollection> getMLDefinitions(ItemCollection workitem) {
+
+        List<ItemCollection> result = new ArrayList<ItemCollection>();
+        // test if ml.definitions object exists...
+        if (!workitem.getItemValueString(ITEM_ML_DEFINITIONS).isEmpty()) {
+            List<Map<String, List<Object>>> mlDefinitions = workitem.getItemValue(ITEM_ML_DEFINITIONS);
+            for (Map<String, List<Object>> aDef : mlDefinitions) {
+                result.add(new ItemCollection(aDef));
+            }
+        }
+        return result;
+    }
 }

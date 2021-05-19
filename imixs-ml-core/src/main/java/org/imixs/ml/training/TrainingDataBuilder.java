@@ -105,9 +105,13 @@ public class TrainingDataBuilder {
                     }
                 } else {
                     // no matching value was found for this entity, the quality level is bad if the entity has
-                    // the required flag.
+                    // the required flag. Otherwise the quality is LOW
                     if (mlEntity.isRequired()) {
                         trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_BAD);
+                    } else {
+                        if (trainingData.getQuality() == XMLTrainingData.TRAININGDATA_QUALITY_GOOD) {
+                            trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_LOW);
+                        }
                     }
                 }
 
