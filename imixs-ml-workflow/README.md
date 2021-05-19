@@ -186,15 +186,6 @@ Filename Pattern can be provided.
 This example will only analyse content from PDF and MS Word files. 
 
 
-### Training Quality
-
-Per default the required training data quality is set to 'PARTIAL' which means that not all Items must contain a value to be acceptable for the training service. 
-You can overwrite the Training quality level to 'FULL' or 'REDUCED' to accept a different quality level.
-
-	<ml-config name="ml.training.quality">REDUCED</ml-config>
-
-
-
 ## The ML Definition
 
 During the processing of a workitem the MLService creates a MLDefinition holding the details of a ml service endpoint. These data is stored in a Map object with the following data
