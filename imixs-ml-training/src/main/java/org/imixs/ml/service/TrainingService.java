@@ -47,6 +47,7 @@ import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLContentBuilder;
 import org.imixs.ml.core.MLEntity;
+import org.imixs.ml.core.MLTrainingResult;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -96,9 +97,10 @@ public class TrainingService {
      * @return - quality result
      */
     @SuppressWarnings("unchecked")
-    public int trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
+    public MLTrainingResult trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
         boolean debug = logger.isLoggable(Level.FINE);
         int qualityResult = -1;
+        MLTrainingResult trainingResult=null;
         Pattern mlFilenamePattern = null;
 
         logger.info("...create new training data for: " + workitem.getUniqueID());
@@ -162,7 +164,7 @@ public class TrainingService {
             // ocrMode, tikaOptions);
 
             if (ocrText == null || ocrText.isEmpty()) {
-                return XMLTrainingData.TRAININGDATA_QUALITY_BAD;
+                return new MLTrainingResult( XMLTrainingData.TRAININGDATA_QUALITY_BAD,null);
             }
 
             logger.fine("extracted text content to be analysed=");
@@ -223,14 +225,17 @@ public class TrainingService {
                 }
                 String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
                 MLClient mlClient = new MLClient(serviceEndpoint);
-                mlClient.postTrainingData(trainingData, model);
+                String resultData= mlClient.postTrainingData(trainingData, model);
+                trainingResult= new MLTrainingResult(qualityResult,resultData);
+            } else {
+                trainingResult= new MLTrainingResult(qualityResult,null);
             }
 
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
 
-        return qualityResult;
+        return trainingResult;
 
     }
 

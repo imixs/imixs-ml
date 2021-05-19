@@ -18,6 +18,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLEntity;
+import org.imixs.ml.core.MLTrainingResult;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -213,10 +214,13 @@ public class MLService implements Serializable {
      * item 'ml.definitions'.
      * <p>
      * The method is called by the MLTrainingScheduler.
+     * <p>
+     * @return a TrainingResult object containing the quality level and the Rest Service response
      * 
      * @param uid
      */
-    public void trainWorkitem(String uid) {
+    public MLTrainingResult trainWorkitem(String uid) {
+        MLTrainingResult trainingResult=null;
         // load the workitem
         ItemCollection workitem = workflowService.getWorkItem(uid);
         if (workitem == null) {
@@ -253,16 +257,18 @@ public class MLService implements Serializable {
             if (XMLTrainingData.TRAININGDATA_QUALITY_BAD == trainingData.getQuality()) {
                 logger.warning("...document '" + workitem.getUniqueID()
                         + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                return;
+                return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD,null);
             }
 
             // post training data...
             // validate if usefull data
             if (!trainingData.isEmpty()) {
-                mlClient.postTrainingData(trainingData, mlModel);
+                String resultData= mlClient.postTrainingData(trainingData, mlModel);
+                trainingResult= new MLTrainingResult(trainingData.getQuality(),resultData);
             }
         }
 
+        return trainingResult;
     }
 
     /**

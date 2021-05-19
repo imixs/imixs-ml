@@ -18,9 +18,11 @@ import javax.ws.rs.core.Response;
 
 import org.imixs.melman.RestAPIException;
 import org.imixs.melman.WorkflowClient;
+import org.imixs.ml.core.MLTrainingResult;
 import org.imixs.ml.service.TrainingService;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.ItemCollection;
+import org.imixs.workflow.util.JSONParser;
 import org.imixs.workflow.xml.XMLDataCollectionAdapter;
 import org.imixs.workflow.xml.XMLDocument;
 import org.imixs.workflow.xml.XMLDocumentAdapter;
@@ -91,6 +93,8 @@ public class TrainingResource {
         int countQualityGood = 0;
         int countQualityLow = 0;
         int countQualityBad = 0;
+        double nerFactor = -1;
+        double allNerFactors=0.0;
 
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
@@ -119,18 +123,39 @@ public class TrainingResource {
 
             // now iterate over all documents and start the training algorithm
             logger.info("...... " + documents.size() + " documents found");
+            int currentCount=0;
             for (ItemCollection doc : documents) {
-                int qualityResult = trainingService.trainWorkitemData(config, doc, worklowClient);
+                currentCount++;
+                MLTrainingResult trainingResult = trainingService.trainWorkitemData(config, doc, worklowClient);
 
-                // compute quality statistic
-                switch (qualityResult) {
-                case XMLTrainingData.TRAININGDATA_QUALITY_GOOD:
-                    countQualityGood++;
-                    break;
-                case XMLTrainingData.TRAININGDATA_QUALITY_LOW:
-                    countQualityLow++;
-                    break;
-                default:
+                if (trainingResult != null) {
+                    // compute quality statistic
+                    switch (trainingResult.getQualityLevel()) {
+                    case XMLTrainingData.TRAININGDATA_QUALITY_GOOD:
+                        countQualityGood++;
+                        break;
+                    case XMLTrainingData.TRAININGDATA_QUALITY_LOW:
+                        countQualityLow++;
+                        break;
+                    default:
+                        countQualityBad++;
+                    }
+
+                    // extract ner factor
+                    String resultData = trainingResult.getData();
+                    if (resultData != null && !resultData.isEmpty()) {
+                        // parse currentNerFactor....
+                        try {
+                            String nerString = JSONParser.getKey("ner", resultData);
+                            double newNerFactor = Double.parseDouble(nerString);
+                            allNerFactors=allNerFactors+newNerFactor;
+                            nerFactor=allNerFactors/currentCount;
+                        } catch (Exception e) {
+                            logger.severe("failed to parse training result (ner)");
+                        }
+                    }
+
+                } else {
                     countQualityBad++;
                 }
 
@@ -141,7 +166,7 @@ public class TrainingResource {
             e.printStackTrace();
         }
 
-        logger.info("**************** FINISHED ***********************");
+        logger.info(" ");
         // log the stats XMLDocument object....
         ItemCollection stats = new ItemCollection();
 
@@ -149,20 +174,24 @@ public class TrainingResource {
         stats.setItemValue("workitems.quality.good", countQualityGood);
         stats.setItemValue("workitems.quality.low", countQualityLow);
         stats.setItemValue("workitems.quality.bad", countQualityBad);
+        stats.setItemValue("workitems.quality.nerFactor", nerFactor);
+        
 
         DecimalFormat df = new DecimalFormat("###.##");
         String log = "......workitems read in total = " + countTotal + "\n";
-        log = log + "  ......           good quality = "
+
+        log = log + "  ......     quality level GOOD = "
                 + df.format(((double) countQualityGood / (double) countTotal) * 100) + "%  (" + countQualityGood + ")"
                 + "\n";
-        log = log + "  ......        low quality = "
-                + df.format(((double) countQualityLow / (double) countTotal) * 100) + "%  (" + countQualityLow
-                + ")" + "\n";
-        log = log + "  ......            bad quality = "
-                + df.format(((double) countQualityBad / (double) countTotal) * 100) + "%  (" + countQualityBad + ")"
-                + "\n";
+
+        log = log + "  ......      quality level LOW = " + df.format(((double) countQualityLow / (double) countTotal) * 100)
+                + "%  (" + countQualityLow + ")" + "\n";
+        log = log + "  ......      quality level BAD = "
+                + df.format(((double) countQualityBad / (double) countTotal) * 100) + "%  (" + countQualityBad + ")";
+        log=log + "\n  ......            average NER = " + nerFactor;
+        
         logger.info(log);
-        logger.info("**************** FINISHED ***********************");
+        logger.info("**************** Completed ***********************");
 
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();

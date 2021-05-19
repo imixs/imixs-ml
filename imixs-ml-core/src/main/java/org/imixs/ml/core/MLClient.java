@@ -22,6 +22,11 @@
  *******************************************************************************/
 package org.imixs.ml.core;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -70,7 +75,7 @@ public class MLClient {
      * @param trainingData    - the training data object
      * @param serviceEndpoint - the ml API endpoint
      */
-    public void postTrainingData(XMLTrainingData trainingData, String model) {
+    public String postTrainingData(XMLTrainingData trainingData, String model) {
 
         logger.fine("......sending new training data object...");
         Client client = ClientBuilder.newClient();
@@ -87,6 +92,12 @@ public class MLClient {
 
         @SuppressWarnings("unused")
         Response response = invocationBuilder.post(Entity.entity(list, MediaType.APPLICATION_JSON));
+        
+       
+        String output = response.readEntity(String.class);
+            
+        return output;
+       
 
     }
 
@@ -129,4 +140,5 @@ public class MLClient {
 
     }
 
+  
 }

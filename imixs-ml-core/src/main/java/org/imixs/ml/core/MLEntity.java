@@ -49,10 +49,10 @@ public class MLEntity {
         this.itemType = (String) map.get("itemType");
         this.itemName = (String) map.get("itemName");
         if (map.containsKey("length")) {
-            setLength(Integer.parseInt((String) map.get("length")));
+            setLength( (int) map.get("length"));
         }
         if (map.containsKey("required")) {
-            this.required = Boolean.getBoolean((String) map.get("required"));
+            this.required = (boolean) map.get("required");
         }
 
     }
