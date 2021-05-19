@@ -2,12 +2,12 @@ package org.imixs.ml.integration;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.imixs.ml.core.MLClient;
+import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.service.TrainingService;
 import org.imixs.ml.training.TrainingDataBuilder;
 import org.imixs.ml.xml.XMLTrainingData;
@@ -32,11 +32,11 @@ public class TestMLIntegrationTest {
 
     // static String SERVICE_ENDPOINT="http://localhost:8000/trainingdatasingle/";
     static String SERVICE_ENDPOINT = "http://localhost:8000/trainingdata/";
-
+ 
     private IntegrationTest integrationTest = new IntegrationTest(ML_SERVICE_API);
     private  List<Locale> locals=null;
     private TrainingService trainingService = null;
-    List<String> items = null;
+    List<MLEntity> items = null;
     MLClient mlClient = null;
 
     /**
@@ -108,14 +108,14 @@ public class TestMLIntegrationTest {
      */
     @Test
     public void testBuilderStartStop() {
-        items = Arrays.asList( new String[] { "project", "city" });
+        //items = Arrays.asList( new String[] { "project", "city" });
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("project", "Imixs Workflow");
         doc.replaceItemValue("city", "Munich");
 
         String text = "Imixs Workflow in an open source project organized from Munich.";
 
-        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, items,locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(text, doc, buildMLEntites("project", "city" ),locals).build();
 
         trainingService.printXML(trainingData);
 
@@ -129,6 +129,15 @@ public class TestMLIntegrationTest {
         Assert.assertEquals(62, trainingEntities.get(1).getStop());
 
     }
+    
+    
+    private List<MLEntity> buildMLEntites(String... names) {
+        List<MLEntity> mlEntities = new ArrayList<MLEntity>();
+        for (String name: names) {
+            mlEntities.add(new MLEntity(name,null,null,0,true));
+        }
+        return mlEntities;
+    }
 
     /**
      * 
@@ -136,14 +145,14 @@ public class TestMLIntegrationTest {
      */
     @Test
     public void testCreateSingleXMLTrainingEntity() {
-        items = Arrays.asList( new String[]  { "iban", "price" });
+       // items = Arrays.asList( new String[]  { "iban", "price" });
         String content = "what is the price of 11,00? with an IBAN of XX08 1101 0030 0000 2222 02.";
         ItemCollection doc = new ItemCollection();
         doc.setItemValue("price", "11,00");
         doc.setItemValue("iban", "XX08 1101 0030 0000 2222 02");
 
         // build a trainingData set
-        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc, items,locals).build();
+        XMLTrainingData trainingData = new TrainingDataBuilder(content, doc,  buildMLEntites("iban", "price"),locals).build();
         Assert.assertEquals(2, trainingData.getEntities().size());
         Assert.assertEquals(21, trainingData.getEntities().get(1).getStart());
         Assert.assertEquals(26, trainingData.getEntities().get(1).getStop());
@@ -187,7 +196,8 @@ public class TestMLIntegrationTest {
     @Test
     public void testFullTrainingDataSet() {
 
-        items = Arrays.asList( new String[]  { "iban", "price" });
+        items = buildMLEntites("iban", "price");
+        //Arrays.asList( new String[]  { "iban", "price" });
         String content = null;
         ItemCollection doc = null;
         XMLTrainingData trainingData = null;
@@ -332,7 +342,8 @@ public class TestMLIntegrationTest {
         ItemCollection doc = new ItemCollection();
         doc.replaceItemValue("org", "Kéin");
   
-        items = Arrays.asList( new String[]  { "org", "gpe", "money" });
+        //items = Arrays.asList( new String[]  { "org", "gpe", "money" });
+        items = buildMLEntites( "org", "gpe", "money" );
 
         String text = "Postfach 51 10 26 - 50946 Kéin  Krouser GmbH Möbelhaus";
 
