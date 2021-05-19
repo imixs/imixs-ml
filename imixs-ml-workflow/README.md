@@ -45,7 +45,6 @@ See the following example:
 	<ml-config name="endpoint">
 	    https://localhost:8111/api/resource/
 	</ml-config>
-	<ml-config name="quality">REDUCED</ml-config>
 	<ml-config name="locales">de_DE,en_GB</ml-config>
 
 **Note:** The mode name is mandatory. In case not default model is defined by the environment variable 'ML_MODEL' and not model is specified by the BPMN model, the Adapter throws an ProcessingErrorException. 
@@ -134,30 +133,32 @@ In this example the returned text entity for the item 'cdtr.bic' will have a max
 
 ##### Required
 
-Per default each  entity is marked as 'required=true' for later training. 
-This means if a workitem does not provide a value for a ml-config entity, than the workitem is classified with TRAININGDATA_QUALITY_LEVEL_BAD and will not be included for later training.
+Per default each  entity is marked as 'required=false' for later training. 
+This means, that in case a workitem does not provide a value for a ml-config entity or the value is not found in the training text, this workitem will be classified with TRAININGDATA_QUALITY_LOW and will be included for later training.
+
+If you want to force a MLEntity to be part of a Training Data set you can set the option "required=true"
+
+	<ml-config name="entity">
+	    <name>invoice.total</name>
+	    <type>currency</type>
+	    <required>true</required>
+	</ml-config>
+	<ml-config name="entity">
+	    <name>invoice.date</name>
+	    <type>date</type>
+	    <required>true</required>
+	</ml-config>
+
+In this case a missing item value or a not matching text representation does lead to the TRAININGDATA_QUALITY_BAD and the workitem will not be used for training.
 
 Specially for Date and Currency values this requirement can often not be fulfilled. For example the Date Text representation
 
 	APR. 14, 2021
 
-can hardly be accociated with the date ISO Date 2021-04-14.
+can hardly be accociated with the date ISO Date 2021-04-14. To exclude those workitems from training the optional attribute 'required' can be set to true. 
 
-To avoid that a workitem is excluded from training because of a not matching text representation in the training text the optional attribute 'required' can be set to false. 
+A good practice is to start with the flag 'required=true' for all ML Entities. If the training results are to low, than the switch to 'required=false' for some entities. 
 
-
-	<ml-config name="entity">
-	    <name>invoice.total</name>
-	    <type>currency</type>
-	    <required>false</required>
-	</ml-config>
-	<ml-config name="entity">
-	    <name>invoice.date</name>
-	    <type>date</type>
-	    <required>false</required>
-	</ml-config>
-
-In this case a not matching text representation does not lead to the TRAININGDATA_QUALITY_LEVEL_BAD.
 
 
 #### Text Classification
@@ -238,8 +239,6 @@ The service reacts on the  eventlog entry 'ml.training'. If this event log topic
 
 If the ml status of a mlDefinition is 'training' then the workitem data is used for training againsed the corresponding ml service endpoint.
 
-**Note:** the training service can reject the workitem for training if the data is of an insufficient quality.
-
 The training service can be configured by the following configuration parameters:
 
  - ML_TRAINING_SCHEDULER_ENABLED - true|false
@@ -256,18 +255,28 @@ This setting will enable the training scheduler with an interval of 30 seconds a
   
 ### The Training Quality Level
   
-The training scheduler will only train data with a training quality level="PARTIAL" or "FULL". The  training quality level="PARTIAL" is the default setting. 
+The training scheduler will only train data with a training quality level="GOOD" or "LOW".
 
- - ML_TRAINING_QUALITYLEVEL=FULL  - all ML Items of a workitem must provide matching values. 
- - ML_TRAINING_QUALITYLEVEL=PARTIAL -  empty values are allowed (default).
- - ML_TRAINING_QUALITYLEVEL=REDUCED
+ - TRAININGDATA_QUALITY_GOOD=10  - all ML Items of a workitem provide matching values. 
+ - TRAININGDATA_QUALITY_LOW=4 -  some entities have no matching value and the required flag is set to false (default).
+ - TRAININGDATA_QUALITY_BAD=0 - some entities have no matching value and the required flag is set to true. Or no matching training data if found at all.
 
-It is possible to force the training quality level "FULL" with the environment 'ML_TRAINING_QUALITYLEVEL': 
+It is possible to force the training quality level "FULL" if all MLEntities are marked with the flag 'required=true'
 
-	ML_TRAINING_QUALITYLEVEL=FULL
+	<ml-config name="entity">
+	    <name>invoice.total</name>
+	    <type>currency</type>
+	    <required>true</required>
+	</ml-config>
+	<ml-config name="entity">
+	    <name>invoice.date</name>
+	    <type>date</type>
+	    <required>true</required>
+	</ml-config>
 
+In this example only workitems with matching values for 'invoice.total' and 'invoice.date' will be used for training. If the items have no matching values or are empty the workitem is qualified with TRAININGDATA_QUALITY_BAD and will not be trained.
 
-**Note:** If a workitem provide no value for a item, but the corresponding text is part of the text, this may lead to a decrease of the overall ml model quality. 
+**Note:** If a workitem provides no value for a MLEntity, but the corresponding training text contains a logical text value, than this may lead to a decrease of the overall ml model quality. Also, if a workitem provides a value for a MLEntiry, which is not part of the corresponding training text, can lead to a decrease of the overall ml model quality. You can avoid this effect by setting the ML Entity flag 'required=true'.
 
 
 
