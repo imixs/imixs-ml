@@ -71,6 +71,7 @@ public class TestDateAdapter {
         Assert.assertTrue(enityVariants.contains("03 MAY 2020"));
         Assert.assertTrue(enityVariants.contains("03-MAY-2020"));
         
+        Assert.assertTrue(enityVariants.contains("MAI 03, 2020"));
 
     }
     
@@ -170,5 +171,43 @@ public class TestDateAdapter {
         Assert.assertNull(o);
 
     }
+    
+
+    /**
+     * Test conversion of German long date "MAI 18, 2021" to Date object
+     * 
+     * 
+     */
+    @Test
+    public void testGerman18Mai2021() {
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.GERMANY);
+
+        List<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("MAI 18, 2021");
+        DateAdapter dateAdapter = new DateAdapter();
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(4, cal.get(Calendar.MONTH));
+        Assert.assertEquals(18, cal.get(Calendar.DAY_OF_MONTH));
+
+        
+        // test text variants...
+        Set<String> enityVariants = new HashSet<String>();
+        dateAdapter.onEvent(new EntityObjectEvent(cal.getTime(), enityVariants, locals));
+
+        for (String variant : enityVariants) {
+            logger.info(variant);
+        }
+
+        Assert.assertTrue(enityVariants.size()>16);
+
+    }
+
 
 }
