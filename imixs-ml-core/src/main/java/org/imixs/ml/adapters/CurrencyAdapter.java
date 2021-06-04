@@ -101,6 +101,18 @@ public class CurrencyAdapter {
         }
     }
 
+    /**
+     * The Probem with detected currencies are the different digit separtors
+     * depending on the locale.
+     * <p>
+     * e.g. 1.000,00 and 1,000.00 in Germany and US
+     * <p>
+     * To handle this problem we try to figure out if a US format is given. In this
+     * case we simply remove the , chars
+     * 
+     * 
+     * @param event
+     */
     public void onTextEvent(@Observes EntityTextEvent event) {
 
         // if the event already has a object then we return
@@ -119,6 +131,27 @@ public class CurrencyAdapter {
         BigDecimal result = null;
 
         for (String variant : variants) {
+
+            // test if the variant is a US currency format
+            if (variant.indexOf(",") > -1 && variant.indexOf(".") > -1 && variant.indexOf(",") < variant.indexOf(".")) {
+                String oldVariant = variant;
+                variant = variant.replace(",", "");
+                logger.info("...US Currency format: " + oldVariant + " converted into: " + variant);
+            }
+            // test if variant contains multipl ,
+            if (variant.split(",").length > 2) {
+                // remove ,
+                String oldVariant = variant;
+                variant = variant.replace(",", "");
+                logger.info("... Currency format: " + oldVariant + " converted into: " + variant);
+            }
+            // test if variant contains multipl ,
+            if (variant.split("\\.").length > 2) {
+                // remove .
+                String oldVariant = variant;
+                variant = variant.replace(".", "");
+                logger.info("... Currency format: " + oldVariant + " converted into: " + variant);
+            }
 
             BigDecimal b = textToCurrency(variant, event.getLocals());
             if (b != null) {
