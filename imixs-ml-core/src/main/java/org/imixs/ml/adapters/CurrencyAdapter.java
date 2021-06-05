@@ -33,6 +33,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
@@ -114,7 +115,7 @@ public class CurrencyAdapter {
      * @param event
      */
     public void onTextEvent(@Observes EntityTextEvent event) {
-
+        boolean debug = logger.isLoggable(Level.FINE);
         // if the event already has a object then we return
         if (event.getItemValue() != null) {
             return;
@@ -136,22 +137,32 @@ public class CurrencyAdapter {
             if (variant.indexOf(",") > -1 && variant.indexOf(".") > -1 && variant.indexOf(",") < variant.indexOf(".")) {
                 String oldVariant = variant;
                 variant = variant.replace(",", "");
-                logger.info("...US Currency format: " + oldVariant + " converted into: " + variant);
+                if (debug) {
+                    logger.finest("...US Currency format: " + oldVariant + " converted into: " + variant);
+                }
             }
             // test if variant contains multipl ,
             if (variant.split(",").length > 2) {
                 // remove ,
                 String oldVariant = variant;
                 variant = variant.replace(",", "");
-                logger.info("... Currency format: " + oldVariant + " converted into: " + variant);
+                if (debug) {
+                    logger.finest("... Currency format: " + oldVariant + " converted into: " + variant);
+                }
             }
             // test if variant contains multipl ,
             if (variant.split("\\.").length > 2) {
                 // remove .
                 String oldVariant = variant;
                 variant = variant.replace(".", "");
-                logger.info("... Currency format: " + oldVariant + " converted into: " + variant);
+                if (debug) {
+                    logger.finest("... Currency format: " + oldVariant + " converted into: " + variant);
+                }
             }
+
+            // fix bad OCR scan quality
+            variant = OCRTextAdapter.letterToNumber(variant);
+            variant = OCRTextAdapter.stripSpaces(variant);
 
             BigDecimal b = textToCurrency(variant, event.getLocals());
             if (b != null) {

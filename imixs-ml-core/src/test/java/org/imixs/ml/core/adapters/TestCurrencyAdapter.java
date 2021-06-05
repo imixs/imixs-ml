@@ -58,7 +58,7 @@ public class TestCurrencyAdapter {
 
         Assert.assertTrue(enityVariants.contains("1.700.411,00"));
     }
-    
+
     /**
      * test US variants
      */
@@ -67,7 +67,7 @@ public class TestCurrencyAdapter {
 
         Set<String> enityVariants = new HashSet<String>();
 
-        //float f = new Double(1700411.01).floatValue();
+        // float f = new Double(1700411.01).floatValue();
         double f = 1700411.01;
 
         List<Locale> locals = new ArrayList<Locale>();
@@ -85,8 +85,6 @@ public class TestCurrencyAdapter {
         Assert.assertTrue(enityVariants.contains("1,700,411.01"));
     }
 
-    
-    
     /**
      * test variants
      */
@@ -246,9 +244,44 @@ public class TestCurrencyAdapter {
         Float f = (Float) o;
         Assert.assertEquals(new Float("663.52"), f);
     }
-    
-    
-    
-    
+
+    /**
+     * test bad OCR text variants including letters
+     */
+    @Test
+    public void testBadOCRVariants() {
+
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.GERMANY);
+        locals.add(Locale.UK);
+        locals.add(Locale.US);
+
+        List<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("3,lI0.34");
+        CurrencyAdapter currencyAdapter = new CurrencyAdapter();
+
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency", 0);
+        currencyAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+
+        Assert.assertTrue(o instanceof Float);
+
+        Float f = (Float) o;
+        Assert.assertEquals(new Float("3110.34"), f);
+
+        // test with spaces
+        itemValueList = new ArrayList<String>();
+        itemValueList.add("3 lI0.34");
+        currencyAdapter = new CurrencyAdapter();
+
+        entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency", 0);
+        currencyAdapter.onTextEvent(entityTextEvent);
+        o = entityTextEvent.getItemValue();
+
+        Assert.assertTrue(o instanceof Float);
+
+        f = (Float) o;
+        Assert.assertEquals(new Float("3110.34"), f);
+    }
 
 }
