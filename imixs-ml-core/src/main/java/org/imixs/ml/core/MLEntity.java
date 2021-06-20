@@ -1,6 +1,7 @@
 package org.imixs.ml.core;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -45,16 +46,48 @@ public class MLEntity {
 
     public MLEntity(Map<String, Object> map) {
         super();
-        setName((String) map.get("name"));
-        this.itemType = (String) map.get("itemType");
-        this.itemName = (String) map.get("itemName");
+
+        // setName((String) map.get("name"));
+        // this.itemType = (String) map.get("itemType");
+        // this.itemName = (String) map.get("itemName");
+        // if (map.containsKey("length")) {
+        // setLength((int) map.get("length"));
+        // }
+        // if (map.containsKey("required")) {
+        // this.required = (boolean) map.get("required");
+        // }
+
+        // Issue 62
+        setName((String) getMapValue(map, "name"));
+        this.itemType = (String) getMapValue(map, "itemType");
+        this.itemName = (String) getMapValue(map, "itemName");
         if (map.containsKey("length")) {
-            setLength( (int) map.get("length"));
+            setLength((int) getMapValue(map, "length"));
         }
         if (map.containsKey("required")) {
-            this.required = (boolean) map.get("required");
+            this.required = (boolean) getMapValue(map, "required");
         }
 
+    }
+
+    /**
+     * Helper method to convert the map value form a MLEntity. This can be a simple
+     * object or in case of previous XML conversion a ArraList of objects. In the
+     * later case we take the first value of the list.
+     * <p>
+     * See also Github Issue 62
+     * 
+     * @param o
+     * @return
+     */
+    @SuppressWarnings({ "rawtypes" })
+    private Object getMapValue(Map<String, Object> map, String item) {
+        Object o = map.get(item);
+        Object result = o;
+        if (result instanceof List) {
+            result = ((List) o).get(0);
+        }
+        return result;
     }
 
     public String getName() {
