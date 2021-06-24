@@ -36,7 +36,7 @@ public class MLController implements Serializable {
     private static final long serialVersionUID = 1L;
     private static Logger logger = Logger.getLogger(MLController.class.getName());
 
-    public static List<String> STOP_PHRASE_LIST = Arrays.asList("\n", "  ", ", ", ". ");
+    public static List<String> STOP_PHRASE_LIST = Arrays.asList("\n", "  ", ", ", ". ", ".\n");
 
     @Inject
     protected WorkflowController workflowController;
