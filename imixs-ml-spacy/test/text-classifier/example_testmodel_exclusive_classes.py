@@ -2,6 +2,7 @@ import os
 import random
 
 from pydantic import BaseModel
+
 import spacy
 from spacy.util import minibatch, compounding
 

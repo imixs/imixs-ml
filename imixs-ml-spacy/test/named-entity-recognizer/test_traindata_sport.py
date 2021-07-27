@@ -1,7 +1,9 @@
-import sys 
-sys.path.append('../..')
-from imixs.core import datamodel, modelservice
 import random
+import sys 
+
+from imixs.core import datamodel, modelservice
+
+sys.path.append('../..')
 
 
 
