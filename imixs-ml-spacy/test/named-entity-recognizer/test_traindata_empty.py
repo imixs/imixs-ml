@@ -1,4 +1,3 @@
-import random
 import sys 
 
 from imixs.core import datamodel, modelservice
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     # the test model
     modelfile = "models/training_model_empty"
     
-    modelservice.initModelByCategories([], modelfile)
+    modelservice.initModel( modelfile)
                   
     # Test your text
     test_text = input("Enter your text to be analyzed: ")

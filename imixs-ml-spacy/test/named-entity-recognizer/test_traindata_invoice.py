@@ -29,11 +29,8 @@ if __name__ == "__main__":
     training_data=[]
     TRAIN_RAWDATA = [
               ('what is the price of 11,00', {'entities': [(21, 26, 'price')]}), 
-              #('what is the price of 11,00', {'entities': [(21, 26, 'price')] , 'cats': [('invoice', True)]}), 
               ('what is the price of 12,50', {'entities': [(21, 26, 'price')]}), 
               ('what is the price of 20000,00', {'entities': [(21, 29, 'price')]}), 
-              #('what is the price of 20000,00', {'entities': [(21, 29, 'price')] , 'cats': [('biginvoice', True)]}), 
-              #('what is the price of 20000,00', {'entities': [(21, 29, 'price')]}), 
               ('what is the price of 10120,00', {'entities': [(21, 29, 'price')]}), 
               ('what is the price of 333,00', {'entities': [(21, 27, 'price')]}), 
               ('what is the price of 0,50', {'entities': [(21, 25, 'price')]}), 
@@ -50,9 +47,11 @@ if __name__ == "__main__":
               ('what is the price of 70000,00', {'entities': [(21, 29, 'price')]}), 
               ('what is the price of 30,00', {'entities': [(21, 26, 'price')]}), 
               ('what is the price of 20,00', {'entities': [(21, 26, 'price')]}), 
-              ('what is the price of 11,50', {'entities': [(21, 26, 'price')]})] 
-    
-    
+              ('what is the price of 11,50', {'entities': [(21, 26, 'price')]}) 
+              # optional we can add some categories too
+              #('what is the price of 11,00', {'entities': [(21, 26, 'price')] , 'cats': [('invoice', True)]}), 
+              #('what is the price of 20000,00', {'entities': [(21, 29, 'price')] , 'cats': [('biginvoice', True)]}), 
+            ]
     
     
     """ 

@@ -64,7 +64,9 @@ if __name__ == "__main__":
               ('chess player knight hits the bishop.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
               ('chess player knight hits the queen.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]}), 
               ('chess player knight hits the king.', {'entities': [(0,5,'game')], 'cats': [('sports', True)]})
-
+              
+              ,
+              ('add some pepper to the soup.', {'entities': [(23,4,'dish')], 'cats': [('cooking', True)]})
               
               ] 
     

@@ -1,8 +1,10 @@
+from builtins import str
 import os
 import shutil
-from builtins import str
 from typing import List
+
 from fastapi import FastAPI, HTTPException
+
 from imixs.core import datamodel, modelservice
 
 
@@ -52,10 +54,10 @@ def analyse_text(model: str, analyseData: datamodel.AnalyseData):
 # Initialize a new model with a given set of categories 
 #
 @app.post("/{model}")
-def init_Model(model: str,categories: List[str] ):
+def init_Model(model: str):
     try:
         # try to create a blank model
-        result=modelservice.initModelByCategories(categories, modelpath+model)
+        result=modelservice.initModel(modelpath+model)
         return result
     except Exception as e:
         print("failed to init model '" + modelpath + model +"' ")
