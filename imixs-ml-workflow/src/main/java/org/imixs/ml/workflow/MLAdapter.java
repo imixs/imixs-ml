@@ -380,7 +380,7 @@ public class MLAdapter implements SignalAdapter {
             mlMaxAccuracy = mlDefaultMaxAccuracy;
         }
         if (debug) {
-            logger.info("......ml model = " + mlMaxAccuracy);
+            logger.info("......ml max_accuracy = " + mlMaxAccuracy);
         }
 
         return mlMaxAccuracy;
