@@ -31,10 +31,12 @@ import spacy
 from spacy.training import Example
 from thinc.api import Config
 
-from spacy.pipeline.textcat_multilabel import multi_label_bow_config
+from spacy.pipeline.textcat_multilabel import multi_label_bow_config, multi_label_cnn_config
 
 
-def updateModel(trainingDataSet, modelPath):
+
+
+def updateModel(trainingDataSet, modelPath, max_Accuracy):
     
     print("updateModel....")
     
@@ -84,6 +86,7 @@ def updateModel(trainingDataSet, modelPath):
             
             # Now we need to manually config the multilabel feature
             textcat = nlp.add_pipe("textcat_multilabel", config=Config().from_str(multi_label_bow_config))
+            #textcat = nlp.add_pipe("textcat_multilabel", config=Config().from_str(multi_label_cnn_config))
             assert nlp.get_pipe("textcat_multilabel").is_resizable
             # See duscussion here https://github.com/explosion/spaCy/discussions/6905
             # maybe an alternative is:
@@ -140,11 +143,20 @@ def updateModel(trainingDataSet, modelPath):
         examples.append(Example.from_dict(nlp.make_doc(text), annots))
         
     losses = nlp.update(examples, sgd=optimizer);
-    print(losses)
+    print("losses=",losses)
     
     # finally we save the updated model to disk
-    # print("save model to disk "+modelPath)
-    nlp.to_disk(modelPath)
+    writeToDisk=True
+    if ("ner" in losses):
+        if losses.get('ner')<max_Accuracy:
+            writeToDisk=False
+    
+    if (writeToDisk == True):
+        # We update the model only if the losses is  > then a given max_accuracy 
+        print("writing new model to disk - MAX_ACCURACY= ",max_Accuracy)
+        nlp.to_disk(modelPath)
+    else: 
+        print("no model update - MAX_ACCURACY= ",max_Accuracy)
   
     return losses
 

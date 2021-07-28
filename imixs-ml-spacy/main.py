@@ -27,9 +27,13 @@ print("")
 
 # Train a training data set
 @app.post("/training/{model}")
-def train_model(model: str,trainngdata: List[datamodel.TrainingData]):
+def train_model(model: str,trainngdata: List[datamodel.TrainingData],max_accuracy: float = 0.0):
     try : 
-        losses = modelservice.updateModel(trainngdata, modelpath+model)
+        if max_accuracy==0.0:
+            # optional read max_Accuracy from environment variables
+            max_accuracy = float(os.getenv('MAX_ACCURACY', '0.0'))
+            
+        losses = modelservice.updateModel(trainngdata, modelpath+model,max_accuracy)
     except Exception as e:
         print (e)
         raise HTTPException(status_code=406, detail="Training Data is not acceptable!") from e    

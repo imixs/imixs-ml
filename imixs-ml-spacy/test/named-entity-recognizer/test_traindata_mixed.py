@@ -102,7 +102,7 @@ if __name__ == "__main__":
         print(i+1,". run....")
         
         random.shuffle(training_data)
-        losses = modelservice.updateModel(training_data,modelfile)
+        losses = modelservice.updateModel(training_data,modelfile,0.0)
     
     print("------------training finished--------------------")
                 

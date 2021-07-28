@@ -22,7 +22,7 @@ public class IntegrationTest {
 	public IntegrationTest(String uri) {
 		this.serviceEndpoint = uri;
 	}
-
+ 
 	public boolean connected() {
 		try {
 			HttpURLConnection urlConnection = (HttpURLConnection) new URL(serviceEndpoint).openConnection();

@@ -126,6 +126,7 @@ public class TrainingResource {
             int currentCount=0;
             for (ItemCollection doc : documents) {
                 currentCount++;
+                logger.info("...... " +currentCount + "/" + countTotal+"...");
                 MLTrainingResult trainingResult = trainingService.trainWorkitemData(config, doc, worklowClient);
 
                 if (trainingResult != null) {

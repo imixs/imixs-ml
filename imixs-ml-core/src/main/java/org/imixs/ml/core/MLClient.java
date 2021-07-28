@@ -69,12 +69,17 @@ public class MLClient {
      * 
      * @param trainingData    - the training data object
      * @param serviceEndpoint - the ml API endpoint
+     * @param options - an optional query parameter
      */
-    public String postTrainingData(XMLTrainingData trainingData, String model) {
+    public String postTrainingData(XMLTrainingData trainingData, String model, String options) {
 
         logger.fine("......sending new training data object...");
         Client client = ClientBuilder.newClient();
-        WebTarget webTarget = client.target(serviceEndpoint + "/training/" + model);
+        String uri=serviceEndpoint + "/training/" + model;
+        if (options!=null && !options.isEmpty()) {
+            uri=uri+"?"+options;
+        }
+        WebTarget webTarget = client.target(uri);
 
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
 
@@ -85,15 +90,10 @@ public class MLClient {
         GenericEntity<List<XMLTrainingData>> list = new GenericEntity<List<XMLTrainingData>>(dataset) {
         };
 
-        @SuppressWarnings("unused")
         Response response = invocationBuilder.post(Entity.entity(list, MediaType.APPLICATION_JSON));
-        
-       
         String output = response.readEntity(String.class);
-            
         return output;
        
-
     }
 
     /**

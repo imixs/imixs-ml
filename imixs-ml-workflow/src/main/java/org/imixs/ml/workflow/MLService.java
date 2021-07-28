@@ -62,17 +62,14 @@ public class MLService implements Serializable {
     public static final String ITEM_ML_LOCALES = "ml.locales";
     public static final String ITEM_ML_STATUS = "ml.status";
     public static final String ITEM_ML_MODEL = "ml.model";
-    // public static final String ITEM_ML_QUALITY = "ml.quality";
-
+    public static final String ITME_ML_MAX_ACCURACY = "ml.max_accuracy";
+  
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
     public static final String ML_STATUS_TRAINING = "training";
 
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
 
-//    @Inject
-//    @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
-//    String trainingQualityLevel;
 
     // enabled
     @Inject
@@ -239,6 +236,7 @@ public class MLService implements Serializable {
             String mlEndpoint = mlDefinition.getItemValueString(ITEM_ML_ENDPOINT);
             String mlModel = mlDefinition.getItemValueString(ITEM_ML_MODEL);
             String mlLocals = mlDefinition.getItemValueString(ITEM_ML_LOCALES);
+            float mlMaxAccuracy = mlDefinition.getItemValueFloat(ITME_ML_MAX_ACCURACY);
             // String mlQuality = mlDefinition.getItemValueString(ITEM_ML_QUALITY);
             logger.info("...train " + mlEndpoint + " model: " + mlModel);
 
@@ -263,7 +261,11 @@ public class MLService implements Serializable {
             // post training data...
             // validate if usefull data
             if (!trainingData.isEmpty()) {
-                String resultData= mlClient.postTrainingData(trainingData, mlModel);
+                String options=null;
+                if (mlMaxAccuracy>0) {
+                    options="max_accuracy="+mlMaxAccuracy;
+                }
+                String resultData= mlClient.postTrainingData(trainingData, mlModel,options);
                 trainingResult= new MLTrainingResult(trainingData.getQuality(),resultData);
             }
         }
