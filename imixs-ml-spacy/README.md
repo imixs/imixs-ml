@@ -56,6 +56,17 @@ The spaCy API provides different language models. The model language is set by I
 	  
 **Note:** The language is only relevant for creating a new model. You should not change the language for an existing model.	  
 
+
+### SpaCy Max Accuracy
+
+Imixs-ML-spaCy provides an optional parameter called "max_accuracy". This parameter defaults to 0. This means, independent how accurate a model update with a given training set was, the model will be updated. This can be in some cases a problem when parts of the training data have an overweight against other parts in the training data set. It means that some kind of data will be trained better and better against the other parts. This is indicated by a very low ner.losses value (<0.0000000001). In such cases you can set the evnironment variable 'MAX_ACCURACY' with a higher value (e.g. 0.1) to avoid this effect. 
+
+The MAX_ACCURACY can also be set via the imixs-ml-workflow api with the ml-config item named 'max_accuracy'
+
+
+	<ml-config name="max_accuracy">0.1</ml-config>
+ 
+
 ## Access the API from your Web Browser
 
 The Imixs-ML-spaCy wrapper service provides a web front-end to access the api for testing: 
