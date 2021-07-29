@@ -16,7 +16,7 @@ public class MLConfig {
     public static final String ML_MODEL = "ml.model";
     public static final String ML_LOCALES = "ml.locales";
     public static final String ML_TRAINING_QUALITYLEVEL = "ml.training.quality";
-    public static final String ML_MAX_ACCURACY = "ml.max_accuracy";
+    public static final String ML_OPTIONS = "ml.options";
 
     /**
      * Convert the List of ItemCollections back into a List of Map elements

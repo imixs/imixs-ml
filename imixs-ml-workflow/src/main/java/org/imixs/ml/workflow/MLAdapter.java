@@ -136,9 +136,9 @@ public class MLAdapter implements SignalAdapter {
     String mlDefaultQualityLevel;
     
     @Inject
-    @ConfigProperty(name = MLConfig.ML_MAX_ACCURACY, defaultValue = "0.0000000001")
-    Float mlDefaultMaxAccuracy;
-
+    @ConfigProperty(name = MLConfig.ML_OPTIONS)
+    Optional<String> mlDefaultOptions;
+    
     @Inject
     private WorkflowService workflowService;
 
@@ -156,7 +156,7 @@ public class MLAdapter implements SignalAdapter {
         String mlAPIEndpoint = null;
         String mlModelName = null;
         String mlLocals = null;
-        float mlMaxAccuracy=0;
+        String mlOptions = null;
         //String mlQuality = null;
         Pattern mlFilenamePattern = null;
         List<Locale> locals = new ArrayList<Locale>();
@@ -173,7 +173,7 @@ public class MLAdapter implements SignalAdapter {
             mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
-            mlMaxAccuracy=parseMLMaxAccuracyByBPMN(mlConfig);
+            mlOptions=parseMLOptionsByBPMN(mlConfig);
             //mlQuality = parseMLQualityByBPMN(mlConfig);
             // parse optional filename regex pattern...
             String _FilenamePattern = parseMLFilePatternByBPMN(mlConfig);
@@ -275,7 +275,7 @@ public class MLAdapter implements SignalAdapter {
             mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
             mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS,MLConfig.implodeMLEntityList(mlEntities) );
             mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
-            mlDefinition.setItemValue(MLService.ITME_ML_MAX_ACCURACY, mlMaxAccuracy);
+            mlDefinition.setItemValue(MLService.ITME_ML_OPTIONS, mlOptions);
             mlService.updateMLDefinition(document, mlDefinition);
 
         } else {
@@ -336,7 +336,7 @@ public class MLAdapter implements SignalAdapter {
         String mlModel = null;
 
         // test if the model provides a MLModel name. If not, the adapter uses the
-        // mlDefaultAPIEndpoint
+        // mlDefaultModel
         if (mlConfig != null) {
             mlModel = mlConfig.getItemValueString("model");
         }
@@ -357,33 +357,35 @@ public class MLAdapter implements SignalAdapter {
     
     
     /**
-     * This helper method parses the ml max_accuracy value either provided by a model
+     * This helper method parses the ml options value either provided by a model
      * definition or a imixs.property or an environment variable
      * 
      * @param mlConfig
      * @return
      */
-    private float parseMLMaxAccuracyByBPMN(ItemCollection mlConfig) {
+    private String parseMLOptionsByBPMN(ItemCollection mlConfig) {
         boolean debug = logger.isLoggable(Level.FINE);
         debug = true;
-        float mlMaxAccuracy = 0;
+        String mlOptions = null;
 
-        // test if the model provides a MLModel name. If not, the adapter uses the
-        // mlDefaultAPIEndpoint
+        // test if the model provides options. If not, the adapter uses the
+        // mlDefaultOptions
         if (mlConfig != null) {
-            mlMaxAccuracy = mlConfig.getItemValueFloat("max_accuracy");
+            mlOptions = mlConfig.getItemValueString("options");
         }
 
         // switch to default api endpoint?
-        if (mlMaxAccuracy==0) {
-            // set defautl maxAccuracy if defined
-            mlMaxAccuracy = mlDefaultMaxAccuracy;
+        if (mlOptions==null || mlOptions.isEmpty()) {
+            // set defautl options if defined
+            if (mlDefaultOptions.isPresent() && !mlDefaultOptions.get().isEmpty()) {
+                mlOptions = mlDefaultOptions.get();
+            }
         }
         if (debug) {
-            logger.info("......ml max_accuracy = " + mlMaxAccuracy);
+            logger.info("......ml options = " + mlOptions);
         }
 
-        return mlMaxAccuracy;
+        return mlOptions;
 
     }
     

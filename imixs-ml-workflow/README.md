@@ -29,8 +29,9 @@ The parameters can be set in the imixs.properties or as environment variables:
 	ML_SERVICE_ENDPOINT=http://imixs-ml-spacy:8000/
 	ML_MODEL=invoice-model-1.0.0
 	ML_LOCALES=de_DE,en_GB
+	ML_OPTIONS=...
 
-All these parameters can be overwritten by the model.
+All these parameters can be overwritten by the model. The parameter '*ML_OPTIONS*' is optional and can contain additional key/value pairs used to configure the ml framework. See the ML framework implementation for details. 
 
 ### Configuration by the Model
 
@@ -46,11 +47,11 @@ See the following example:
 	    https://localhost:8111/api/resource/
 	</ml-config>
 	<ml-config name="locales">de_DE,en_GB</ml-config>
+	<ml-config name="options">value1=x;value2=</ml-config>
 
-**Note:** The mode name is mandatory. In case not default model is defined by the environment variable 'ML_MODEL' and not model is specified by the BPMN model, the Adapter throws an ProcessingErrorException. 
+**Note:** The ml-config '*model*' is mandatory. In case no default model is defined by the environment variable 'ML_MODEL' and no model is specified by the BPMN model, the Adapter throws an ProcessingErrorException. 
 
-The model name of a successful text analyses will be stored by the MLAdapter into the item 'ml.model'. This information is used by the ML Training Service later. 
-
+The ml-configuration will be stored after a successful text analyses  by the MLAdapter into the item 'ml.model'. This information is used by the ML Training Service for later processing. 
 
 
 ### Natural Language Processing (NLP) 
@@ -252,7 +253,7 @@ The training scheduler will only train data with a training quality level="GOOD"
  - TRAININGDATA_QUALITY_LOW=4 -  some entities have no matching value and the required flag is set to false (default).
  - TRAININGDATA_QUALITY_BAD=0 - some entities have no matching value and the required flag is set to true. Or no matching training data if found at all.
 
-It is possible to force the training quality level "FULL" if all MLEntities are marked with the flag 'required=true'
+It is possible to force the training quality level "GOOD" if all MLEntities are marked with the flag 'required=true'
 
 	<ml-config name="entity">
 	    <name>invoice.total</name>

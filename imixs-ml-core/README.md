@@ -105,10 +105,11 @@ The ML-CLient is a Rest Service Client based on Jax-rs to access an ml framework
 
 
 	MLClient mlClient = new MLClient();
-	
-	mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT);
+	mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT, options);
 
+The parameter 'options' can contain additional parameters to configure the ML adapter service. E.g:
 
+	mlClient.postTrainingData(trainingData, SERVICE_ENDPOINT, "min_losses=0.01;value1=xxx");
 
 
 # The EntityAdapter

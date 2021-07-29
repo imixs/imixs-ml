@@ -77,7 +77,12 @@ public class MLClient {
         Client client = ClientBuilder.newClient();
         String uri=serviceEndpoint + "/training/" + model;
         if (options!=null && !options.isEmpty()) {
-            uri=uri+"?"+options;
+            if (uri.contains("?")) {
+                uri=uri+"&";
+            } else {
+                uri=uri+"?";
+            }
+            uri=uri+options;
         }
         WebTarget webTarget = client.target(uri);
 
