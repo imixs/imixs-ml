@@ -106,7 +106,7 @@ public class TrainingService {
         logger.info("...create new training data for: " + workitem.getUniqueID());
 
         String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
-        float mlMaxAccuracy = config.getItemValueFloat(TrainingApplication.ITME_ML_MAX_ACCURACY);
+        String mlOptions = config.getItemValueString(TrainingApplication.ITME_ML_OPTIONS);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
@@ -226,11 +226,7 @@ public class TrainingService {
                 }
                 String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
                 MLClient mlClient = new MLClient(serviceEndpoint);
-                String options=null;
-                if (mlMaxAccuracy>0) {
-                    options="max_accuracy="+mlMaxAccuracy;
-                }
-                String resultData= mlClient.postTrainingData(trainingData, model,options); 
+                String resultData= mlClient.postTrainingData(trainingData, model,mlOptions); 
                 trainingResult= new MLTrainingResult(qualityResult,resultData);
             } else {
                 trainingResult= new MLTrainingResult(qualityResult,null);

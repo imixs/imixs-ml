@@ -27,7 +27,7 @@ public class TrainingApplication extends Application {
     public static final String ITEM_ML_ANALYSE_ENDPOINT = "ml.analyse.endpoint";
     public static final String ITEM_ML_ANALYSE_MODEL = "ml.analyse.model";
     public static final String ITEM_ML_TRAINING_QUALITYLEVEL = "ml.training.quality";
-    public static final String ITME_ML_MAX_ACCURACY = "ml.max_accuracy";
+    public static final String ITME_ML_OPTIONS = "ml.options";
 
     private static Logger logger = Logger.getLogger(TrainingApplication.class.getName());
 
