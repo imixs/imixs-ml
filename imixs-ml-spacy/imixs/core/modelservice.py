@@ -36,7 +36,7 @@ from spacy.pipeline.textcat_multilabel import multi_label_bow_config, multi_labe
 
 
 
-def updateModel(trainingDataSet, modelPath, max_Accuracy):
+def updateModel(trainingDataSet, modelPath, min_losses):
     
     print("updateModel....")
     
@@ -148,15 +148,15 @@ def updateModel(trainingDataSet, modelPath, max_Accuracy):
     # finally we save the updated model to disk
     writeToDisk=True
     if ("ner" in losses):
-        if losses.get('ner')<max_Accuracy:
+        if losses.get('ner')<min_losses:
             writeToDisk=False
     
     if (writeToDisk == True):
-        # We update the model only if the losses is  > then a given max_accuracy 
-        print("writing new model to disk - MAX_ACCURACY= ",max_Accuracy)
+        # We update the model only if the losses is  > then a given min_losses 
+        print("writing new model to disk - min_losses= ",min_losses)
         nlp.to_disk(modelPath)
     else: 
-        print("no model update - MAX_ACCURACY= ",max_Accuracy)
+        print("no model update - min_losses= ",min_losses)
   
     return losses
 
