@@ -54,8 +54,7 @@ public class TestCurrencyAdapter {
 
         }
 
-        Assert.assertEquals(4, enityVariants.size());
-
+        Assert.assertEquals(6, enityVariants.size());
         Assert.assertTrue(enityVariants.contains("1.700.411,00"));
     }
 
@@ -80,7 +79,7 @@ public class TestCurrencyAdapter {
             logger.info(variant);
         }
 
-        Assert.assertEquals(4, enityVariants.size());
+        Assert.assertEquals(6, enityVariants.size());
         Assert.assertTrue(enityVariants.contains("1.700.411,01"));
         Assert.assertTrue(enityVariants.contains("1,700,411.01"));
     }
@@ -183,6 +182,47 @@ public class TestCurrencyAdapter {
 
     }
 
+    
+    /**
+     * test blank separator 3 990.00
+     */
+    @Test
+    public void testBlankSeparator() {
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.GERMANY);
+        locals.add(Locale.UK);
+        locals.add(Locale.US);
+
+    
+        // ----- core test end
+
+        List<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("3 990.34");
+        CurrencyAdapter currencyAdapter = new CurrencyAdapter();
+
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "currency", 0);
+        currencyAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+
+        Assert.assertTrue(o instanceof Float);
+
+        Float f = (Float) o;
+        Assert.assertEquals(new Float("3990.34"), f);
+
+        
+        
+        // ----- convert back to string...
+        Set<String> enityVariants = new HashSet<String>();
+        currencyAdapter.onObjectEvent(new EntityObjectEvent(f, enityVariants, locals));
+        for (String variant : enityVariants) {
+            logger.info(variant);
+        }
+        Assert.assertEquals(6, enityVariants.size());
+        Assert.assertTrue(enityVariants.contains("3 990.34"));
+        Assert.assertTrue(enityVariants.contains("3 990,34"));
+    }
+
+    
     /**
      * test US currency conversion from USD 3,695.34
      */

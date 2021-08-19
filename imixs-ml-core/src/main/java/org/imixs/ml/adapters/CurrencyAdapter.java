@@ -91,6 +91,14 @@ public class CurrencyAdapter {
                 DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
                 formatter.applyPattern("#,###,##0.00");
                 event.getEnityTextVariants().add(formatter.format(d));
+                
+                // also we provide one pattern where we replace the GroupingSeparator with a blank (e.g. 3 999.00)
+                String s=formatter.format(d);
+                char c=formatter.getDecimalFormatSymbols().getGroupingSeparator();
+                s=s.replace(c, ' ');
+                if (!event.getEnityTextVariants().contains(s)) {
+                	event.getEnityTextVariants().add(s);
+                }
 
                 formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
                 formatter.applyPattern("0.00");
