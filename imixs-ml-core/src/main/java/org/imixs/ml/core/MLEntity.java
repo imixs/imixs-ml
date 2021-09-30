@@ -46,17 +46,6 @@ public class MLEntity {
 
     public MLEntity(Map<String, Object> map) {
         super();
-
-        // setName((String) map.get("name"));
-        // this.itemType = (String) map.get("itemType");
-        // this.itemName = (String) map.get("itemName");
-        // if (map.containsKey("length")) {
-        // setLength((int) map.get("length"));
-        // }
-        // if (map.containsKey("required")) {
-        // this.required = (boolean) map.get("required");
-        // }
-
         // Issue 62
         setName((String) getMapValue(map, "name"));
         this.itemType = (String) getMapValue(map, "itemType");
