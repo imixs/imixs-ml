@@ -501,12 +501,11 @@ public class MLAdapter implements SignalAdapter {
                     String type = entityData.getItemValueString("type");
                     String mapping = entityData.getItemValueString("mapping");
                     int length = entityData.getItemValueInteger("length");
-                    boolean forceTraining=true;
+                    boolean forceTraining=false; // issue #69 
                     if (entityData.hasItem("required")) {
                         forceTraining=entityData.getItemValueBoolean("required");
                     }
                     // add definition into the definition map...
-                    //result.put(name, new EntityDefinition(name, type, mapping, length,forceTraining));
                     result.add(new MLEntity(name, type, mapping, length,forceTraining));
                 }
             } catch (PluginException e) {
