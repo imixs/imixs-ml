@@ -53,12 +53,13 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 			<value xsi:type="xs:string">_invoicenumber|invoice.number</value>
 		</item>
 		<item name="workflow.locale">
-			<value xsi:type="xs:string">UK</value>
-			<value xsi:type="xs:string">DE</value>
+			<value xsi:type="xs:string">en_GB</value>
+			<value xsi:type="xs:string">en_US</value>		
+			<value xsi:type="xs:string">de_DE</value>
 		</item>
 		
-		<!-- Tika OCR Server PDF_ONLY|OCR_ONLY|MIXED -->
-		<item name="tika.ocrmode"><value xsi:type="xs:string">MIXED</value></item>
+		<!-- Tika OCR Server PDF_ONLY|OCR_ONLY -->
+		<item name="tika.ocrmode"><value xsi:type="xs:string">OCR_ONLY</value></item>
 		<item name="tika.options">
 			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_AND_TEXT_EXTRACTION</value>
 			<value xsi:type="xs:string">X-Tika-PDFOcrImageType=RGB</value>
@@ -66,17 +67,31 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 		</item>
 		
 		<!-- ML spaCy Server -->
-		<item name="ml.training.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/training</value></item>
-		<item name="ml.analyse.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/analyse</value></item>
+		<item name="ml.training.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/</value></item>
+		<item name="ml.training.model"><value xsi:type="xs:string">invoice-de-0.1.0</value></item>
+		<item name="ml.training.filepattern"><value xsi:type="xs:string">.pdf|.PDF</value></item>
+		<!-- LOW | GOOD -->
+		<item name="ml.training.quality"><value xsi:type="xs:string">LOW</value></item>
+		<item name="ml.training.iterations"><value xsi:type="xs:string">10</value></item>
+		<item name="ml.training.dropoutrate"><value xsi:type="xs:string">0.25</value></item>
+
 	</document>
 
+### ML Settings
 
-### OCR Options
+**ml.training.endpoint** - defines the service endpoint of the spacy Rest service
 
-During the training mode the TrainingService run a OCR on documents attached to a workitem. The ocr is processed by Apache Tika.
-Out of the box, Apache Tika will start with the default configuration. By providing additional config options you can specify a custom tika configuration to be used by the tika server. These options can be set in the config item 'tika.options' and 'tika.ocrmode'.
+**ml.training.model** - the Model to be trained
 
-Find more details [here](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents#the-tikadocumentservice).
+**ml.training.filepattern** - optional file pattern to filter file types (e.g. pdf documents only)
+
+**ml.training.quality** - training quality - see below
+
+**ml.training.iterations** - number of iterations the training set will be trained (a good value is 10)
+
+**ml.training.dropoutrate** - drop out rate (e.g. 0.25 - means 25% will be filtered out for each iteration)
+
+The Training service runs the trainingSet in iterations. In each iteration the trainingSet is shuffled 	and reduced by a given DropOutRate. This is to avoid the 'memory effect' of an AI model. See details in the spaCy documentation. 
 
 
 ### The Entity List
@@ -93,8 +108,8 @@ This example maps the item '_capacity' to the entity 'invoice.total'.
 
 The training data quality depends on the entities found in the content of a workitem.  There are the following training data quality levels defined:
 
- - FULL - all training items in the workitem have a value and all values are part of the training text. This means a 100% match.
- - PARTIAL - not all training items in the workitem have a value, but all values are part of the training text. This means the workitem data has a partial match.
+ - GOOD - all training items in the workitem have a value and all values are part of the training text. This means a 100% match.
+ - LOW - not all training items in the workitem have a value, but all values are part of the training text. This means the workitem data has a partial match.
  - BAD - not all training item values are part of the training text.  This means the training object has a bad quality and can not be used for training
  
 
@@ -102,16 +117,25 @@ The training data quality depends on the entities found in the content of a work
 The requested quality level for a training data set can be defined with the config item "ml.training.quality"
 
 	....
-	<!-- ML Quality Level (FULL|PARTIAL) -->
-	<item name="ml.training.quality"><value xsi:type="xs:string">FULL</value></item>
+	<!-- ML Quality Level (GOOD|LOW) -->
+	<item name="ml.training.quality"><value xsi:type="xs:string">GOOD</value></item>
 	....
 
-**Note:** It is recommended to set the training quality to 'FULL' which is the default level. The training quality level 'PARTIAL' can lead to a lesser quality of the ML model. 
+**Note:** It is recommended to set the training quality to 'GOOD' which is the default level. The training quality level 'LOW' can lead to a lesser quality of the ML model. 
 
 
-## The Testing Mode
 
-You can also test an existing model. The Imixs-ML Training service provides the Rest Resource */testing/*. This resource expects a POST request with the following XML payload:
+
+### OCR Options
+
+During the training mode the TrainingService run a OCR on documents attached to a workitem. The ocr is processed by Apache Tika.
+Out of the box, Apache Tika will start with the default configuration. By providing additional config options you can specify a custom tika configuration to be used by the tika server. These options can be set in the config item 'tika.options' and 'tika.ocrmode'.
+
+Find more details [here](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents#the-tikadocumentservice).
+
+## The Validation Mode
+
+You can also validate an existing model. The Imixs-ML Training service provides the Rest Resource */validation/*. This resource expects a POST request with the following XML payload:
 
 	<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 	<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -124,17 +148,18 @@ You can also test an existing model. The Imixs-ML Training service provides the 
 		<item name="workflow.query"><value xsi:type="xs:string">($workflowgroup:"Invoice") AND ($taskid:5900)</value></item>
 		<item name="workflow.pagesize"><value xsi:type="xs:int">100</value></item>
 		<item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
-		
-		<!-- Tika OCR Server PDF_ONLY|OCR_ONLY|MIXED -->
-		<item name="tika.ocrmode"><value xsi:type="xs:string">MIXED</value></item>
+			
+		<!-- Tika OCR Server  -->
+		<item name="tika.ocrmode"><value xsi:type="xs:string">OCR_ONLY</value></item>
 		<item name="tika.options">
-			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_AND_TEXT_EXTRACTION</value>
-			<value xsi:type="xs:string">X-Tika-PDFOcrImageType=RGB</value>
-			<value xsi:type="xs:string">X-Tika-PDFOcrDPI=400</value>
+			<value xsi:type="xs:string">X-Tika-OCRLanguage=eng+deu</value>
+			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_ONLY</value>		
 		</item>
-		
+	
 		<!-- ML spaCy Server -->
-		<item name="ml.analyse.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/analyse</value></item>
+		<item name="ml.validation.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/</value></item>
+		<item name="ml.validation.model"><value xsi:type="xs:string">invoice-de-0.1.0</value></item>
+		<item name="ml.validation.filepattern"><value xsi:type="xs:string">.pdf|.PDF</value></item>
 	</document>
 
 

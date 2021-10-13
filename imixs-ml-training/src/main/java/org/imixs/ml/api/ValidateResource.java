@@ -23,14 +23,14 @@ import org.imixs.workflow.xml.XMLDocument;
 import org.imixs.workflow.xml.XMLDocumentAdapter;
 
 @Named
-@Path("testing")
+@Path("validate")
 @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-public class TestingResource {
+public class ValidateResource {
 
     @Inject
     TrainingService trainingService;
 
-    private static Logger logger = Logger.getLogger(TestingResource.class.getName());
+    private static Logger logger = Logger.getLogger(ValidateResource.class.getName());
 
     /**
      * POST Request with a valid training configuration
@@ -93,7 +93,7 @@ public class TestingResource {
 
             // now iterate over all documents and start the training algorithm
             for (ItemCollection doc : documents) {
-                trainingService.testWorkitemData(config, doc, worklowClient);
+                trainingService.validateWorkitemData(config, doc, worklowClient);
             }
 
         } catch (RestAPIException | UnsupportedEncodingException e) {

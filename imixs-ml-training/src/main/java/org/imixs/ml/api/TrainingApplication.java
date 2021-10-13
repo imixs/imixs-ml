@@ -21,14 +21,28 @@ public class TrainingApplication extends Application {
     public static final String ITEM_WORKFLOW_PAGESIZE = "workflow.pagesize";
     public static final String ITEM_ENTITIES = "workflow.entities";
     public static final String ITEM_LOCALES = "workflow.locale";
+    
     public static final String ITEM_TIKA_OPTIONS = "tika.options";
     public static final String ITEM_TIKA_OCR_MODE = "tika.ocrmode";
+    
     public static final String ITEM_ML_TRAINING_ENDPOINT = "ml.training.endpoint";
-    public static final String ITEM_ML_ANALYSE_ENDPOINT = "ml.analyse.endpoint";
-    public static final String ITEM_ML_ANALYSE_MODEL = "ml.analyse.model";
+    public static final String ITEM_ML_TRAINING_MODEL = "ml.training.model";
     public static final String ITEM_ML_TRAINING_QUALITYLEVEL = "ml.training.quality";
+    public static final String ITEM_ML_TRAINING_ITERATIONS = "ml.training.iterations";
+    public static final String ITEM_ML_TRAINING_DROP_OUT_RATE = "ml.training.dropoutrate";
+    public static final String ITEM_ML_TRAINING_OCR = "ml.training.ocr";
+    
+    public static final String ITEM_ML_TRAINING_FILEPATTERN="ml.training.filepattern";
     public static final String ITME_ML_OPTIONS = "ml.options";
 
+    
+    public static final String ITEM_ML_VALIDATION_ENDPOINT = "ml.validation.endpoint";
+    public static final String ITEM_ML_VALIDATION_MODEL = "ml.validation.model";
+    public static final String ITEM_ML_VALIDATION_OCR = "ml.validation.ocr";
+    public static final String ITEM_ML_VALIDATION_FILEPATTERN="ml.validation.filepattern";
+
+    
+    
     private static Logger logger = Logger.getLogger(TrainingApplication.class.getName());
 
     

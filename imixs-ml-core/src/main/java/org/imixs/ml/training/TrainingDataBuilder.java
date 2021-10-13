@@ -77,7 +77,7 @@ public class TrainingDataBuilder {
         // set quality level to full and reduce the level during the build process
         trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_GOOD);
         // now lets see if we find some of our item values....
-        for (MLEntity mlEntity:  mlEntities) {
+        for (MLEntity mlEntity : mlEntities) {
             String itemName = mlEntity.getItemName().toLowerCase().trim();
             // if the itemName contains a | character than we do a mapping here.....
             if (itemName.contains("|")) {
@@ -94,7 +94,7 @@ public class TrainingDataBuilder {
                 List<XMLTrainingEntity> trainingEntities = createTrainingEntities(trainingData.getText(), value,
                         itemName, locals);
 
-                if (trainingEntities!=null && trainingEntities.size()>0) {
+                if (trainingEntities != null && trainingEntities.size() > 0) {
                     for (XMLTrainingEntity trainingEntity : trainingEntities) {
                         trainingData.addTrainingEntity(trainingEntity);
                         if (debug) {
@@ -104,7 +104,8 @@ public class TrainingDataBuilder {
                         }
                     }
                 } else {
-                    // no matching value was found for this entity, the quality level is bad if the entity has
+                    // no matching value was found for this entity, the quality level is bad if the
+                    // entity has
                     // the required flag. Otherwise the quality is LOW
                     if (mlEntity.isRequired()) {
                         trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_BAD);
@@ -124,81 +125,15 @@ public class TrainingDataBuilder {
             }
         }
 
-        // if the trainingData contains no entities set quality to TRAININGDATA_QUALITY_LEVEL_BAD
-        if (trainingData.getEntities().size()==0) {
+        // if the trainingData contains no entities set quality to
+        // TRAININGDATA_QUALITY_LEVEL_BAD
+        if (trainingData.getEntities().size() == 0) {
             // no training entities for this workitem value were found
             trainingData.setQuality(XMLTrainingData.TRAININGDATA_QUALITY_BAD);
         }
-        
+
         return trainingData;
     }
-
-    /**
-     * compute the training data quality
-     * 
-     * The training data quality depends on the entities found in the content. there
-     * are two different quality modes possible.
-     * <p>
-     * <ul>
-     * <li>FULL - all trainingItems in the workitem have a value and all values are
-     * part of the traingData. This means a 100% match.
-     * <li>PARTIAL - not all trainingItems in the workitem have a value, but all
-     * values are part of the traingData. This means we have a partial match.
-     * <li>BAD - not all item values of the workitem are part of the traingData.
-     * This means the training object has a bad quality and can not be used for
-     * training
-     * 
-     **/
-//    private int computeTrainingDataQuality(ItemCollection workitem, List<String> trainingItemNames,
-//            XMLTrainingData trainingData) {
-//
-//        // trainingItemNames can contain a | for a mapping betwen the itemName in the
-//        // workitem and the training entity. for that reason we now build two lists. The
-//        // first contains the normalized training items and the second contains the
-//        // items with the workitem not empty.
-//
-//        List<String> normalizedTrainingEntities = new ArrayList<String>();
-//        List<String> normalizedWorkitemEntities = new ArrayList<String>();
-//
-//        // now lets see if we find some of our item values....
-//        for (String itemName : trainingItemNames) {
-//            String trainingEntity = null;
-//            String workitemEntity = null;
-//
-//            itemName = itemName.toLowerCase().trim();
-//            // if the itemName contains a | character than we do a mapping here.....
-//            if (itemName.contains("|")) {
-//                trainingEntity = itemName.substring(itemName.indexOf('|') + 1).trim();
-//                workitemEntity = itemName.substring(0, itemName.indexOf('|')).trim();
-//            } else {
-//                trainingEntity = itemName;
-//                workitemEntity = itemName;
-//            }
-//
-//            // is the workitemEntiy part of the workitem?
-//            if (!workitem.isItemEmpty(workitemEntity) && !normalizedWorkitemEntities.contains(workitemEntity)) {
-//                normalizedWorkitemEntities.add(workitemEntity);
-//            }
-//
-//            for (XMLTrainingEntity _trainingEntity : trainingData.getEntities()) {
-//                if (_trainingEntity.getLabel().equals(trainingEntity)
-//                        && !normalizedTrainingEntities.contains(trainingEntity)) {
-//                    normalizedTrainingEntities.add(trainingEntity);
-//                }
-//            }
-//        }
-//
-//        // now we can compute the quality level of the traing data....
-//        if (normalizedTrainingEntities.size() == normalizedWorkitemEntities.size()) {
-//            return TRAININGDATA_QUALITY_LEVEL_FULL;
-//        }
-//
-//        if (normalizedTrainingEntities.size() > normalizedWorkitemEntities.size()) {
-//            return TRAININGDATA_QUALITY_LEVEL_PARTIAL;
-//        }
-//
-//        return TRAININGDATA_QUALITY_LEVEL_BAD;
-//    }
 
     /**
      * This helper method computes the start/stop position of a substring in a text.
@@ -221,6 +156,7 @@ public class TrainingDataBuilder {
      * @param text
      * @param entity
      * @param label
+     * 
      * @return
      */
     protected List<XMLTrainingEntity> createTrainingEntities(String text, Object entity, String label,

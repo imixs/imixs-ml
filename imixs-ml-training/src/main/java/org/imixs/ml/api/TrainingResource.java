@@ -4,7 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
@@ -88,13 +92,8 @@ public class TrainingResource {
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response trainData(XMLDocument xmlConfig) {
-
-        int countTotal = 0;
-        int countQualityGood = 0;
-        int countQualityLow = 0;
-        int countQualityBad = 0;
-        double nerFactor = -1;
-        double allNerFactors=0.0;
+        String mainLog="";
+        Map<String, ItemCollection> trainingDataSet = null;
 
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
@@ -112,55 +111,42 @@ public class TrainingResource {
             // select result
             String encodedQuery = URLEncoder.encode(config.getItemValueString(TrainingApplication.ITEM_WORKFLOW_QUERY),
                     StandardCharsets.UTF_8.toString());
-            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$created&sortReverse=true";
+            String queryURL = "documents/search/" + encodedQuery + "?sortBy=$modified&sortReverse=true";
             queryURL = queryURL + "&pageSize=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGESIZE)
                     + "&pageIndex=" + config.getItemValueInteger(TrainingApplication.ITEM_WORKFLOW_PAGEINDEX);
             queryURL = TrainingApplication.appendItenNames(queryURL, itemNames);
 
             logger.info("......select workitems: " + queryURL);
             List<ItemCollection> documents = worklowClient.getCustomResource(queryURL);
-            countTotal = documents.size();
-
+           
             // now iterate over all documents and start the training algorithm
             logger.info("...... " + documents.size() + " documents found");
-            int currentCount=0;
+
+            // now we store all Documents in a HashMap.....
+            trainingDataSet = new HashMap<String, ItemCollection>();
             for (ItemCollection doc : documents) {
-                currentCount++;
-                logger.info("...... " +currentCount + "/" + countTotal+"...");
-                MLTrainingResult trainingResult = trainingService.trainWorkitemData(config, doc, worklowClient);
+                trainingDataSet.put(doc.getUniqueID(), doc);
+            }
 
-                if (trainingResult != null) {
-                    // compute quality statistic
-                    switch (trainingResult.getQualityLevel()) {
-                    case XMLTrainingData.TRAININGDATA_QUALITY_GOOD:
-                        countQualityGood++;
-                        break;
-                    case XMLTrainingData.TRAININGDATA_QUALITY_LOW:
-                        countQualityLow++;
-                        break;
-                    default:
-                        countQualityBad++;
-                    }
-
-                    // extract ner factor
-                    String resultData = trainingResult.getData();
-                    if (resultData != null && !resultData.isEmpty()) {
-                        // parse currentNerFactor....
-                        try {
-                            String nerString = JSONParser.getKey("ner", resultData);
-                            double newNerFactor = Double.parseDouble(nerString);
-                            allNerFactors=allNerFactors+newNerFactor;
-                            nerFactor=allNerFactors/currentCount;
-                        } catch (Exception e) {
-                            logger.severe("failed to parse training result (ner)");
-                        }
-                    }
-
-                } else {
-                    countQualityBad++;
-                }
+            int trainingInterations = config.getItemValueInteger(TrainingApplication.ITEM_ML_TRAINING_ITERATIONS);
+            double trainigDropoutRate = config.getItemValueDouble(TrainingApplication.ITEM_ML_TRAINING_DROP_OUT_RATE);
+            if (trainigDropoutRate < 0 || trainigDropoutRate >= 1) {
+                logger.warning("WRONG ml.training.dropoutrate : " + trainigDropoutRate + " should be between 0 and 1");
+                trainigDropoutRate = 0.25;
+            }
+            logger.info("..... iterations=" + trainingInterations);
+            logger.info("..... dropoutrate=" + trainigDropoutRate);
+            // we iterate over the whole trainingg data several times.
+            for (int iteration = 0; iteration < trainingInterations; iteration++) {
+                logger.info("\n\n\n---- Starting " + iteration + ". Training Iteration ----\n\n");
+                // Start the Training
+               String log= startSingleTrainingIteration(trainingDataSet, trainigDropoutRate, worklowClient, config);
+               mainLog=mainLog+log;
+               logger.info(log);
+               logger.info("\\n\\n\\n---- Training Iteration Completed -----");
 
             }
+
 
         } catch (RestAPIException | UnsupportedEncodingException e) {
             logger.warning("Failed to query documents: " + e.getMessage());
@@ -168,34 +154,107 @@ public class TrainingResource {
         }
 
         logger.info(" ");
+        logger.info(" ");
+        logger.info("****************Trainng Iteration Completed ***********************");
+        logger.info("SUMMMARY:");
+        logger.info(mainLog);
         // log the stats XMLDocument object....
         ItemCollection stats = new ItemCollection();
 
-        stats.setItemValue("workitems.total", countTotal);
-        stats.setItemValue("workitems.quality.good", countQualityGood);
-        stats.setItemValue("workitems.quality.low", countQualityLow);
-        stats.setItemValue("workitems.quality.bad", countQualityBad);
-        stats.setItemValue("workitems.quality.nerFactor", nerFactor);
-        
-
-        DecimalFormat df = new DecimalFormat("###.##");
-        String log = "......workitems read in total = " + countTotal + "\n";
-
-        log = log + "  ......     quality level GOOD = "
-                + df.format(((double) countQualityGood / (double) countTotal) * 100) + "%  (" + countQualityGood + ")"
-                + "\n";
-
-        log = log + "  ......      quality level LOW = " + df.format(((double) countQualityLow / (double) countTotal) * 100)
-                + "%  (" + countQualityLow + ")" + "\n";
-        log = log + "  ......      quality level BAD = "
-                + df.format(((double) countQualityBad / (double) countTotal) * 100) + "%  (" + countQualityBad + ")";
-        log=log + "\n  ......            average NER = " + nerFactor;
-        
-        logger.info(log);
-        logger.info("**************** Completed ***********************");
+//        stats.setItemValue("workitems.total", countTotal);
+//        stats.setItemValue("workitems.quality.good", countQualityGood);
+//        stats.setItemValue("workitems.quality.low", countQualityLow);
+//        stats.setItemValue("workitems.quality.bad", countQualityBad);
+//        stats.setItemValue("workitems.quality.nerFactor", nerFactor);
 
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
     }
 
+    /**
+     * Helper method to train a trainingDataSet. The training data is shuffled an
+     * the size of the training data set is reduzed by the trainigDropoutRate. This
+     * is to avoid memory effects.
+     * 
+     * @param trainingDataSet
+     * @param trainigDropoutRate
+     */
+    private String startSingleTrainingIteration(Map<String, ItemCollection> trainingDataSet, double trainigDropoutRate,
+            WorkflowClient worklowClient, ItemCollection config) {
+        int countTotal = 0;
+        int countQualityGood = 0;
+        int countQualityLow = 0;
+        int countQualityBad = 0;
+        double nerFactor = -1;
+        double allNerFactors = 0.0;
+
+        List<String> iterraionUniqueIDs = new ArrayList<String>(trainingDataSet.keySet());
+        // shuffle the uniqueids
+        Collections.shuffle(iterraionUniqueIDs);
+        // drop
+        int size = iterraionUniqueIDs.size();
+        int targetSize = (int) (size - (size * trainigDropoutRate));
+        while (iterraionUniqueIDs.size() > targetSize) {
+            iterraionUniqueIDs.remove(0);
+        }
+
+        // now we start the training with the shuffled reduced traing set....
+
+        int currentCount = 0;
+        for (String uniqueid : iterraionUniqueIDs) {
+            ItemCollection doc = trainingDataSet.get(uniqueid);
+            currentCount++;
+            countTotal++;
+            logger.info("...... train " + uniqueid + "...");
+            MLTrainingResult trainingResult = trainingService.trainWorkitemData(config, doc, worklowClient);
+
+            if (trainingResult != null) {
+                // compute quality statistic
+                switch (trainingResult.getQualityLevel()) {
+                case XMLTrainingData.TRAININGDATA_QUALITY_GOOD:
+                    countQualityGood++;
+                    break;
+                case XMLTrainingData.TRAININGDATA_QUALITY_LOW:
+                    countQualityLow++;
+                    break;
+                default:
+                    countQualityBad++;
+                }
+
+                // extract ner factor
+                String resultData = trainingResult.getData();
+                if (resultData != null && !resultData.isEmpty()) {
+                    // parse currentNerFactor....
+                    try {
+                        String nerString = JSONParser.getKey("ner", resultData);
+                        double newNerFactor = Double.parseDouble(nerString);
+                        allNerFactors = allNerFactors + newNerFactor;
+                        nerFactor = allNerFactors / currentCount;
+                    } catch (Exception e) {
+                        logger.severe("failed to parse training result (ner)");
+                    }
+                }
+
+            } else {
+                countQualityBad++;
+            }
+
+        }
+        DecimalFormat df = new DecimalFormat("###.##");
+        String log = "\n......documents trained in total = " + countTotal + "\n";
+
+        log = log + "  ......     quality level GOOD = "
+                + df.format(((double) countQualityGood / (double) countTotal) * 100) + "%  (" + countQualityGood + ")"
+                + "\n";
+
+        log = log + "  ......      quality level LOW = "
+                + df.format(((double) countQualityLow / (double) countTotal) * 100) + "%  (" + countQualityLow + ")"
+                + "\n";
+        log = log + "  ......      quality level BAD = "
+                + df.format(((double) countQualityBad / (double) countTotal) * 100) + "%  (" + countQualityBad + ")";
+        log = log + "\n  ......            average NER = " + nerFactor;
+        log = log + "\n";
+        return log;
+       
+    }
 }

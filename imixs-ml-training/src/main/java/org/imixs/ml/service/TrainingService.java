@@ -97,25 +97,28 @@ public class TrainingService {
      * @return - quality result
      */
     @SuppressWarnings("unchecked")
-    public MLTrainingResult trainWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
+    public MLTrainingResult trainWorkitemData(ItemCollection config, ItemCollection workitem,
+            WorkflowClient workflowClient) {
         boolean debug = logger.isLoggable(Level.FINE);
         int qualityResult = -1;
-        MLTrainingResult trainingResult=null;
+        MLTrainingResult trainingResult = null;
         Pattern mlFilenamePattern = null;
 
         logger.info("...create new training data for: " + workitem.getUniqueID());
 
-        String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
+        String model = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_MODEL);
         String mlOptions = config.getItemValueString(TrainingApplication.ITME_ML_OPTIONS);
+        String mlOCR = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_OCR);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
         String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
+
         if (qualityLevel.isEmpty()) {
             qualityLevel = "LOW"; // default level!
         }
         // parse optional filename regex pattern...
-        String _FilenamePattern = config.getItemValueString("filename.pattern");
+        String _FilenamePattern = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_FILEPATTERN);
         if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
             logger.info("......apply filename.pattern=" + _FilenamePattern);
             mlFilenamePattern = Pattern.compile(_FilenamePattern);
@@ -155,8 +158,11 @@ public class TrainingService {
 
         try {
 
-            // update ocr information if needed....
-            workitem = doVerifyOCRContent(workitem, mlFilenamePattern, workflowClient, tikaOptions);
+            // update ocr information only if defined in xml config item
+            // 'ml.training.ocr'...
+            if ("true".equalsIgnoreCase(mlOCR)) {
+                workitem = doVerifyOCRContent(workitem, mlFilenamePattern, workflowClient, tikaOptions);
+            }
 
             // build the ml content....
             String ocrText = new MLContentBuilder(workitem, null, false, mlFilenamePattern).build();
@@ -165,7 +171,7 @@ public class TrainingService {
             // ocrMode, tikaOptions);
 
             if (ocrText == null || ocrText.isEmpty()) {
-                return new MLTrainingResult( XMLTrainingData.TRAININGDATA_QUALITY_BAD,null);
+                return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD, null);
             }
 
             logger.fine("extracted text content to be analysed=");
@@ -208,9 +214,9 @@ public class TrainingService {
 
             } else {
                 if (XMLTrainingData.TRAININGDATA_QUALITY_LOW == trainingData.getQuality()
-                        && "FULL".equalsIgnoreCase(qualityLevel)) {
+                        && "GOOD".equalsIgnoreCase(qualityLevel)) {
                     logger.severe("...document '" + workitem.getUniqueID()
-                            + "' TRAININGDATA_QUALITY_LOW but FULL is required - document will be ignored!");
+                            + "' TRAININGDATA_QUALITY_LOW but GOOD is required - document will be ignored!");
                     qualityResult = XMLTrainingData.TRAININGDATA_QUALITY_BAD;
                 } else {
                     logger.info("...document '" + workitem.getUniqueID() + "' TRAININGDATA_QUALITY_LEVEL="
@@ -226,10 +232,11 @@ public class TrainingService {
                 }
                 String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
                 MLClient mlClient = new MLClient(serviceEndpoint);
-                String resultData= mlClient.postTrainingData(trainingData, model,mlOptions); 
-                trainingResult= new MLTrainingResult(qualityResult,resultData);
+                String resultData = mlClient.postTrainingData(trainingData, model, mlOptions);
+                trainingResult = new MLTrainingResult(qualityResult, resultData);
+
             } else {
-                trainingResult= new MLTrainingResult(qualityResult,null);
+                trainingResult = new MLTrainingResult(qualityResult, null);
             }
 
         } catch (PluginException | RestAPIException e1) {
@@ -251,31 +258,36 @@ public class TrainingService {
      * @param workflowClient - a rest client instance
      */
     @SuppressWarnings("unchecked")
-    public void testWorkitemData(ItemCollection config, ItemCollection doc, WorkflowClient workflowClient) {
-        logger.info("......anaysing: " + doc.getUniqueID());
+    public void validateWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
+        logger.info("......anaysing: " + workitem.getUniqueID());
         Pattern mlFilenamePattern = null;
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
-        String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_ENDPOINT);
-        String model = config.getItemValueString(TrainingApplication.ITEM_ML_ANALYSE_MODEL);
+        String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_VALIDATION_ENDPOINT);
+        String model = config.getItemValueString(TrainingApplication.ITEM_ML_VALIDATION_MODEL);
+        String mlOCR = config.getItemValueString(TrainingApplication.ITEM_ML_VALIDATION_OCR);
         // parse optional filename regex pattern...
-        String _FilenamePattern = config.getItemValueString("filename.pattern");
+        String _FilenamePattern = config.getItemValueString(TrainingApplication.ITEM_ML_VALIDATION_FILEPATTERN);
         if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
             logger.info("......apply filename.pattern=" + _FilenamePattern);
             mlFilenamePattern = Pattern.compile(_FilenamePattern);
         }
         try {
 
-            // update ocr information if needed....
-            doc = doVerifyOCRContent(doc, mlFilenamePattern, workflowClient, tikaOptions);
+            // update ocr information only if defined in xml config item
+            // 'ml.training.ocr'...
+            if ("true".equalsIgnoreCase(mlOCR)) {
+                workitem = doVerifyOCRContent(workitem, mlFilenamePattern, workflowClient, tikaOptions);
+            }
 
             // build the ml content....
-            String ocrText = new MLContentBuilder(doc, null, false, mlFilenamePattern).build();
+            String ocrText = new MLContentBuilder(workitem, null, false, mlFilenamePattern).build();
 
             // String ocrText = getTextContent(doc, mlFilenamePattern, workflowClient,
             // ocrMode, tikaOptions);
             if (ocrText != null && !ocrText.isEmpty()) {
                 MLClient mlClient = new MLClient(serviceEndpoint);
                 mlClient.postAnalyseData(ocrText, model);
+
             }
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
@@ -308,7 +320,7 @@ public class TrainingService {
      * This method tests if we already have OCR text in the workitem. If not we load
      * the snapshot and post the files first to the tika service. In a normal setup
      * of Imixs-Office-Workfow this task should not be necessary here. But we need
-     * to be abel to parse old data.
+     * to be able to parse old data.
      * 
      * 
      * @param workitem - workitem containing file attachments
