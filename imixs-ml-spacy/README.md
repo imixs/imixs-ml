@@ -202,6 +202,11 @@ I had a similar problem before. I solved the problem by this steps:
 
 <img src="../images/python/pydev_setup-01.png" style="width:660px" />
 
+Also make sure that you have added the libraries _fastapi, spacy and pydantic_ to your project properties (PyDev -> external libraries)
+
+<img src="../images/python/pydev_setup-02.png" style="width:660px" />
+
+
 ## Docker Hub
 
 To push the latest image to a repository run:
