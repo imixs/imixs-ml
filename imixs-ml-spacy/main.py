@@ -1,11 +1,10 @@
-from builtins import str
 import os
 import shutil
-from typing import List
 
+from builtins import str
 from fastapi import FastAPI, HTTPException
-
 from imixs.core import datamodel, modelservice
+from typing import List
 
 
 app = FastAPI()

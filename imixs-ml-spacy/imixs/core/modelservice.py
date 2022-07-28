@@ -24,16 +24,14 @@ The method 'analyseText' is used get the results of a trained model based on a g
 """ 
 
 import os
-from typing import List
 
-from imixs.core import datamodel
 import spacy
-from spacy.training import Example
 from thinc.api import Config
 
+from imixs.core import datamodel
 from spacy.pipeline.textcat_multilabel import multi_label_bow_config, multi_label_cnn_config
-
-
+from spacy.training import Example
+from typing import List
 
 
 def updateModel(trainingDataSet, modelPath, min_losses):

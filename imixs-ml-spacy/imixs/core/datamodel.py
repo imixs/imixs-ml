@@ -9,9 +9,8 @@ The data object is needed to support the data structure for the Rest API based o
 """ 
 # An Entity class defines a Entity object with its name and its position in the data objects text.
 
-from typing import List
-
 from pydantic import BaseModel
+from typing import List
 
 
 class TrainingEntity(BaseModel):

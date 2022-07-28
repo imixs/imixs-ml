@@ -190,6 +190,18 @@ In the properties for your pydev project, there's a pane called "PyDev - PYTHONP
 
 	~/.local/lib/python3.7/site-packages/spacy
 
+Also take care that the Python interpreter settings are 
+
+
+
+I had a similar problem before. I solved the problem by this steps:
+
+1. Window > Preferences > PyDev > Interpreters > Python Interpreter
+2. Delete the Python Interpreter path you added previously
+3. Add "New" Python Interpreter and choose Pyhton 3.7
+
+<img src="../images/python/pydev_setup-01.png" style="width:660px" />
+
 ## Docker Hub
 
 To push the latest image to a repository run:
