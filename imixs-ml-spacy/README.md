@@ -206,6 +206,9 @@ Also make sure that you have added the libraries _fastapi, spacy and pydantic_ t
 
 <img src="../images/python/pydev_setup-02.png" style="width:660px" />
 
+If you have not yet installed the libraries on your system run
+
+	$ pip install pydantic fastapi spacy
 
 ## Docker Hub
 
