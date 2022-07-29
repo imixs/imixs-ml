@@ -11,7 +11,7 @@ The goal of this test program is to demonstrate the usage of the training data m
 """
 
 
-# Startup method
+# Startup methodkjkj
 if __name__ == "__main__":
     
     modelfile = "models/training_model_mixed"
