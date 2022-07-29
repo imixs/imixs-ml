@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [],
+    "python.envFile": ".env",
+    "python.autoComplete.extraPaths": [
+
+    ],
+    "python.analysis.extraPaths": []
+}
+

@@ -1,9 +1,12 @@
+import os
 import sys 
+# sys import for test only
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from imixs.core import datamodel, modelservice
 
 
-sys.path.append('../..')
+
 
 
 

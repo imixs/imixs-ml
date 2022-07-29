@@ -1,11 +1,15 @@
 import os
 import shutil
 import logging
-
+import sys 
 from builtins import str
 from fastapi import FastAPI, HTTPException
 from imixs.core import datamodel, modelservice
 from typing import List
+
+sys.path.extend([f'./{name}' for name in os.listdir(".") if os.path.isdir(name)])
+
+
 
 # Setup Logging
 # See: https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout

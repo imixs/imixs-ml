@@ -1,11 +1,15 @@
 import os
 import shutil
 import logging
+import sys 
+# sys import for test only
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from builtins import str
 from fastapi import FastAPI, HTTPException
 from imixs.core import datamodel, modelservice
 from typing import List
+
 
 # Setup Logging
 # See: https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout

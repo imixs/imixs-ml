@@ -52,3 +52,8 @@ All source are available on [Github](https://github.com/imixs/imixs-ml).
 ## License
 
 Imixs-ML is free software, because we believe that an open exchange of experiences is fundamental for the development of valuable software. All results of this project are provided under the [GNU General Public License](http://www.gnu.org/licenses/gpl-3.0.en.html). 
+
+
+# Visual Code
+
+https://k0nze.dev/posts/python-relative-imports-vscode/
