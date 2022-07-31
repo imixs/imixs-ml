@@ -39,7 +39,7 @@ def updateModel(trainingDataSet, modelPath, min_losses):
     print("updateModel....")
     
     # Read language
-    language = os.getenv('MODEL_LANGUAGE', 'en')
+    language = os.getenv('MODEL_LANGUAGE', 'xx')
     
     # Analyse the data object ......
     hasEntities = False
