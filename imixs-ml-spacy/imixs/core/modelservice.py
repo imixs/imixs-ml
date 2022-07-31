@@ -36,7 +36,7 @@ from typing import List
 
 def updateModel(trainingDataSet, modelPath, min_losses):
     
-    print("updateModel....")
+    print("...updateModel....")
     
     # Read language
     language = os.getenv('MODEL_LANGUAGE', 'xx')
