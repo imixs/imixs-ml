@@ -70,6 +70,7 @@ public class TestDateAdapter {
         Assert.assertTrue(enityVariants.contains("03/05/2020"));
         Assert.assertTrue(enityVariants.contains("03 MAY 2020"));
         Assert.assertTrue(enityVariants.contains("03-MAY-2020"));
+        Assert.assertTrue(enityVariants.contains("03-05-2020"));
         
         Assert.assertTrue(enityVariants.contains("MAI 03, 2020"));
 
@@ -135,6 +136,86 @@ public class TestDateAdapter {
         // 14/APR/2021
         itemValueList = new ArrayList<String>();
         itemValueList.add("14/APR/2021");
+        dateAdapter = new DateAdapter();
+        entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
+
+        // reverse order of year/month/day
+        // 2021-04-14
+        itemValueList = new ArrayList<String>();
+        itemValueList.add("2021-04-14");
+        dateAdapter = new DateAdapter();
+        entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
+
+
+        // 14-04-2021
+        itemValueList = new ArrayList<String>();
+        itemValueList.add("14-04-2021");
+        dateAdapter = new DateAdapter();
+        entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
+
+    }
+
+
+
+
+    /**
+     * Test YYYY at start or end position
+     * Compare  beween
+     * 
+     * yyyy-MM-dd  and dd-MM-yyyy
+     * 
+     */
+    @Test
+    public void testYYYYPostion() {
+        List<Locale> locals = new ArrayList<Locale>();
+        locals.add(Locale.UK);
+        locals.add(Locale.US);
+        locals.add(Locale.GERMANY);
+
+      
+        // reverse order of year/month/day
+        // 2021-04-14
+        ArrayList<String> itemValueList = new ArrayList<String>();
+        itemValueList.add("2021-04-14");
+        dateAdapter = new DateAdapter();
+        EntityTextEvent entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
+        dateAdapter.onTextEvent(entityTextEvent);
+        Object o = entityTextEvent.getItemValue();
+        Assert.assertTrue(o instanceof Date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime((Date) o);
+        Assert.assertEquals(2021, cal.get(Calendar.YEAR));
+        Assert.assertEquals(3, cal.get(Calendar.MONTH));
+        Assert.assertEquals(14, cal.get(Calendar.DAY_OF_MONTH));
+
+
+        // 14-04-2021
+        itemValueList = new ArrayList<String>();
+        itemValueList.add("14-04-2021");
         dateAdapter = new DateAdapter();
         entityTextEvent = new EntityTextEvent(itemValueList, locals, "date", 0);
         dateAdapter.onTextEvent(entityTextEvent);

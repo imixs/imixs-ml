@@ -169,7 +169,12 @@ public class DateAdapter {
      */
     public void onTextEvent(@Observes EntityTextEvent event) {
 
-        String[] simplePatternList = { "yyyy-MM-dd", "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" , "dd/MM/yyyy", "dd/MM/yy"  , "dd-MM-yyyy" };
+        String REGEX_START_WITH_4DIGITS_YEAR="\\d{4}.\\d{2}.\\d{2}";
+        String REGEX_END_WITH_4DIGITS_YEAR="\\d{2}.\\d{2}.\\d{4}";
+
+        String[] simplePatternListEndWith4DigitsYear = { "dd.MM.yyyy", "d.M.yyyy", "dd/MM/yyyy",  "dd-MM-yyyy" };
+        String[] simplePatternListStartWith4DigitsYear = { "yyyy-MM-dd", "yyyy.MM.dd" };
+        String[] simplePatternList2DigitsYear = {  "dd.MM.yy", "d.M.yy" ,  "dd/MM/yy"   };
         String[] localePatternList = { "d MMMMM yyyy", "d. MMMMM yyyy", "MMM. dd, yyyy", "MMM dd, yyyy", "dd/MMM/yyyy", "dd.MMM.yyyy", "dd MMM yyyy","dd-MMM-yyyy" };
 
         // if the event already has a object then we return
@@ -189,11 +194,31 @@ public class DateAdapter {
 
         for (String variant : variants) {
 
-            for (String simplePattern : simplePatternList) {
-                result = parseDateByPattern(variant, simplePattern);
-                if (result != null) {
-                    event.setItemValue(result);
-                    return;
+            // do we start with 4 digts year?
+            if (variant.matches(REGEX_END_WITH_4DIGITS_YEAR)) {
+                for (String simplePattern : simplePatternListEndWith4DigitsYear) {
+                    result = parseDateByPattern(variant, simplePattern);
+                    if (result != null) {
+                        event.setItemValue(result);
+                        return;
+                    }
+                }
+            } else if (variant.matches(REGEX_START_WITH_4DIGITS_YEAR)) {
+                for (String simplePattern : simplePatternListStartWith4DigitsYear) {
+                    result = parseDateByPattern(variant, simplePattern);
+                    if (result != null) {
+                        event.setItemValue(result);
+                        return;
+                    }
+                }
+            } else {
+                // test simple pattern list (2digts year)
+                for (String simplePattern : simplePatternList2DigitsYear) {
+                    result = parseDateByPattern(variant, simplePattern);
+                    if (result != null) {
+                        event.setItemValue(result);
+                        return;
+                    }
                 }
             }
 
@@ -207,7 +232,6 @@ public class DateAdapter {
                     }
                 }
             }
-
         }
 
     }
