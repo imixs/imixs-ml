@@ -32,11 +32,22 @@ from imixs.core import datamodel
 from spacy.pipeline.textcat_multilabel import multi_label_bow_config, multi_label_cnn_config
 from spacy.training import Example
 from typing import List
-
+import logging
 
 def updateModel(trainingDataSet, modelPath, min_losses):
     
-    print("...updateModel....")
+    # Setup Logging
+    # See: https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler("imixs.log"),
+            logging.StreamHandler()
+        ]
+    )
+    
+    logging.info("...updateModel....")
     
     # Read language
     language = os.getenv('MODEL_LANGUAGE', 'xx')
