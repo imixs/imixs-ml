@@ -1,6 +1,8 @@
 import os
+import sys
 import shutil
 import logging
+from logging.handlers import TimedRotatingFileHandler
 
 from builtins import str
 from fastapi import FastAPI, HTTPException
@@ -9,16 +11,17 @@ from typing import List
 
 # Setup Logging
 # See: https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
+#      https://stackoverflow.com/questions/40088496/how-to-use-pythons-rotatingfilehandler
+#
+# We rotate 5 logfiles over the last 7 days
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler("imixs.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger('imixs-ml')
+        handlers=[TimedRotatingFileHandler('./imixs.log', when='D', interval=1, backupCount=7)],
+        level=logging.INFO,
+        format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+        datefmt='%Y-%m-%dT%H:%M:%S')
 
+logger = logging.getLogger('imixs-ml')
+print = logger.info
 app = FastAPI()
 
 modelpath=os.getenv('MODEL_PATH', 'models/')

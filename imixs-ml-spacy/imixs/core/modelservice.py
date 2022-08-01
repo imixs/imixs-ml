@@ -35,18 +35,7 @@ from typing import List
 import logging
 
 def updateModel(trainingDataSet, modelPath, min_losses):
-    
-    # Setup Logging
-    # See: https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(name)s [%(levelname)s] %(message)s",
-        handlers=[
-            logging.FileHandler("imixs.log"),
-            logging.StreamHandler()
-        ]
-    )
-    
+
     logging.info("...updateModel....")
     
     # Read language
@@ -75,13 +64,14 @@ def updateModel(trainingDataSet, modelPath, min_losses):
         # nlp = spacy.blank(language)  # create blank Language class
         nlp = initModel(modelPath)
         restartTraining = True
-        print("...creating blank model, language='" + language + "'")
+        logging.info("...creating blank model, language='" + language + "'")
     
     # 2.) set up the pipeline and entity recognizer.
     if hasEntities:
         if 'ner' not in nlp.pipe_names:
-            print("...adding new pipe 'ner'...")
+            logging.info("...adding new pipe 'ner'...")
             ner = nlp.add_pipe('ner')
+            nlp.add_pipe()
             restartTraining = True
         else:
             # the pipe 'ner' already exists 
@@ -90,7 +80,7 @@ def updateModel(trainingDataSet, modelPath, min_losses):
     if hasCategories: 
         # 2.a) setup pipeline and categories...
         if 'textcat_multilabel' not in nlp.pipe_names:
-            print("...adding new pipe 'textcat_multilabel'...")
+            logging.info("...adding new pipe 'textcat_multilabel'...")
             # textcat = nlp.add_pipe("textcat_multilabel")
             
             # Now we need to manually config the multilabel feature
@@ -100,7 +90,6 @@ def updateModel(trainingDataSet, modelPath, min_losses):
             # See duscussion here https://github.com/explosion/spaCy/discussions/6905
             # maybe an alternative is:
             # nlp.add_pipe("textcat_multilabel", config=Config().from_str(multi_label_cnn_config))
-  
             restartTraining = True
         else:
             # the pipe 'textcat' already exists
@@ -113,7 +102,7 @@ def updateModel(trainingDataSet, modelPath, min_losses):
             _labelList = ner.labels
             # We only need to add the label if it is not already part of the entityRecognizer
             if _label not in _labelList:
-                print("...adding new entity '" + _label + "'...")
+                logging.info("...adding new entity '" + _label + "'...")
                 ner.add_label(_label)
 
         # add categories
@@ -122,7 +111,7 @@ def updateModel(trainingDataSet, modelPath, min_losses):
             _labelList = textcat.labels
             # We only need to add the label if it is not already part of the categories
             if _label not in _labelList:
-                print("...adding new category '" + _label + "'...")
+                logging.info("...adding new category '" + _label + "'...")
                 # textcat.initialize(lambda: [], nlp=nlp)
                 # optimizer = nlp.initialize()
                 textcat.add_label(_label)               
@@ -138,21 +127,23 @@ def updateModel(trainingDataSet, modelPath, min_losses):
     trainingData = datamodel.convertToTrainingData(trainingDataSet)
         
     if restartTraining: 
-        print("...begin new training!")
+        logging.info("...begin new training!")
         optimizer = nlp.initialize()
     else:
-        print("...resume training!")
+        logging.info("...resume training!")
         optimizer = nlp.resume_training()
     
     # new api 3.0  - see: https://spacy.io/usage/v3
     examples = []
     for text, annots in trainingData:
-        # print("text=", text)
-        print("annots=", annots)
+        logging.info("---- TEXT START ----------------------")
+        logging.info(text)
+        logging.info("---- TEXT END   ----------------------")
+        logging.info("---- ANNOTS: "+ str(annots))
         examples.append(Example.from_dict(nlp.make_doc(text), annots))
         
     losses = nlp.update(examples, sgd=optimizer);
-    print("losses=",losses)
+    logging.info("---- RESULT: losses="+str(losses))
     
     # finally we save the updated model to disk
     writeToDisk=True
@@ -162,10 +153,10 @@ def updateModel(trainingDataSet, modelPath, min_losses):
     
     if (writeToDisk == True):
         # We update the model only if the losses is  > then a given min_losses 
-        print("writing new model to disk - min_losses= ",min_losses)
+        logging.info("writing new model to disk - min_losses= "+str(min_losses))
         nlp.to_disk(modelPath)
     else: 
-        print("no model update - min_losses= ",min_losses)
+        logging.info("no model update - min_losses= "+str(min_losses))
   
     return losses
 
@@ -177,10 +168,10 @@ def updateModel(trainingDataSet, modelPath, min_losses):
 
 def analyseText(analyseData, modelPath):
 
-    print("analyseText started....")
+    logging.info("analyseText started....")
     modelExists = os.path.isdir(modelPath)
     if not modelExists:
-        print("model '" + modelPath + "' not found!")
+        logging.info("model '" + modelPath + "' not found!")
         raise Exception("model '" + modelPath + "' not found!")
     
     nlp = spacy.load(modelPath)  # load existing spaCy model    
@@ -195,12 +186,12 @@ def analyseText(analyseData, modelPath):
     result['categories'] = []
     # add all entities
     for ent in doc.ents:
-        print("    entity: ", ent.label_, " = ", ent.text)
+        logging.info("    entity: " + str(ent.label_) +  " = " + str(ent.text))
         result['entities'].append({"label": ent.label_, "text": ent.text})
 
     # add all categories
     for label, score in doc.cats.items():
-        print("  category: ", label, " score=" + str(score))
+        logging.info("  category: " + str(label) + " score=" + str(score))
         result['categories'].append({"category": label, "score": str(score)})
 
     return result
@@ -209,12 +200,12 @@ def analyseText(analyseData, modelPath):
 """
  This is a helper method to initialize a blank model by a given
  model path. 
- The method did not create and pipelines as this is managed
+ The method did not create any pipelines as this is managed
  by the 'updateModel' method depending on the given traing data.
 """
 def initModel (modelPath):
     
-    print("...init new model ' " + modelPath + "'...")
+    logging.info("...init new model ' " + modelPath + "'...")
     # Read language
     language = os.getenv('MODEL_LANGUAGE', 'xx')
     # Test if the model exists
@@ -226,7 +217,7 @@ def initModel (modelPath):
     # NOTE: the pipelines will be added during the updateModel method.     
    
     # nlp.initialize()
-    print ("...new Model created successful.")
+    logging.info ("...new Model created successful.")
     nlp.to_disk(modelPath)
     return nlp
    

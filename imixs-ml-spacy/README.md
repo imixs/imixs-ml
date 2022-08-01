@@ -34,6 +34,8 @@ To test the image run the container in an interactive mode:
 	    - "8000:8000" 
       
 
+
+
 ### The Model
 
 The default model path for the service is set to *models/*. You can of course overwrite the path to provide you own one:
@@ -66,6 +68,22 @@ The MIN_LOSSES can also be set via the imixs-ml-workflow api by the '*options*' 
 
 	<ml-config name="options">min_losses=0.1</ml-config>
  
+
+### Logging
+
+Imixs-ML-Spacy write a separate log file named `imixs.log`. From a running docker container you can view the messages with
+
+	$ docker exec -it imixs-ml-spacy tail -f imixs.log
+
+For example you can also grep only the latest losses from training with:
+
+	$ docker exec -it officealexanderlogistics_imixs-ml-spacy_1 tail -f imixs.log | grep losses={
+
+The Imixs Logger rotate 5 logfiles over the last 7 days
+
+To check all Log files:
+
+	$ docker exec -it imixs-ml-spacy ls -lah
 
 ## Access the API from your Web Browser
 
