@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -21,6 +23,8 @@ import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.core.MLTrainingResult;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
+import org.imixs.ml.xml.XMLAnalyseEntity;
+import org.imixs.ml.xml.XMLAnalyseResult;
 import org.imixs.ml.xml.XMLTrainingData;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
@@ -31,6 +35,7 @@ import org.imixs.workflow.engine.ProcessingEvent;
 import org.imixs.workflow.engine.WorkflowService;
 import org.imixs.workflow.exceptions.ModelException;
 import org.imixs.workflow.exceptions.PluginException;
+import org.imixs.workflow.util.XMLParser;
 
 import util.LocaleHelper;
 
@@ -63,13 +68,12 @@ public class MLService implements Serializable {
     public static final String ITEM_ML_STATUS = "ml.status";
     public static final String ITEM_ML_MODEL = "ml.model";
     public static final String ITME_ML_OPTIONS = "ml.options";
-  
+
     public static final String ML_STATUS_SUGGEST = "suggest";
     public static final String ML_STATUS_CONFIRMED = "confirmed";
     public static final String ML_STATUS_TRAINING = "training";
 
     public static final String EVENTLOG_TOPIC_TRAINING = "ml.training";
-
 
     // enabled
     @Inject
@@ -212,12 +216,14 @@ public class MLService implements Serializable {
      * <p>
      * The method is called by the MLTrainingScheduler.
      * <p>
-     * @return a TrainingResult object containing the quality level and the Rest Service response
+     * 
+     * @return a TrainingResult object containing the quality level and the Rest
+     *         Service response
      * 
      * @param uid
      */
     public MLTrainingResult trainWorkitem(String uid) {
-        MLTrainingResult trainingResult=null;
+        MLTrainingResult trainingResult = null;
         // load the workitem
         ItemCollection workitem = workflowService.getWorkItem(uid);
         if (workitem == null) {
@@ -255,14 +261,14 @@ public class MLService implements Serializable {
             if (XMLTrainingData.TRAININGDATA_QUALITY_BAD == trainingData.getQuality()) {
                 logger.warning("...document '" + workitem.getUniqueID()
                         + "' TRAININGDATA_QUALITY_LEVEL=BAD - document will be ignored!");
-                return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD,null);
+                return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD, null);
             }
 
             // post training data...
             // validate if usefull data
             if (!trainingData.isEmpty()) {
-                String resultData= mlClient.postTrainingData(trainingData, mlModel,mlOptions);
-                trainingResult= new MLTrainingResult(trainingData.getQuality(),resultData);
+                String resultData = mlClient.postTrainingData(trainingData, mlModel, mlOptions);
+                trainingResult = new MLTrainingResult(trainingData.getQuality(), resultData);
             }
         }
 
@@ -331,6 +337,89 @@ public class MLService implements Serializable {
             }
         }
         return result;
+    }
+
+    /**
+     * Analyse a text content by calling a ML Service Endpoint
+     * <p>
+     * The method returns a list of XMLAnalyseEntity extracted from the given text
+     * or null if the request failed.
+     * 
+     * @param text            - text to be analyzed
+     * @param serviceEndpoint - the ml API endpoint
+     * @param mlModelName     - the ML model name to be used by the endpoint
+     * @return XMLAnalyseResult
+     **/
+    public XMLAnalyseResult analyseTextByMLFramework(String text, String serviceEndpoint, String mlModelName) {
+        // create a MLClient for the current service endpoint
+        MLClient mlClient = new MLClient(serviceEndpoint);
+        XMLAnalyseResult result = mlClient.postAnalyseData(text, mlModelName);
+        return result;
+    }
+
+    /**
+     * Analyse a text by searching for matches in a text with Regex Pattern
+     * Recognition
+     * <p>
+     * The method expects a XMLAnalseEntity and does only apply a Regex if the
+     * corresponding item is not yet part of the given XMLAnalseEntity.
+     * 
+     * 
+     * @param text         - text to be analyzed
+     * @param anylseResult - a optional existing XMLAnalyseResult instance
+     * @return XMLAnalyseResult containing a list of XMLAnalyseEntity
+     **/
+    public XMLAnalyseResult analyseTextByRegex(String text, ItemCollection mlConfig, XMLAnalyseResult anylseResult) {
+        // do we have alredy an anylseResult?
+        if (anylseResult == null) {
+            anylseResult = new XMLAnalyseResult();
+        }
+        // parse the mlConfig object for optional regex definitions
+        List<String> regexDevList = mlConfig.getItemValueList("regex", String.class);
+        if (regexDevList.size() == 0) {
+            // no regex definitions found
+            return anylseResult;
+        }
+        for (String regexDev : regexDevList) {
+            if (regexDev.trim().isEmpty()) {
+                // no definition
+                continue;
+            }
+            try {
+                // evaluate the item content (XML format expected here!)
+                ItemCollection regexData = XMLParser.parseItemStructure(regexDev);
+
+                if (regexData != null) {
+                    String name = regexData.getItemValueString("name");
+                    String patternString = regexData.getItemValueString("pattern");
+
+                    // do we have already a result for this item?
+                    List<XMLAnalyseEntity> mlEntityList = anylseResult.getEntities();
+                    boolean found = false;
+                    for (XMLAnalyseEntity analyseEntity : mlEntityList) {
+                        if (name.equals(analyseEntity.getLabel()) && !analyseEntity.getText().isEmpty()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // no value found so far - so apply the regex pattern...
+                        Pattern p = Pattern.compile(patternString); // the pattern to search for
+                        Matcher m = p.matcher(text);
+                        // now try to find at least one match
+                        while (m.find()) {
+                            String value = m.group(1);
+                            anylseResult.getEntities().add(new XMLAnalyseEntity(name, value));
+                        }
+                    }
+                }
+            } catch (PluginException e) {
+                logger.warning("Invalid ml.config definition with unexpected regex element - verify model!");
+            }
+
+        }
+
+        return anylseResult;
     }
 
     /**

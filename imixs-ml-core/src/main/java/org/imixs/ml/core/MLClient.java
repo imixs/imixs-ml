@@ -65,7 +65,7 @@ public class MLClient {
     }
 
     /**
-     * This method posts a spacy json training string to the spacy service endpoint
+     * This method posts a Imixs-ML json training string to a ML service endpoint
      * 
      * @param trainingData    - the training data object
      * @param serviceEndpoint - the ml API endpoint
@@ -102,13 +102,13 @@ public class MLClient {
     }
 
     /**
-     * This method posts a spacy json training string to the spacy service endpoint.
+     * This method posts a Imixs-ML json training string to the ML service endpoint.
      * <p>
      * The method returns a list of XMLAnalyseEntity extracted from the given text
      * or null if the request failed.
      * 
      * 
-     * @param text            - text to be analysed
+     * @param text            - text to be analyzed
      * @param serviceEndpoint - the ml API endpoint
      * @return list of XMLAnalyseEntity
      **/

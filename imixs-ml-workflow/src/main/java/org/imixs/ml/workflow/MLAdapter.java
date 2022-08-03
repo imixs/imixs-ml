@@ -42,7 +42,6 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.imixs.ml.core.MLClient;
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLContentBuilder;
 import org.imixs.ml.core.MLEntity;
@@ -104,6 +103,24 @@ import util.LocaleHelper;
  * }
  * </pre>
  * 
+ * Optional you can add a 'regex' definition to find matches in the text, in
+ * case the statistical model did not provide any results.
+ *
+ * <pre>
+ * {@code
+    <ml-config name="regex">
+        <name>cdtr.iban</name>
+        <type>text</type>
+        <pattern>[A-Z].....</pattern>
+    </ml-config>
+    <ml-config name="regex">
+        <name>cdtr.bic</name>
+        <type>text</type>
+        <pattern>[A-Z0-9].....?</pattern>
+    </ml-config>
+ * }
+ * </pre>
+ *     
  * @author Ralph Soika
  * @version 1.0
  *
@@ -130,15 +147,15 @@ public class MLAdapter implements SignalAdapter {
     @Inject
     @ConfigProperty(name = MLConfig.ML_LOCALES, defaultValue = "de_DE,en_GB")
     private String mlDefaultLocales;
-    
+
     @Inject
     @ConfigProperty(name = MLConfig.ML_TRAINING_QUALITYLEVEL, defaultValue = "PARTIAL")
     String mlDefaultQualityLevel;
-    
+
     @Inject
     @ConfigProperty(name = MLConfig.ML_OPTIONS)
     Optional<String> mlDefaultOptions;
-    
+
     @Inject
     private WorkflowService workflowService;
 
@@ -157,7 +174,7 @@ public class MLAdapter implements SignalAdapter {
         String mlModelName = null;
         String mlLocals = null;
         String mlOptions = null;
-        //String mlQuality = null;
+        // String mlQuality = null;
         Pattern mlFilenamePattern = null;
         List<Locale> locals = new ArrayList<Locale>();
         List<MLEntity> mlEntities = null;
@@ -165,16 +182,16 @@ public class MLAdapter implements SignalAdapter {
         debug = true;
 
         logger.finest("...running api adapter...");
-
+        ItemCollection mlConfig=null;
         // read optional configuration form the model or imixs.properties....
         try {
-            ItemCollection mlConfig = workflowService.evalWorkflowResult(event, "ml-config", document, false);
+            mlConfig = workflowService.evalWorkflowResult(event, "ml-config", document, false);
 
             mlAPIEndpoint = parseMLEndpointByBPMN(mlConfig);
             mlModelName = parseMLModelByBPMN(mlConfig);
             mlLocals = parseMLLocalesByBPMN(mlConfig);
-            mlOptions=parseMLOptionsByBPMN(mlConfig);
-            //mlQuality = parseMLQualityByBPMN(mlConfig);
+            mlOptions = parseMLOptionsByBPMN(mlConfig);
+            // mlQuality = parseMLQualityByBPMN(mlConfig);
             // parse optional filename regex pattern...
             String _FilenamePattern = parseMLFilePatternByBPMN(mlConfig);
             if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
@@ -205,15 +222,16 @@ public class MLAdapter implements SignalAdapter {
 
         // if we have ocr text content than we call the ml api endpoint
         if (!mlContent.isEmpty()) {
-            // create a MLClient for the current service endpoint
-            MLClient mlClient = new MLClient(mlAPIEndpoint);
-            XMLAnalyseResult result = mlClient.postAnalyseData(mlContent, mlModelName);
-
+            // analyse text...
+            XMLAnalyseResult result = mlService.analyseTextByMLFramework(mlContent, mlAPIEndpoint, mlModelName);            
             if (result == null) {
                 // interrupt current transaction
                 throw new ProcessingErrorException(MLAdapter.class.getSimpleName(), API_ERROR,
                         "imixs-ml api error at endpoint: " + mlAPIEndpoint + "!");
             }
+            // optional apply regex definitions if defined....
+            // this is used to refine the result if ML did not find entities.
+            result=mlService.analyseTextByRegex(mlContent,  mlConfig , result);
 
             /*
              * We now have a list of XMLAnalyseEntity objects possible matching the same
@@ -228,10 +246,10 @@ public class MLAdapter implements SignalAdapter {
                 String mlEntityName = mlEntity.getKey();
 
                 // is this entity listed in our configuration?
-                MLEntity entityDef= MLConfig.findMLEntityByName(mlEntityName,mlEntities);
-                if (entityDef!=null) {
+                MLEntity entityDef = MLConfig.findMLEntityByName(mlEntityName, mlEntities);
+                if (entityDef != null) {
                     // Do we have an entityDefinition for this entity?
-                    // If not we do ignore this ml item! issue #34                    
+                    // If not we do ignore this ml item! issue #34
                     if (document.isItemEmpty(entityDef.getItemName())) {
                         List<String> itemValueList = mlEntity.getValue();
                         // fire entityTextEvents so that an adapter can resolve the text into a
@@ -249,7 +267,7 @@ public class MLAdapter implements SignalAdapter {
                             }
                             _resultValueObject = entityTextEvent.getItemValue();
                         } else {
-                            // if type=text or type="" then  set the first text value as is
+                            // if type=text or type="" then set the first text value as is
                             if (entityDef.getItemType().isEmpty() || "text".equals(entityDef.getItemType())) {
                                 _resultValueObject = mlEntity.getValue().iterator().next();
                             }
@@ -273,7 +291,7 @@ public class MLAdapter implements SignalAdapter {
             ItemCollection mlDefinition = new ItemCollection();
             mlDefinition.setItemValue(MLService.ITEM_ML_ENDPOINT, mlAPIEndpoint);
             mlDefinition.setItemValue(MLService.ITEM_ML_MODEL, mlModelName);
-            mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS,MLConfig.implodeMLEntityList(mlEntities) );
+            mlDefinition.setItemValue(MLService.ITEM_ML_ITEMS, MLConfig.implodeMLEntityList(mlEntities));
             mlDefinition.setItemValue(MLService.ITEM_ML_LOCALES, mlLocals);
             mlDefinition.setItemValue(MLService.ITME_ML_OPTIONS, mlOptions);
             mlService.updateMLDefinition(document, mlDefinition);
@@ -353,9 +371,7 @@ public class MLAdapter implements SignalAdapter {
         return mlModel;
 
     }
-    
-    
-    
+
     /**
      * This helper method parses the ml options value either provided by a model
      * definition or a imixs.property or an environment variable
@@ -375,7 +391,7 @@ public class MLAdapter implements SignalAdapter {
         }
 
         // switch to default api endpoint?
-        if (mlOptions==null || mlOptions.isEmpty()) {
+        if (mlOptions == null || mlOptions.isEmpty()) {
             // set defautl options if defined
             if (mlDefaultOptions.isPresent() && !mlDefaultOptions.get().isEmpty()) {
                 mlOptions = mlDefaultOptions.get();
@@ -388,39 +404,7 @@ public class MLAdapter implements SignalAdapter {
         return mlOptions;
 
     }
-    
-    
-    
-    /**
-     * This helper method parses the ml model name either provided by a model
-     * definition or a imixs.property or an environment variable
-     * 
-     * @param mlConfig
-     * @return
-     */
-//    private String parseMLQualityByBPMN(ItemCollection mlConfig) {
-//        boolean debug = logger.isLoggable(Level.FINE);
-//        debug = true;
-//        String mlQuality = null;
-//
-//        // test if the model provides a MLModel name. If not, the adapter uses the
-//        // mlDefaultAPIEndpoint
-//        if (mlConfig != null) {
-//            mlQuality = mlConfig.getItemValueString("quality");
-//        }
-//
-//        // switch to default api endpoint?
-//        if (mlQuality == null || mlQuality.isEmpty()) {
-//            // set defautl model if defined
-//            mlQuality = mlDefaultQualityLevel;
-//        }
-//        if (debug) {
-//            logger.info("......ml quality = " + mlQuality);
-//        }
-//
-//        return mlQuality;
-//
-//    }
+
 
     /**
      * This helper method parses the ml model name either provided by a model
@@ -483,7 +467,8 @@ public class MLAdapter implements SignalAdapter {
                     "missing ml-config entity definitions!");
         }
 
-       // Map<String, EntityDefinition> result = new HashMap<String, EntityDefinition>();
+        // Map<String, EntityDefinition> result = new HashMap<String,
+        // EntityDefinition>();
         List<MLEntity> result = new ArrayList<MLEntity>();
 
         for (String entityDev : entityDevList) {
@@ -501,12 +486,12 @@ public class MLAdapter implements SignalAdapter {
                     String type = entityData.getItemValueString("type");
                     String mapping = entityData.getItemValueString("mapping");
                     int length = entityData.getItemValueInteger("length");
-                    boolean forceTraining=false; // issue #69 
+                    boolean forceTraining = false; // issue #69
                     if (entityData.hasItem("required")) {
-                        forceTraining=entityData.getItemValueBoolean("required");
+                        forceTraining = entityData.getItemValueBoolean("required");
                     }
                     // add definition into the definition map...
-                    result.add(new MLEntity(name, type, mapping, length,forceTraining));
+                    result.add(new MLEntity(name, type, mapping, length, forceTraining));
                 }
             } catch (PluginException e) {
                 logger.warning("Invalid ml.config definition with unexpected entity element - verify model!");
@@ -517,6 +502,8 @@ public class MLAdapter implements SignalAdapter {
         return result;
     }
 
+    
+  
     /**
      * This method groups a List of XMLAnalyseEntity by the label name. The method
      * builds a Map with the key 'label' containing all entities found in given data
@@ -549,6 +536,4 @@ public class MLAdapter implements SignalAdapter {
         return result;
     }
 
-  
-   
 }

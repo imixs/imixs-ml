@@ -56,7 +56,7 @@ The ml-configuration will be stored after a successful text analyses  by the MLA
 
 ### Natural Language Processing (NLP) 
 
-The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER) and text classification. The results will automatically stored into the current process instance. 
+The MLAdapter sends text from documents to the ML Service endpoint for Named Entity Recognition (NER) and text classification. The results are automatically stored into the current process instance. 
 
 The ML Adapter creates the following items
 
@@ -174,6 +174,34 @@ For a text classification the MLAdapter expects a configuration specifying the t
 In this example all categories found by the ML Framework will be listed in the item 'ml.category' (target item).
 
 The tag <source> specifies the text category to be used for a incremental training. The source tag can be empty if a incremental training should not be performed. 
+
+
+
+### Regex Pattern Recognition
+
+For complex tasks, it’s sometimes hard to train a statistical entity recognition model.
+Since statistical models require very accurate training data, rule-based approaches are more practical in many situations. Especially when sufficiently large test data are not yet available. This is especially true at the start of a project. In this situation, you can use *Imixs-ML Regex Pattern Recognition* as part of the data collection process to "bootstrap" a statistical model.
+
+With the *Regex Pattern Recognition* the Imixs ML Adapter will try to find matches in the text, in case the statistical model did not provide any results.  
+
+To activate the *Regex Pattern Recognition* you can add the configuration via the workflow model:
+
+	<ml-config name="regex">
+	    <name>cdtr.iban</name>
+	    <type>text</type>
+	    <pattern>[A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}</pattern>
+	</ml-config>
+	<ml-config name="regex">
+	    <name>cdtr.bic</name>
+	    <type>text</type>
+	    <pattern>[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?</pattern>
+	</ml-config>
+
+This is an example to find matches for IBAN/BIC
+
+**Note:** The *Regex Pattern Recognition* will only be applied in case the statistical model did not provide any results.  
+
+
 
 
 
