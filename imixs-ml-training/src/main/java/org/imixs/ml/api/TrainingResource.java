@@ -98,11 +98,15 @@ public class TrainingResource {
         ItemCollection config = XMLDocumentAdapter.putDocument(xmlConfig);
         // validate Input Data....
         logger.info("...starting training....");
-
+        logger.fine("......model=" + config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_MODEL));
+        logger.info("......required qualityLevel=" + config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL));
+        logger.info("......ocrMode=" + config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE));
+        
         try {
             WorkflowClient worklowClient = TrainingApplication.buildWorkflowClient(config);
 
             List<String> itemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
+            itemNames.add(TrainingService.ITEM_ML_DEFINITIONS);
             if (itemNames.contains("$file") || itemNames.contains("$snapshotid")) {
                 logger.severe("$file and $snapshot must not be included in the workflow.entities!");
                 System.exit(0);
@@ -161,11 +165,6 @@ public class TrainingResource {
         // log the stats XMLDocument object....
         ItemCollection stats = new ItemCollection();
 
-//        stats.setItemValue("workitems.total", countTotal);
-//        stats.setItemValue("workitems.quality.good", countQualityGood);
-//        stats.setItemValue("workitems.quality.low", countQualityLow);
-//        stats.setItemValue("workitems.quality.bad", countQualityBad);
-//        stats.setItemValue("workitems.quality.nerFactor", nerFactor);
 
         // return response
         return Response.ok(XMLDataCollectionAdapter.getDataCollection(stats), MediaType.APPLICATION_XML).build();
@@ -205,7 +204,7 @@ public class TrainingResource {
             ItemCollection doc = trainingDataSet.get(uniqueid);
             currentCount++;
             countTotal++;
-            logger.info("...... train " + uniqueid + "...");
+            logger.fine("...... train " + uniqueid + "...");
             MLTrainingResult trainingResult = trainingService.trainWorkitemData(config, doc, worklowClient);
 
             if (trainingResult != null) {

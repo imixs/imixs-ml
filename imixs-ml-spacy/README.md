@@ -20,6 +20,7 @@ To build the image from the Dockerfile run:
 To test the image run the container in an interactive mode:
     
 	$ docker run --rm --name="imixs-ml-spacy" -it \
+	  -e PYTHONUNBUFFERED=1 \
 	  -p 8000:8000 \
 	  imixs/imixs-ml-spacy
 

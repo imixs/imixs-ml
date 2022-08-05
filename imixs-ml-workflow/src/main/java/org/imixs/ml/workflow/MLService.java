@@ -408,7 +408,8 @@ public class MLService implements Serializable {
                         Matcher m = p.matcher(text);
                         // now try to find at least one match
                         while (m.find()) {
-                            String value = m.group(1);
+                            String value = m.group();
+                            logger.info("...apply Regex Pattern Recognition for '" + name + "'");
                             anylseResult.getEntities().add(new XMLAnalyseEntity(name, value));
                         }
                     }

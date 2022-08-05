@@ -25,7 +25,6 @@ package org.imixs.ml.service;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,6 +103,7 @@ public class TrainingService {
         MLTrainingResult trainingResult = null;
         Pattern mlFilenamePattern = null;
 
+        logger.info("=======================START ======================================");
         logger.info("...create new training data for: " + workitem.getUniqueID());
 
         String model = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_MODEL);
@@ -111,7 +111,6 @@ public class TrainingService {
         String mlOCR = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_OCR);
         List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
-        String ocrMode = config.getItemValueString(TrainingApplication.ITEM_TIKA_OCR_MODE);
         String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
 
         if (qualityLevel.isEmpty()) {
@@ -120,7 +119,7 @@ public class TrainingService {
         // parse optional filename regex pattern...
         String _FilenamePattern = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_FILEPATTERN);
         if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
-            logger.info("......apply filename.pattern=" + _FilenamePattern);
+            logger.fine("......apply filename.pattern=" + _FilenamePattern);
             mlFilenamePattern = Pattern.compile(_FilenamePattern);
         }
 
@@ -151,11 +150,6 @@ public class TrainingService {
             }
         }
 
-        logger.info("......model=" + model);
-        logger.info("......qualityLevel=" + qualityLevel);
-        logger.info("......ocrMode=" + ocrMode);
-        logger.info("......locales=" + Arrays.toString(sLocales.toArray()));
-
         try {
 
             // update ocr information only if defined in xml config item
@@ -171,6 +165,9 @@ public class TrainingService {
             // ocrMode, tikaOptions);
 
             if (ocrText == null || ocrText.isEmpty()) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                + "' No text found!");
+                logger.info("=======================FINISHED====================================");
                 return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD, null);
             }
 
@@ -242,6 +239,7 @@ public class TrainingService {
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
+        logger.info("=======================FINISHED====================================");
 
         return trainingResult;
 

@@ -165,3 +165,12 @@ You can also validate an existing model. The Imixs-ML Training service provides 
 
 In this mode, the service reads documents stored in a workflow instance and performs a OCR Scan. The extracted text is than send for analyzing to the Imixs-ML Service. The results are printed into the log file. 
 You can use this mode to verify your current model.
+
+
+# Development 
+
+## Docker Build
+
+To build the latest image from sources run:
+
+	$ mvn clean install -Pdocker
