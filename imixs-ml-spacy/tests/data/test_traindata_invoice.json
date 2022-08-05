@@ -1,0 +1,54 @@
+[
+	{
+		"text": "what is the price of 11,00.",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+        "categories": []
+	},
+	{
+		"text": "what is the price of 71,00.",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+        "categories": []
+	},
+	{
+		"text": "what is the price of 51,00.",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+        "categories": []
+	},
+	{
+		"text": "what is the price of 12,00.",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+        "categories": []
+	},
+	{
+		"text": "what is the price of 18,00.",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 26 }
+		],
+        "categories": []
+	},
+	{
+		"text": "what is the price of 20000,00",
+		"entities": [
+			{ "label": "price", "start": 21, "stop": 29 }
+		],
+		"categories": []
+	},
+	{
+		"text": "Z10 Demo GmbH \n Blumen Str. 101 \n80123 München\n\nUst. ID Nr. DE333000444\nDatum: 30.07.2022\nKunden Nr.: 00627\nRechnungssummer: EUR 287,91\n\nIBAN: AT80 120 221 333 700 842 999 / BIC: VOXXDEBBAAC",
+		"entities": [
+			{ "label": "invoice.total", "start": 135, "stop": 140 },
+			{ "label": "invoice.date", "start": 83, "stop": 92 },
+			{ "label": "cdtr.iban", "start": 151, "stop": 178 },
+			{ "label": "cdtr.bic", "start": 187, "stop": 213 }
+		],
+		"categories": []
+	} 	
+]

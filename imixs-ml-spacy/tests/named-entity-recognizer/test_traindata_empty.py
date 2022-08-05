@@ -19,12 +19,8 @@ if __name__ == "__main__":
         shutil.rmtree(os.getcwd()+"/imixs-ml-spacy/models/training_model_empty")
     except OSError as e:
         print("Error: %s : %s" % (modelpath+model, e.strerror))
-   
-
-    
     # the test model
-    modelfile = os.getcwd()+"/imixs-ml-spacy/models/training_model_empty"
-    
+    modelfile = os.getcwd()+"/imixs-ml-spacy/models/training_model_empty"    
     modelservice.initModel( modelfile)
                   
     # Test your text

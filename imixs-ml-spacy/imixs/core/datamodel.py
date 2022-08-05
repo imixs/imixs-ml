@@ -11,6 +11,7 @@ The data object is needed to support the data structure for the Rest API based o
 
 from pydantic import BaseModel
 from typing import List
+import json
 
 
 class TrainingEntity(BaseModel):
@@ -69,3 +70,22 @@ def convertToTrainingData(dataList):
     # now we have the traing data structure
     return result
     
+# This helper method reads a json file into a training structure
+# The method build an array of TraingData objects
+#
+def readTrainingDataFromJSONFile(datafile):
+    training_data=[]
+    # Opening JSON file
+    with open(datafile, 'r') as JSON:
+       json_dict = json.load(JSON)
+     
+    for i in json_dict:
+        _text=i['text'];
+        _entities=i['entities'];        
+        _d=TrainingData(text=_text,entities=[],categories=[])
+        if _entities is not None:
+            for e in _entities:
+                _e=TrainingEntity(label=e['label'],start=e['start'],stop=e['stop'])
+                _d.entities.append(_e)        
+        training_data.append(_d)
+    return training_data

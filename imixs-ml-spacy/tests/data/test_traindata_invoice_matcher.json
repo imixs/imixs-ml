@@ -1,0 +1,42 @@
+[
+	{
+		"text": "Z10 Demo GmbH   Blumen Str. 101  80123 München  Ust. ID Nr. WRONDEBBAA0 Datum: 30.07.2022 Kunden Nr.: 00627 Rechnungssummer: EUR 287,91  IBAN: AT80 120 221 333 700 842 999 / BIC: VOXXDEBBAAC, Algemeine Geschäftsbedinungen...",
+		"entities": [
+			{ "label": "invoice.total", "start": 129, "stop": 135 },
+			{ "label": "invoice.date", "start": 79, "stop": 89 },
+			{ "label": "cdtr.iban", "start": 143, "stop": 171 },
+			{ "label": "cdtr.bic", "start": 179, "stop": 190 }
+		],
+		"categories": []
+	},
+	{
+		"text": "Die Demo GmbH   Blumen Str. 222  80123 München  Ust. ID Nr. WRONDEBBAA1 Datum: 01.08.2022 Kunden Nr.: 00627 Rechnungssummer: EUR 187,91  IBAN: ZB80 920 221 333 000 042 999 / BIC: POSXDEBBAAC, Algemeine Geschäftsbedinungen...",
+		"entities": [
+			{ "label": "invoice.total", "start": 129, "stop": 135 },
+			{ "label": "invoice.date", "start": 79, "stop": 89 },
+			{ "label": "cdtr.iban", "start": 143, "stop": 171 },
+			{ "label": "cdtr.bic", "start": 179, "stop": 190 }
+		],
+		"categories": []
+	},
+	{
+		"text": "Die Demo GmbH   Blumen Str. 222  80123 München  Ust. ID Nr. WRONDEBBAA2 Datum: 01.08.2022 Kunden Nr.: 00627 Rechnungssummer: EUR 187,91  IBAN: ZB80 920 221 333 000 042 999 / BIC: POSXDEBBAAC, Algemeine Geschäftsbedinungen. Alternative beachten Sie bitte unsere ander BIC POSXDEBBAA1 oder POSXDEBBAA2 Grüße..",
+		"entities": [
+			{ "label": "invoice.total", "start": 129, "stop": 135 },
+			{ "label": "invoice.date", "start": 79, "stop": 89 },
+			{ "label": "cdtr.iban", "start": 143, "stop": 171 },
+			{ "label": "cdtr.bic", "start": 179, "stop": 190 }
+		],
+		"categories": []
+	},
+	{
+		"text": "AAA1Demo GmbH   Blumen Str. 222  80123 München  Ust. ID Nr. 0000DEBBAA2 Datum: 01.08.2022 Kunden Nr.: 00627 Rechnungssummer: EUR 087,91  IBAN: ZB80 920 221 333 000 042 999 / BIC: POSXDEBBAAC, Algemeine Geschäftsbedinungen. Alternative beachten Sie bitte unsere ander BIC POSXDEBB991 oder POSXDEB3332 Grüße nach Hause..",
+		"entities": [
+			{ "label": "invoice.total", "start": 129, "stop": 135 },
+			{ "label": "invoice.date", "start": 79, "stop": 89 },
+			{ "label": "cdtr.iban", "start": 143, "stop": 171 },
+			{ "label": "cdtr.bic", "start": 179, "stop": 190 }
+		],
+		"categories": []
+	} 	
+]

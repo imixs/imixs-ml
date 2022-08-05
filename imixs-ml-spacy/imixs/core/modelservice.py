@@ -71,11 +71,10 @@ def updateModel(trainingDataSet, modelPath, min_losses):
         if 'ner' not in nlp.pipe_names:
             logging.info("...adding new pipe 'ner'...")
             ner = nlp.add_pipe('ner')
-            nlp.add_pipe()
             restartTraining = True
         else:
             # the pipe 'ner' already exists 
-            ner = nlp.get_pipe('ner')
+            ner = nlp.get_pipe('ner')            
         
     if hasCategories: 
         # 2.a) setup pipeline and categories...
@@ -122,6 +121,20 @@ def updateModel(trainingDataSet, modelPath, min_losses):
                 #    
                 # else :
                 #    raise Exception("adding a new category (" + _label + ") to an existing model is not supported by spacy!")
+
+
+    #if not nlp.has_pipe("entity_ruler"):
+    #    logging.info("...adding regex matcher pipeline")
+    #    ruler = nlp.add_pipe("entity_ruler", before="ner")
+    #else:        
+    #    logging.info("...matcher already added")
+    #    ruler = nlp.get_pipe("entity_ruler")
+    #if (len(ruler) == 0):
+    #    # Add matcher for IBAN [A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}
+    #    patterns = [{"label": "cdtr.iban", "pattern": [{"TEXT": {"REGEX": "[A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}"}}]},
+    #                {"label": "cdtr.bic", "pattern": [{"TEXT": {"REGEX": "[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?"}}]}
+    #                ]
+    #    ruler.add_patterns(patterns)
 
     # Convert the data list to the Spacy Training Data format
     trainingData = datamodel.convertToTrainingData(trainingDataSet)
@@ -173,8 +186,19 @@ def analyseText(analyseData, modelPath):
     if not modelExists:
         logging.info("model '" + modelPath + "' not found!")
         raise Exception("model '" + modelPath + "' not found!")
-    
-    nlp = spacy.load(modelPath)  # load existing spaCy model    
+ 
+
+    nlp = spacy.load(modelPath)  # load existing spaCy model  
+
+    #ruler = nlp.get_pipe("entity_ruler")
+    #print("...adding patterns to ruler")
+    #if (len(ruler) == 0):
+    #    patterns = [{"label": "cdtr.iban", "pattern": [{"TEXT": {"REGEX": "[A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}"}}]},
+    #                {"label": "cdtr.bic", "pattern": [{"TEXT": {"REGEX": "[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?"}}]}
+    #               ]
+    #    ruler.add_patterns(patterns)
+    #    print("...ruler pattern vorbereitest")
+
     # print(analyseData.text)
     doc = nlp(analyseData.text)
        
