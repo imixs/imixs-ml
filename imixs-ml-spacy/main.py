@@ -64,7 +64,8 @@ def train_model(model: str,trainngdata: List[datamodel.TrainingData],min_losses:
 def analyse_text(model: str, analyseData: datamodel.AnalyseData):
     logger.info("anaylse by model: " + model)
     try : 
-        result=modelservice.analyseText(analyseData,modelpath+model)
+        doc=modelservice.analyseText(analyseData,modelpath+model)
+        result=modelservice.getResultData(doc)
     except Exception as e:
         raise HTTPException(status_code=406, detail="failed to analyse data!") from e
     return result

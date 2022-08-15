@@ -115,12 +115,6 @@ def updateModel(trainingDataSet, modelPath, min_losses):
                 # optimizer = nlp.initialize()
                 textcat.add_label(_label)               
                 restartTraining = True
-                
-                # if restartTraining : 
-                #    print("...NOT adding new category '" + _label + "'...")
-                #    
-                # else :
-                #    raise Exception("adding a new category (" + _label + ") to an existing model is not supported by spacy!")
 
 
     #if not nlp.has_pipe("entity_ruler"):
@@ -201,7 +195,18 @@ def analyseText(analyseData, modelPath):
 
     # print(analyseData.text)
     doc = nlp(analyseData.text)
-       
+    return doc
+
+
+
+
+"""
+ This is a helper method returning the response data structure
+ based on a dictionary. The data structure contains the entities 
+ and categories from a spaCy doc.
+"""
+def getResultData(doc):
+      
     # build response data structure based on a dictionary
     # Example: 
     # {"entities":[{"label":"person","text":"Wayne Rooney"}],"categories":[{"label":"sports","score":0.999}]}

@@ -8,7 +8,7 @@ import shutil
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from imixs.core import datamodel, modelservice
-
+from spacy import displacy
 
 """
 The goal of this test program is to demonstrate the usage of the training data module
@@ -25,13 +25,14 @@ data will be provided in a random way.
 if __name__ == "__main__":
 
     # Create or load model    
-    modelPath = os.getcwd()+"/imixs-ml-spacy/models/training_model_invoice"   
+    modelPath = os.getcwd()+"/imixs-ml-spacy/tests/models/training_model_invoice"   
 
     # Test if the model exists
     modelExists = os.path.isdir(modelPath)    
     # 1.) load model or create blank Language class 
     if not modelExists:
-        nlp = modelservice.initModel(modelPath)
+        nlp = modelservice.initModel(modelPath,"en_core_web_sm")
+        #nlp = modelservice.initModel(modelPath,"")
 
     # Opening JSON file
     datafile = os.getcwd()+"/imixs-ml-spacy/tests/data/test_traindata_invoice.json"
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         
         random.shuffle(training_data)
         losses = modelservice.updateModel(training_data,modelPath,0.0)
-    
+        print("losses: ",losses)
     print("------------training finished--------------------")
                 
     # Test your text
@@ -59,9 +60,4 @@ if __name__ == "__main__":
     doc=modelservice.analyseText(anlyseData,modelPath)
 
     print("result=" , doc)
-
-   
-
-
-
 
