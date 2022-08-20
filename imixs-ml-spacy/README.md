@@ -60,14 +60,19 @@ The spaCy API provides different language models. The model language is set by I
 **Note:** The language is only relevant for creating a new model. You should not change the language for an existing model.	  
 
 
-### SpaCy Option: MIN_LOSSES
+### SpaCy Options: MIN_LOSSES & RETAIN_RATE
 
-Imixs-ML-spaCy provides an optional parameter called "min_losses". This parameter defaults to 0. This means, independent how accurate a model update with a given training set was, the model will be updated. This can be in some cases a problem when parts of the training data have an overweight against other parts in the training data set. It means that some kind of data will be trained better and better against the other parts. This is indicated by a very low *ner.losses* value (<0.0000000001). In such cases you can set the environment variable 'MIN_LOSSES' with a higher value (e.g. 0.1) to avoid this effect. 
+Imixs-ML-spaCy provides the optional parameters `min_losses` and `retrain_rate`. These parameters are used to refine continues learning.
 
-The MIN_LOSSES can also be set via the imixs-ml-workflow api by the '*options*' in the ml-config item 
+This parameter `min_losses` defaults to 0. This means, independent how accurate a model update with a given training set was, the model will be updated. This can be in some cases a problem when parts of the training data have an overweight against other parts in the training data set. It means that some kind of data will be trained better and better against the other parts. This is also known as 'overfitting'. This may happen when using very low `min_losses` e.g. <0.0000000001. In such cases it may be helpful to set a higher value (e.g. 0.1) to avoid this effect. 
+
+The param `retrain_rate` (0-100) is a percentage value indicating how strict the min_losses factor should be handled. 0% means: don't retrain results below the min_losses. A higher value determines if good training data should still be retrained (random factor).  A good value is 25% which 
+ means every 4th good training result will be retrained independent from the min_losses. 100% means the model will be updated independent form the losses factor. 
+
+The SpaCy Options can also be set via the imixs-ml-workflow api by the '*options*' in the ml-config item 
 
 
-	<ml-config name="options">min_losses=0.1</ml-config>
+	<ml-config name="options">min_losses=0.1&retrain_rate=25</ml-config>
  
 
 ### Logging

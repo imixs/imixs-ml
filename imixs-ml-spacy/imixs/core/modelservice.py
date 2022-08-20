@@ -14,15 +14,6 @@ The method 'analyseText' is used get the results of a trained model based on a g
 @version:  2.0
 """
 
-"""
- This method 'updateModel' expects a training data set containing one or many training objects.
- The method updates the given model. If no model exists the method will create a new one.
- 
- The method did not use the minibatch algorithm provided by spacy because the assumption is that 
- only one document is trained in a 'incremental training mode' on each call.
- 
-""" 
-
 import os
 
 import spacy
@@ -33,10 +24,29 @@ from spacy.pipeline.textcat_multilabel import multi_label_bow_config, multi_labe
 from spacy.training import Example
 from typing import List
 import logging
+import random
 
-def updateModel(trainingDataSet, modelPath, min_losses):
+"""
+ This method 'updateModel' expects a training data set containing one or many training objects.
+ The method updates the given model. If no model exists the method will create a new one.
+ 
+ The method did not use the minibatch algorithm provided by spacy because the assumption is that 
+ only one document is trained in a 'incremental training mode' on each call.
 
-    logging.info("...updateModel....")
+ The optional param min_losses defines if the traingdata result is stored into the model. If not set
+ (0.0) than the model is updated independed how good the model already is. If, of example the param is 
+ set to 1.5 only training data with losses above 1.5 will update the model. The idea here is that in a 
+ permanent training situation an overfitting with already good trained data happens. The losses can be 
+ monitored on the console output. 
+ The param 'retrain_rate' (0-100) is a persentage value indicating how strict the min_losses factor 
+ should be handled. 0% means: dont retrain reslts below the min_losses. A higher value 
+ determines if good training data should still be retrained (random factor).  A good value is 25% which 
+ means every 4th good training result will be retrained indepnedent from the min_losses. 
+
+""" 
+def updateModel(trainingDataSet, modelPath, min_losses, retrain_rate):
+
+    logging.info("...updateModel (min_losses=" + str(min_losses) +" retrain_rate=" + str(retrain_rate)+")")
     
     # Read language
     language = os.getenv('MODEL_LANGUAGE', 'xx')
@@ -116,20 +126,6 @@ def updateModel(trainingDataSet, modelPath, min_losses):
                 textcat.add_label(_label)               
                 restartTraining = True
 
-
-    #if not nlp.has_pipe("entity_ruler"):
-    #    logging.info("...adding regex matcher pipeline")
-    #    ruler = nlp.add_pipe("entity_ruler", before="ner")
-    #else:        
-    #    logging.info("...matcher already added")
-    #    ruler = nlp.get_pipe("entity_ruler")
-    #if (len(ruler) == 0):
-    #    # Add matcher for IBAN [A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}
-    #    patterns = [{"label": "cdtr.iban", "pattern": [{"TEXT": {"REGEX": "[A-Z]{2}\d{2} ?\d{4} ?\d{4} ?\d{4} ?\d{4} ?[\d]{0,2}"}}]},
-    #                {"label": "cdtr.bic", "pattern": [{"TEXT": {"REGEX": "[A-Z0-9]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?"}}]}
-    #                ]
-    #    ruler.add_patterns(patterns)
-
     # Convert the data list to the Spacy Training Data format
     trainingData = datamodel.convertToTrainingData(trainingDataSet)
         
@@ -156,23 +152,33 @@ def updateModel(trainingDataSet, modelPath, min_losses):
     writeToDisk=True
     if ("ner" in losses):
         if losses.get('ner')<min_losses:
-            writeToDisk=False
+            # We have already a good training result
+            # Should we skipp it?
+            if retrain_rate<=0:
+                writeToDisk=False
+            else:
+                #compute the random rate....
+                _rand=random.randint(0, 100)
+                logging.info("...ramdom=" + str(_rand)) 
+                if (_rand<=retrain_rate):
+                    logging.info("...ramdomly retrain already good training data (random=" + str(_rand)+")")
+                else: 
+                    writeToDisk=False
     
     if (writeToDisk == True):
         # We update the model only if the losses is  > then a given min_losses 
-        logging.info("writing new model to disk - min_losses= "+str(min_losses))
+        logging.info("writing new model to disk - min_losses= "+str(min_losses) + " retrain_rate= " + str(retrain_rate))
         nlp.to_disk(modelPath)
     else: 
         logging.info("no model update - min_losses= "+str(min_losses))
   
     return losses
 
+
 """
  Analysing entities for a given text
  The method assumes that a model exists  
 """
-
-
 def analyseText(analyseData, modelPath):
 
     logging.info("analyseText started....")

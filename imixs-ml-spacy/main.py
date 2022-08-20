@@ -44,13 +44,13 @@ logging.info("modelpath="+modelpath)
 
 # Train a training data set
 @app.post("/training/{model}")
-def train_model(model: str,trainngdata: List[datamodel.TrainingData],min_losses: float = 0.0):
+def train_model(model: str,trainngdata: List[datamodel.TrainingData],min_losses: float = 0.0, retrain_rate: int = 25):
     try : 
         if min_losses==0.0:
             # optional read min_losses from environment variables
             min_losses = float(os.getenv('MIN_LOSSES', '0.0'))
-            
-        losses = modelservice.updateModel(trainngdata, modelpath+model,min_losses)
+
+        losses = modelservice.updateModel(trainngdata, modelpath+model,min_losses,retrain_rate)
     except Exception as e:
         print (e)
         raise HTTPException(status_code=406, detail="Training Data is not acceptable!") from e    

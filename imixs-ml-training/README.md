@@ -75,6 +75,11 @@ To train a new model the Imixs-ML Training service provides the Rest Resource */
 		<item name="ml.training.iterations"><value xsi:type="xs:string">10</value></item>
 		<item name="ml.training.dropoutrate"><value xsi:type="xs:string">0.25</value></item>
 
+		<!-- Query String: min_losses should be between 1 and 0, forgetting_rate 0-100%  -->
+		<item name="ml.options">
+			<value xsi:type="xs:string">min_losses=0.00001&amp;retrain_rate=25</value>
+		</item>
+	
 	</document>
 
 ### ML Settings
@@ -133,6 +138,12 @@ Out of the box, Apache Tika will start with the default configuration. By provid
 
 Find more details [here](https://github.com/imixs/imixs-archive/tree/master/imixs-archive-documents#the-tikadocumentservice).
 
+
+
+
+
+
+
 ## The Validation Mode
 
 You can also validate an existing model. The Imixs-ML Training service provides the Rest Resource */validation/*. This resource expects a POST request with the following XML payload:
@@ -165,6 +176,184 @@ You can also validate an existing model. The Imixs-ML Training service provides 
 
 In this mode, the service reads documents stored in a workflow instance and performs a OCR Scan. The extracted text is than send for analyzing to the Imixs-ML Service. The results are printed into the log file. 
 You can use this mode to verify your current model.
+
+
+# Training Strategies
+
+If you train a complete new empty model you should have enough training data. A minimum of 1000 Training data records is recommended. 
+
+If you retrain the same data set take care about the options `min_losses` and `retrain_rate`. For the beginning, a good setting is 
+
+		<!-- Query String: min_losses should be between 1 and 0, forgetting_rate 0-100%  -->
+		<item name="ml.options">
+			<value xsi:type="xs:string">min_losses=0.00001&amp;retrain_rate=25</value>
+		</item>
+	
+This means training result above 0.00001 losses will be retrained in any case. Results below will be retrains with chance of 25% 	
+
+If the model is already in production a min_losses of 0.1 can perform better. But do not set the retrain_rate to 0 because this can lead to a 'forgetting' situation where already good training data will be lost over the time. 
+
+
+## Example
+
+Let's assume you have 1000 Invoice documents already tagged and you want to train a new model. 
+
+For the first Training Phase use 10 iterations with min_losses 0.0 and a retrain rate of 100%
+
+	<!-- Define the training set and taining mode -->
+	<item name="workflow.query"><value xsi:type="xs:string">($workflowgroup:"Rechnungseingang" OR $workflowgroup:"Sachrechnung") AND ($taskid:5900)</value></item>	  
+	<item name="workflow.pagesize"><value xsi:type="xs:int">1000</value></item>
+	<item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
+	<item name="ml.training.iterations"><value xsi:type="xs:string">10</value></item>
+	<item name="ml.training.dropoutrate"><value xsi:type="xs:string">0.0</value></item>
+	<item name="ml.options">
+		<value xsi:type="xs:string">min_losses=0.0&amp;retrain_rate=100</value>
+	</item>
+
+
+Result Example:
+
+
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 13.778002031959247
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 6.893718251502024
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 5.772998749105051
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 5.382218959718584
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 5.252528165562391
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 4.781865464834507
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 3.5301892510610036
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 3.052076283581273
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 2.6510388435630166
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 2.4029949594783506
+	imixs-ml-training_1  | |#]
+
+
+
+In the second phase we refine the model by changed the min_losses to 0.1 and retrain rate to 25% which means we retrain the data which is not yet good enough but we also retain good data with a rate of 25% 	
+		
+	<!-- Define the training set and taining mode -->
+	<item name="workflow.query"><value xsi:type="xs:string">($workflowgroup:"Rechnungseingang" OR $workflowgroup:"Sachrechnung") AND ($taskid:5900)</value></item>	  
+	<item name="workflow.pagesize"><value xsi:type="xs:int">1000</value></item>
+	<item name="workflow.pageindex"><value xsi:type="xs:int">0</value></item>
+	<item name="ml.training.iterations"><value xsi:type="xs:string">10</value></item>
+	<item name="ml.training.dropoutrate"><value xsi:type="xs:string">0.0</value></item>
+	<item name="ml.options">
+		<value xsi:type="xs:string">min_losses=0.1&amp;retrain_rate=25</value>
+	</item>
+	
+	
+Result Example:
+	
+	
+	imixs-ml-training_1  |   
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 2.0860731714231404
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 2.083436307751995
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.9063005937115136
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.7812667292139812
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.6297307309480873
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.7164011037635025
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 2.0494950737422126
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.6481886264606276
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.6205282350385186
+	imixs-ml-training_1  | 
+	imixs-ml-training_1  | ......documents trained in total = 1000
+	imixs-ml-training_1  |   ......     quality level GOOD = 45.1%  (451)
+	imixs-ml-training_1  |   ......      quality level LOW = 54.9%  (549)
+	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
+	imixs-ml-training_1  |   ......            average NER = 1.5447060877300045
+	imixs-ml-training_1  | |#]
 
 
 # Development 

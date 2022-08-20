@@ -33,16 +33,13 @@ services:
       - "9009:9009"
 
 
-# OCR Service
+# Tika OCR Service
   tika: 
-    image: imixs/tika
+    #image: apache/tika:latest
+    #image: apache/tika:1.24.1-full
+    image: apache/tika:2.4.1-full
     environment:
       TZ: "Europe/Berlin"
-      #TIKA_CONFIG: "/tika-config.xml"
     ports:
       - "9998:9998"  
-    #volumes:
-    #  - ~/git/imixs-ml/imixs-ml-api/src/docker/configuration/tika/tika-config.xml:/tika-config.xml
-
-
 
