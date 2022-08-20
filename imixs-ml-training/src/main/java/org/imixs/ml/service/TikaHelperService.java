@@ -26,8 +26,8 @@ import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.exceptions.PluginException;
 
 /**
- * This class is a helper class to extrect text content form attached documents.
- * The service loades the corresponding snapthsot for a workitem. It is used
+ * This class is a helper class to extract text content form attached documents.
+ * The service loads the corresponding snaptshot for a workitem. It is used
  * only by the TrainingService.
  * 
  * 
