@@ -100,6 +100,36 @@ public class MLClient {
         return output;
        
     }
+    
+    /**
+     * This method posts a Imixs-ML json training string to a ML service endpoint 
+     * for validation only. Not model update is performed. 
+     * 
+     * @param trainingData    - the training data object
+     * @param serviceEndpoint - the ml API endpoint
+     * @param options - an optional query parameter
+     */
+    public String postValidateData(XMLTrainingData trainingData, String model) {
+
+        logger.fine("......sending new training data object...");
+        Client client = ClientBuilder.newClient();
+        String uri=serviceEndpoint + "/validate/" + model;
+        WebTarget webTarget = client.target(uri);
+
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+
+        // build an array with one training data object
+        List<XMLTrainingData> dataset = new ArrayList<XMLTrainingData>();
+        dataset.add(trainingData);
+
+        GenericEntity<List<XMLTrainingData>> list = new GenericEntity<List<XMLTrainingData>>(dataset) {
+        };
+
+        Response response = invocationBuilder.post(Entity.entity(list, MediaType.APPLICATION_JSON));
+        String output = response.readEntity(String.class);
+        return output;
+       
+    }    
 
     /**
      * This method posts a Imixs-ML json training string to the ML service endpoint.

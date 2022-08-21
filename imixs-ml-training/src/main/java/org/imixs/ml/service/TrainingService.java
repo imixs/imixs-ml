@@ -49,8 +49,8 @@ import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.core.MLTrainingResult;
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.training.TrainingDataBuilder;
+import org.imixs.ml.xml.XMLAnalyseResult;
 import org.imixs.ml.xml.XMLTrainingData;
-import org.imixs.ml.xml.XMLTrainingEntity;
 import org.imixs.workflow.FileData;
 import org.imixs.workflow.ItemCollection;
 import org.imixs.workflow.exceptions.PluginException;
@@ -173,35 +173,16 @@ public class TrainingService {
 
             logger.fine("extracted text content to be analysed=");
             logger.fine(ocrText);
-
-            // we try to extract the mlEntities from the workitem
-            // if this is not possible we take the data form the XML configuraiton
-            List<MLEntity> mlEntities = null;
-            List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
-            if (mlDefinitionList != null && mlDefinitionList.size() > 0) {
-                ItemCollection mlDefinition = mlDefinitionList.get(0);
-                mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
-            }
-            if (mlEntities == null || mlEntities.size() == 0) {
-                logger.info("migrating to dummy mlEntity definition set from XML configuration!");
-                mlEntities = new ArrayList<MLEntity>();
-                // build a dummy mlEntity list form the xml config..
-                for (String aname : trainingItemNames) {
-                    mlEntities.add(new MLEntity(aname, null, null, 0, false));
-                }
-            }
-
-            // build training data set...
-            XMLTrainingData trainingData = new TrainingDataBuilder(ocrText, workitem, mlEntities, locals)
-                    .setAnalyzerEntityEvents(entityObjectEvents).build();
+            
+            XMLTrainingData trainingData= generateTraingDataSet( ocrText, workitem, trainingItemNames, locals );
 
             // compute stats rate for found entities
-            List<String> entitysFound = new ArrayList<String>();
-            for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
-                if (!entitysFound.contains(trainingEntity.getLabel())) {
-                    entitysFound.add(trainingEntity.getLabel());
-                }
-            }
+//            List<String> entitysFound = new ArrayList<String>();
+//            for (XMLTrainingEntity trainingEntity : trainingData.getEntities()) {
+//                if (!entitysFound.contains(trainingEntity.getLabel())) {
+//                    entitysFound.add(trainingEntity.getLabel());
+//                }
+//            }
 
             qualityResult = trainingData.getQuality();
             // we only send the training data in case of quality level is sufficient
@@ -245,10 +226,12 @@ public class TrainingService {
 
     }
 
+    
+    
     /**
-     * This method is used to test an existing model. The method extracts the text
+     * This method is used to analyze test data on an existing model. The method extracts the text
      * contained in a snapshot document and sends the text to the Imixs-ML service
-     * to be analyzed. The resuls are printed out.
+     * to be analyzed. The method returnd a XMLAnalyseResult object with the anlyze result
      * 
      * @param doc            - a workitem providing the attachments and the entity
      *                       data
@@ -256,7 +239,7 @@ public class TrainingService {
      * @param workflowClient - a rest client instance
      */
     @SuppressWarnings("unchecked")
-    public void validateWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
+    public XMLAnalyseResult analyzeWorkitemData(ItemCollection config, ItemCollection workitem, WorkflowClient workflowClient) {
         logger.info("......anaysing: " + workitem.getUniqueID());
         Pattern mlFilenamePattern = null;
         List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
@@ -284,15 +267,129 @@ public class TrainingService {
             // ocrMode, tikaOptions);
             if (ocrText != null && !ocrText.isEmpty()) {
                 MLClient mlClient = new MLClient(serviceEndpoint);
-                mlClient.postAnalyseData(ocrText, model);
-
+                XMLAnalyseResult result = mlClient.postAnalyseData(ocrText, model);
+                return result;
             }
         } catch (PluginException | RestAPIException e1) {
             logger.severe("Error parsing documents: " + e1.getMessage());
         }
-
+        return null;
     }
 
+    
+
+ 
+
+    /**
+     * This method is used to validate of a training data set without updating the model
+     * <p>
+     * The method generates statistical data.
+     * 
+     * @param config         - a config object providing the training configuration
+     * @param workitem       - a workitem providing the data
+     * @param workflowClient - a rest client instance
+     * @return - quality result
+     */
+    @SuppressWarnings("unchecked")
+    public MLTrainingResult validateWorkitemData(ItemCollection config, ItemCollection workitem,
+            WorkflowClient workflowClient) {
+        boolean debug = logger.isLoggable(Level.FINE);
+        int qualityResult = -1;
+        MLTrainingResult trainingResult = null;
+        Pattern mlFilenamePattern = null;
+
+        logger.info("=======================START ======================================");
+        logger.info("...validate training data for: " + workitem.getUniqueID());
+
+        String model = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_MODEL);
+        String mlOCR = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_OCR);
+        List<String> trainingItemNames = config.getItemValue(TrainingApplication.ITEM_ENTITIES);
+        List<String> tikaOptions = config.getItemValue(TrainingApplication.ITEM_TIKA_OPTIONS);
+        String qualityLevel = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_QUALITYLEVEL);
+
+        if (qualityLevel.isEmpty()) {
+            qualityLevel = "LOW"; // default level!
+        }
+        // parse optional filename regex pattern...
+        String _FilenamePattern = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_FILEPATTERN);
+        if (_FilenamePattern != null && !_FilenamePattern.isEmpty()) {
+            logger.fine("......apply filename.pattern=" + _FilenamePattern);
+            mlFilenamePattern = Pattern.compile(_FilenamePattern);
+        }
+
+        // build locales....
+        List<String> sLocales = config.getItemValue(TrainingApplication.ITEM_LOCALES);
+        List<Locale> locals = new ArrayList<Locale>();
+        for (String _locale : sLocales) {
+            Locale aLocale = null;
+            // split parts?
+            if (_locale.contains("_")) {
+                String[] localParts = _locale.split("_");
+                // language country?
+                if (localParts.length >= 1) {
+                    aLocale = new Locale(localParts[0], localParts[1]);
+                } else {
+                    logger.warning("Wrong Locale Configuration: " + _locale);
+                }
+            } else {
+                // simple language locale
+                aLocale = new Locale(_locale);
+            }
+
+            if (aLocale != null) {
+                locals.add(aLocale);
+                if (debug) {
+                    logger.finest("......suporting locale " + aLocale);
+                }
+            }
+        }
+
+        try {
+
+            // update ocr information only if defined in xml config item
+            // 'ml.training.ocr'...
+            if ("true".equalsIgnoreCase(mlOCR)) {
+                workitem = doVerifyOCRContent(workitem, mlFilenamePattern, workflowClient, tikaOptions);
+            }
+
+            // build the ml content....
+            String ocrText = new MLContentBuilder(workitem, null, false, mlFilenamePattern).build();
+
+            // String ocrText = getTextContent(workitem, mlFilenamePattern, workflowClient,
+            // ocrMode, tikaOptions);
+
+            if (ocrText == null || ocrText.isEmpty()) {
+                logger.severe("...document '" + workitem.getUniqueID()
+                + "' No text found!");
+                logger.info("=======================FINISHED====================================");
+                return new MLTrainingResult(XMLTrainingData.TRAININGDATA_QUALITY_BAD, null);
+            }
+
+            logger.fine("extracted text content to be analysed=");
+            logger.fine(ocrText);
+            
+            XMLTrainingData trainingData= generateTraingDataSet( ocrText, workitem, trainingItemNames, locals );
+            qualityResult = trainingData.getQuality();
+            String serviceEndpoint = config.getItemValueString(TrainingApplication.ITEM_ML_TRAINING_ENDPOINT);
+            MLClient mlClient = new MLClient(serviceEndpoint);
+            String resultData = mlClient.postValidateData(trainingData, model);
+            trainingResult = new MLTrainingResult(qualityResult, resultData);
+
+        
+
+        } catch (PluginException | RestAPIException e1) {
+            logger.severe("Error parsing documents: " + e1.getMessage());
+        }
+        logger.info("=======================FINISHED====================================");
+
+        return trainingResult;
+
+    }
+    
+    
+    
+    
+    
     /**
      * Log the training data into the server log
      * 
@@ -313,6 +410,63 @@ public class TrainingService {
             e.printStackTrace();
         }
     }
+
+    /**
+     * This method returns a list of ItemCollection object holding the
+     * ml.definitions stored in a given workitem. Each endpoint definition is
+     * defined by a set of items stored in a map. The Map can be conferted into a
+     * ItemCollection
+     * 
+     **/
+    @SuppressWarnings("unchecked")
+    public List<ItemCollection> getMLDefinitions(ItemCollection workitem) {
+    
+        List<ItemCollection> result = new ArrayList<ItemCollection>();
+        // test if ml.definitions object exists...
+        if (!workitem.getItemValueString(ITEM_ML_DEFINITIONS).isEmpty()) {
+            List<Map<String, List<Object>>> mlDefinitions = workitem.getItemValue(ITEM_ML_DEFINITIONS);
+            for (Map<String, List<Object>> aDef : mlDefinitions) {
+                result.add(new ItemCollection(aDef));
+            }
+        }
+        return result;
+    }
+
+
+
+    /**
+     * Generates a XML Traning Data Set
+     * 
+     * @param ocrText
+     * @param workitem
+     * @param trainingItemNames
+     * @param locals
+     * @return
+     */
+    private XMLTrainingData generateTraingDataSet(String ocrText,ItemCollection workitem, List<String> trainingItemNames,List<Locale> locals ) {
+        // we try to extract the mlEntities from the workitem
+        // if this is not possible we take the data form the XML configuraiton
+        List<MLEntity> mlEntities = null;
+        List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
+        if (mlDefinitionList != null && mlDefinitionList.size() > 0) {
+            ItemCollection mlDefinition = mlDefinitionList.get(0);
+            mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
+        }
+        if (mlEntities == null || mlEntities.size() == 0) {
+            logger.info("migrating to dummy mlEntity definition set from XML configuration!");
+            mlEntities = new ArrayList<MLEntity>();
+            // build a dummy mlEntity list form the xml config..
+            for (String aname : trainingItemNames) {
+                mlEntities.add(new MLEntity(aname, null, null, 0, false));
+            }
+        }
+    
+        // build training data set...
+        return  new TrainingDataBuilder(ocrText, workitem, mlEntities, locals)
+                .setAnalyzerEntityEvents(entityObjectEvents).build();
+    }
+
+
 
     /**
      * This method tests if we already have OCR text in the workitem. If not we load
@@ -381,26 +535,5 @@ public class TrainingService {
         }
 
         return workitem;
-    }
-
-    /**
-     * This method returns a list of ItemCollection object holding the
-     * ml.definitions stored in a given workitem. Each endpoint definition is
-     * defined by a set of items stored in a map. The Map can be conferted into a
-     * ItemCollection
-     * 
-     **/
-    @SuppressWarnings("unchecked")
-    public List<ItemCollection> getMLDefinitions(ItemCollection workitem) {
-
-        List<ItemCollection> result = new ArrayList<ItemCollection>();
-        // test if ml.definitions object exists...
-        if (!workitem.getItemValueString(ITEM_ML_DEFINITIONS).isEmpty()) {
-            List<Map<String, List<Object>>> mlDefinitions = workitem.getItemValue(ITEM_ML_DEFINITIONS);
-            for (Map<String, List<Object>> aDef : mlDefinitions) {
-                result.add(new ItemCollection(aDef));
-            }
-        }
-        return result;
     }
 }

@@ -4,6 +4,11 @@ The Imixs-ML API Service is a microservice to train a ML Model based on the work
 
 	http://localhost:8080/api/openapi-ui/
 
+The service proivdes 3 endpoints:
+
+ - training/ - trains a training data and updates the model
+ - validate/ - validates a training data set without updating the model
+ - analyse/ - analyzes test data with a given model
 
 # Build and Run
 
@@ -354,6 +359,57 @@ Result Example:
 	imixs-ml-training_1  |   ......      quality level BAD = 0%  (0)
 	imixs-ml-training_1  |   ......            average NER = 1.5447060877300045
 	imixs-ml-training_1  | |#]
+	
+	
+## Validation
+
+You can also validate a control dataset which was not yet part of the traiing to verify how good the model is. For this purpose you can call the /validate/ resource with a xml 
+
+	<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema">
+		
+		<!-- Workflow Instance -->
+		<item name="workflow.endpoint"><value xsi:type="xs:string">https://localhost:8080/api/</value></item>
+		<item name="workflow.userid"><value xsi:type="xs:string">admin</value></item>
+		<item name="workflow.password"><value xsi:type="xs:string">...</value></item>
+	
+		<item name="workflow.entities">
+			<value xsi:type="xs:string">cdtr.name</value>
+			<value xsi:type="xs:string">cdtr.iban</value>
+			<value xsi:type="xs:string">cdtr.bic</value>
+			<value xsi:type="xs:string">invoice.total</value>
+			<value xsi:type="xs:string">invoice.date</value>
+			<value xsi:type="xs:string">invoice.number</value>
+		</item>
+		<item name="workflow.locale">
+			<value xsi:type="xs:string">en_GB</value>
+			<value xsi:type="xs:string">en_US</value>		
+			<value xsi:type="xs:string">de_DE</value>
+		</item>
+		
+		<!-- Tika OCR Server  -->
+		<item name="tika.ocrmode"><value xsi:type="xs:string">OCR_ONLY</value></item>
+		<item name="tika.options">
+			<value xsi:type="xs:string">X-Tika-OCRLanguage=eng+deu</value>
+			<value xsi:type="xs:string">X-Tika-PDFocrStrategy=OCR_ONLY</value>		
+		</item>
+	
+		<!-- ML spaCy Server -->
+		<item name="ml.training.endpoint"><value xsi:type="xs:string">http://imixs-ml-spacy:8000/</value></item>
+		<item name="ml.training.model"><value xsi:type="xs:string">invoice-de-0.2.0</value></item>
+		<item name="ml.training.filepattern"><value xsi:type="xs:string">.pdf|.PDF</value></item>
+	        <!-- LOW | GOOD -->
+		<item name="ml.training.quality"><value xsi:type="xs:string">LOW</value></item>
+	
+		
+		<!-- Define the training set and taining mode -->
+		<item name="workflow.query"><value xsi:type="xs:string">($workflowgroup:"Rechnungseingang" OR $workflowgroup:"Sachrechnung") AND ($taskid:5900)</value></item>	  
+		<item name="workflow.pagesize"><value xsi:type="xs:int">10</value></item>
+		<item name="workflow.pageindex"><value xsi:type="xs:int">303</value></item>
+	
+	
+	</document>	
 
 
 # Development 
