@@ -56,7 +56,15 @@ def train_model(model: str,trainngdata: List[datamodel.TrainingData],min_losses:
         raise HTTPException(status_code=406, detail="Training Data is not acceptable!") from e    
     return losses
 
-
+# validates a training data set without updating the model
+@app.post("/validate/{model}")
+def validate_model(model: str,trainngdata: List[datamodel.TrainingData]):
+    try : 
+        losses = modelservice.validateModel(trainngdata, modelpath+model)
+    except Exception as e:
+        print (e)
+        raise HTTPException(status_code=406, detail="Training Data is not acceptable!") from e    
+    return losses
 
 # Analyze a text 
 #

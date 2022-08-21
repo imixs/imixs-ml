@@ -27,7 +27,7 @@ import logging
 import random
 
 """
- This method 'updateModel' expects a training data set containing one or many training objects.
+ The method 'updateModel' expects a training data set containing one or many training objects.
  The method updates the given model. If no model exists the method will create a new one.
  
  The method did not use the minibatch algorithm provided by spacy because the assumption is that 
@@ -172,6 +172,39 @@ def updateModel(trainingDataSet, modelPath, min_losses, retrain_rate):
     else: 
         logging.info("no model update - min_losses= "+str(min_losses))
   
+    return losses
+
+
+
+
+
+"""
+ The method 'validateModel' just validates a given training set with a existing model. The
+ method  expects a training data set containing one or many training objects.
+ The method did not update the model but returns the losses.
+""" 
+def validateModel(trainingDataSet, modelPath):
+
+    logging.info("...validateModel")
+
+    nlp = spacy.load(modelPath)  # load existing spaCy model
+
+    # Convert the data list to the Spacy Training Data format
+    trainingData = datamodel.convertToTrainingData(trainingDataSet)
+
+    
+    # new api 3.0  - see: https://spacy.io/usage/v3
+    examples = []
+    for text, annots in trainingData:
+        logging.info("---- TEXT START ----------------------")
+        logging.info(text)
+        logging.info("---- TEXT END   ----------------------")
+        logging.info("---- ANNOTS: "+ str(annots))
+        examples.append(Example.from_dict(nlp.make_doc(text), annots))
+        
+    losses = nlp.update(examples);
+    logging.info("---- RESULT: losses="+str(losses))
+
     return losses
 
 
