@@ -230,19 +230,22 @@ A client implementation can store additional data into ml.definition
 
 ## The MLService
 
-The MLService is a stateless EJB reacting on Processing events. The service updates the  ml.status for each ml.definition of a workitem. 
+The Machine Learning Status of a workitem is controlled by the `MLService` which is a stateless EJB reacting on Processing workflow events. The service updates the  `ml.status` for each `ml.definition` stored in a workitem. 
  
-The '*ml.status*' of a single mlDefinition can have one of the following values:
+The `ml.status` of a single mlDefinition can have one of the following values:
 
- - suggest - not yet confirmed by the user
- - confirmed - confirmed by the user
- - training - workitem is ready for a training
+ - `suggest` - not yet confirmed by the user
+ - `confirmed` - confirmed by the user
+ - `training` - workitem is archived and ready for a training
 
-If no ml.status item  exists, and ml.items is not empty, than the status of the mlDefintion is set to 'suggest'. 
+** The Suggest Status **
+If no ml.status item  exists, and ml.items is not empty, than the status of the mlDefintion is set to `suggest`. 
 
-If the status is 'suggest' and the current event is 'public' than the status is set to 'confirmed'
+** The Confimred Status **
+If the status is `suggest` and the current event is `public` than the status is set to `confirmed`
 
-If the status is 'confirmed' and the workitem type is 'workitemarchive' than the status is set to 'training'. This status indicates that all known entities of a mlDefinition are filled with data found in the document content. This means that this workitem can be used for later training. The MLService creats the eventlog entry 'ml.training' for this workitem. See the 'ML TrainingScheduler'.
+** The Training Status **
+If the status is `confirmed` and the workitem type is `workitemarchive` than the status is set to `training`. This status indicates that all known entities of a mlDefinition are filled with data found in the document content. This means that this workitem can be used for later training. The MLService automatically creates the eventlog entry `ml.training` for this workitem. See the 'ML TrainingScheduler'.
 
 ### Overwriting the ML Status flag
 
