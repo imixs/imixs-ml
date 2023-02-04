@@ -457,7 +457,9 @@ public class TrainingService {
             mlEntities = new ArrayList<MLEntity>();
             // build a dummy mlEntity list form the xml config..
             for (String aname : trainingItemNames) {
-                mlEntities.add(new MLEntity(aname, null, null, 0, false));
+                if (!TrainingService.ITEM_ML_DEFINITIONS.equals(aname)) {
+                    mlEntities.add(new MLEntity(aname, null, null, 0, false));
+                }
             }
         }
     
