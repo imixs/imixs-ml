@@ -117,9 +117,33 @@ public class MLService implements Serializable {
         int eventType = processingEvent.getEventType();
 
         List<ItemCollection> mlDefinitionList = getMLDefinitions(workitem);
+
+        // load event and the optional ml-config
+        ItemCollection mlConfig = null;
+        Model model = null;
+        ItemCollection event = null;
+        try {
+            model = modelService.getModelByWorkitem(workitem);
+            event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
+            mlConfig = workflowService.evalWorkflowResult(event, "ml-config", workitem, false);
+        } catch (ModelException | PluginException e1) {
+            logger.severe("Error loading model information!"); // should not happen
+            e1.printStackTrace();
+            return;
+        }
         boolean bUpdateDefinitions = false;
+
+        // iterate over all mlDefinitions...
         for (ItemCollection mlDefinition : mlDefinitionList) {
             List<MLEntity> mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
+
+            // if ml-config status is defined update the status flag....
+            if (mlConfig != null && mlConfig.hasItem("status")) {
+                // update the status flag
+                mlDefinition.setItemValue(ITEM_ML_STATUS, mlConfig.getItemValueString("status"));
+                bUpdateDefinitions = true;
+            }
+
             // set initial status?
             if (ProcessingEvent.AFTER_PROCESS == eventType) {
                 if (mlEntities.size() > 0 && mlDefinition.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
@@ -134,33 +158,13 @@ public class MLService implements Serializable {
                 if (mlEntities.size() > 0
                         && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
                     // test if we have a public event
-                    Model model;
-                    try {
-
-                        model = modelService.getModelByWorkitem(workitem);
-                        ItemCollection event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
-
-                        // load an optional ml-config
-                        ItemCollection mlConfig = workflowService.evalWorkflowResult(event, "ml-config", workitem,
-                                false);
-                        // if ml-config status is defined updat the status flag....
-                        if (mlConfig != null && mlConfig.hasItem("status")) {
-                            // update the status flag
-                            mlDefinition.setItemValue(ITEM_ML_STATUS, mlConfig.getItemValueString("status"));
-                            bUpdateDefinitions = true;
-                            continue;
-                        } else {
-                            // default behavior - set confirmed status to 'confirmed'...
-                            // set only if event is userControlled != No
-                            if (!"0".equals(event.getItemValueString("keypublicresult"))) {
-                                // update status
-                                mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_CONFIRMED);
-                                bUpdateDefinitions = true;
-                                continue;
-                            }
-                        }
-                    } catch (ModelException | PluginException e) {
-                        logger.warning("unable to parse current bpmn event: " + e.getMessage());
+                    // default behavior - set confirmed status to 'confirmed'...
+                    // set only if event is userControlled != No
+                    if (!"0".equals(event.getItemValueString("keypublicresult"))) {
+                        // update status
+                        mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_CONFIRMED);
+                        bUpdateDefinitions = true;
+                        continue;
                     }
                 }
             }
