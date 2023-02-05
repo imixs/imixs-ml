@@ -124,8 +124,10 @@ public class MLService implements Serializable {
         ItemCollection event = null;
         try {
             model = modelService.getModelByWorkitem(workitem);
-            event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
-            mlConfig = workflowService.evalWorkflowResult(event, "ml-config", workitem, false);
+            if (workitem.getEventID() > 0) {
+                event = model.getEvent(workitem.getTaskID(), workitem.getEventID());
+                mlConfig = workflowService.evalWorkflowResult(event, "ml-config", workitem, false);
+            }
         } catch (ModelException | PluginException e1) {
             logger.severe("Error loading model information!"); // should not happen
             e1.printStackTrace();
@@ -140,7 +142,9 @@ public class MLService implements Serializable {
             // if ml-config status is defined update the status flag....
             if (mlConfig != null && mlConfig.hasItem("status")) {
                 // update the status flag
-                mlDefinition.setItemValue(ITEM_ML_STATUS, mlConfig.getItemValueString("status"));
+                String newMLStatus=mlConfig.getItemValueString("status");
+                logger.info("...update ml.status=" + newMLStatus);
+                mlDefinition.setItemValue(ITEM_ML_STATUS, newMLStatus);
                 bUpdateDefinitions = true;
             }
 
