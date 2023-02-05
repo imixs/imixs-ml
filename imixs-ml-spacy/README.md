@@ -73,7 +73,14 @@ The SpaCy Options can also be set via the imixs-ml-workflow api by the '*options
 
 
 	<ml-config name="options">min_losses=0.1&retrain_rate=25</ml-config>
+
+
+## Cancel Training
+
+You can cancel the training process at any time by overwriting the ml.status. For example you will set the ml.status to 'cancel' in case a workflow process was canceled by the user. 
  
+	<ml-config name="status">cancel</ml-config>
+
 
 ### Logging
 
