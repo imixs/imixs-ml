@@ -134,18 +134,19 @@ public class MLService implements Serializable {
             return;
         }
         boolean bUpdateDefinitions = false;
-
         // iterate over all mlDefinitions...
         for (ItemCollection mlDefinition : mlDefinitionList) {
+            boolean bAutoUpdateMLStatus = true;
             List<MLEntity> mlEntities = MLConfig.explodeMLEntityList(mlDefinition.getItemValue(ITEM_ML_ITEMS));
 
             // if ml-config status is defined update the status flag....
             if (mlConfig != null && mlConfig.hasItem("status")) {
                 // update the status flag
-                String newMLStatus=mlConfig.getItemValueString("status");
+                String newMLStatus = mlConfig.getItemValueString("status");
                 logger.info("...update ml.status=" + newMLStatus);
                 mlDefinition.setItemValue(ITEM_ML_STATUS, newMLStatus);
                 bUpdateDefinitions = true;
+                bAutoUpdateMLStatus = false; // no automatic change of the ml-status!
             }
 
             // set initial status?
@@ -153,17 +154,18 @@ public class MLService implements Serializable {
                 if (mlEntities.size() > 0 && mlDefinition.getItemValueString(ITEM_ML_STATUS).isEmpty()) {
                     mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_SUGGEST);
                     bUpdateDefinitions = true;
+                    bAutoUpdateMLStatus = false; // no automatic change of the ml-status!
                     continue;
                 }
             }
 
-            // set confirmed status?
+            // set confirmed status automatically?
             if (ProcessingEvent.BEFORE_PROCESS == eventType) {
-                if (mlEntities.size() > 0
+                if (bAutoUpdateMLStatus == true && mlEntities.size() > 0
                         && ML_STATUS_SUGGEST.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))) {
                     // test if we have a public event
-                    // default behavior - set confirmed status to 'confirmed'...
-                    // set only if event is userControlled != No
+                    // default behavior - set ml-status to 'confirmed'...
+                    // set only if event is a public result
                     if (!"0".equals(event.getItemValueString("keypublicresult"))) {
                         // update status
                         mlDefinition.setItemValue(ITEM_ML_STATUS, ML_STATUS_CONFIRMED);
@@ -174,7 +176,9 @@ public class MLService implements Serializable {
             }
 
             // set training status?
-            if (ProcessingEvent.AFTER_PROCESS == eventType && trainingSchedulerEnabled
+            if (ProcessingEvent.AFTER_PROCESS == eventType
+                    && trainingSchedulerEnabled
+                    && bAutoUpdateMLStatus == true
                     && ML_STATUS_CONFIRMED.equals(mlDefinition.getItemValueString(ITEM_ML_STATUS))
                     && "workitemarchive".equals(workitem.getType())) {
 
