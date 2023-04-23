@@ -31,7 +31,7 @@ package org.imixs.ml.adapters;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.enterprise.event.Observes;
+import jakarta.enterprise.event.Observes;
 
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.events.EntityTextEvent;

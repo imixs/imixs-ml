@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.event.Observes;
+import jakarta.enterprise.event.Observes;
 
 import org.imixs.ml.events.EntityObjectEvent;
 import org.imixs.ml.events.EntityTextEvent;

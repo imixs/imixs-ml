@@ -3,8 +3,8 @@ package org.imixs.ml.api;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
 
 import org.imixs.melman.FormAuthenticator;
 import org.imixs.melman.WorkflowClient;

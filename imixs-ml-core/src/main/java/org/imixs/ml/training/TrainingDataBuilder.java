@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.event.Event;
+import jakarta.enterprise.event.Event;
 
 import org.imixs.ml.core.MLEntity;
 import org.imixs.ml.events.EntityObjectEvent;

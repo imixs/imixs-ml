@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntPredicate;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * The XMLEntity defines the core Data class used for training data.

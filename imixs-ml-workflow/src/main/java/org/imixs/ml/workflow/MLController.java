@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ConversationScoped;
-import javax.faces.context.FacesContext;
+import jakarta.enterprise.context.ConversationScoped;
+import jakarta.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 

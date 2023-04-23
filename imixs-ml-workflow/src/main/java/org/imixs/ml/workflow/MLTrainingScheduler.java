@@ -37,12 +37,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RunAs;
-import javax.ejb.LocalBean;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.Timeout;
-import javax.ejb.Timer;
-import javax.ejb.TimerConfig;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.ejb.Timeout;
+import jakarta.ejb.Timer;
+import jakarta.ejb.TimerConfig;
 import javax.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -92,7 +92,7 @@ public class MLTrainingScheduler {
     private static Logger logger = Logger.getLogger(MLTrainingScheduler.class.getName());
 
     @Resource
-    javax.ejb.TimerService timerService;
+    jakarta.ejb.TimerService timerService;
 
     @Inject
     MLService mlService;
