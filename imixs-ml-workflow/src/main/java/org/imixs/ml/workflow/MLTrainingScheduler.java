@@ -33,17 +33,17 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RunAs;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.DeclareRoles;
+import jakarta.annotation.security.RunAs;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.ejb.Timeout;
 import jakarta.ejb.Timer;
 import jakarta.ejb.TimerConfig;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLConfig;

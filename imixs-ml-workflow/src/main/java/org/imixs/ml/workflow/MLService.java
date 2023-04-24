@@ -14,7 +14,7 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.imixs.ml.core.MLClient;

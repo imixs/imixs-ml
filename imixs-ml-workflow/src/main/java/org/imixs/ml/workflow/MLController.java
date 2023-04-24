@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ConversationScoped;
 import jakarta.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.imixs.ml.core.MLConfig;
 import org.imixs.ml.core.MLEntity;
