@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.imixs.workflow</groupId>
 	<artifactId>imixs-ml</artifactId>
@@ -10,16 +12,16 @@
 		<module>imixs-ml-core</module>
 		<module>imixs-ml-training</module>
 		<module>imixs-ml-workflow</module>
-	</modules>	
+	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<org.imixs.workflow.version>6.0.3-SNAPSHOT</org.imixs.workflow.version>
+		<org.imixs.workflow.version>6.0.4-SNAPSHOT</org.imixs.workflow.version>
 		<org.imixs.melman.version>1.0.19</org.imixs.melman.version>
 		<jakarta.version>10.0.0</jakarta.version>
 		<microprofile.version>3.0</microprofile.version>
 	</properties>
-	
+
 	<description>Connect Imixs-Workflow with services and software platforms</description>
 
 	<url>https://github.com/imixs/imixs-ml</url>
@@ -43,14 +45,14 @@
 			</roles>
 			<timezone>2</timezone>
 		</developer>
-	</developers>	
+	</developers>
 	<scm>
 		<connection>scm:git:git@github.com:imixs/imixs-ml.git</connection>
 		<developerConnection>scm:git:git@github.com:imixs/imixs-ml.git</developerConnection>
 		<url>https://github.com/imixs/imixs-ml/</url>
 		<tag>HEAD</tag>
 	</scm>
-	
+
 	<issueManagement>
 		<system>GitHub</system>
 		<url>https://github.com/imixs/imixs-ml/issues</url>
@@ -132,7 +134,7 @@
 				<version>3.0.0</version>
 			</plugin>
 
-		
+
 		</plugins>
 	</build>
 
@@ -209,7 +211,7 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>	
+		</profile>
 	</profiles>
 
 	<dependencyManagement>
@@ -233,7 +235,7 @@
 				<version>${org.imixs.workflow.version}</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.imixs.workflow</groupId>
 				<artifactId>imixs-melman</artifactId>
@@ -248,23 +250,23 @@
 
 		<!-- Jakarta EE -->
 		<dependency>
-		    <groupId>jakarta.platform</groupId>
-		    <artifactId>jakarta.jakartaee-api</artifactId>
-		    <version>${jakarta.version}</version>
-		    <scope>provided</scope>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
+			<version>${jakarta.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- JDK 11 - XML Bind -->
 		<dependency>
-		    <groupId>org.glassfish.jaxb</groupId>
-		    <artifactId>jaxb-runtime</artifactId>
-		    <version>3.0.0</version>
-		    <scope>test</scope>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
 		</dependency>
-    	<dependency>
-	       <groupId>jakarta.xml.bind</groupId>
-	       <artifactId>jakarta.xml.bind-api</artifactId>
-	       <version>3.0.0</version>
-	       <scope>test</scope>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>3.0.0</version>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Microprofile -->

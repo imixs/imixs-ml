@@ -120,7 +120,7 @@ import util.LocaleHelper;
     </ml-config>
  * }
  * </pre>
- *     
+ * 
  * @author Ralph Soika
  * @version 1.0
  *
@@ -182,7 +182,7 @@ public class MLAdapter implements SignalAdapter {
         debug = true;
 
         logger.finest("...running api adapter...");
-        ItemCollection mlConfig=null;
+        ItemCollection mlConfig = null;
         // read optional configuration form the model or imixs.properties....
         try {
             mlConfig = workflowService.evalWorkflowResult(event, "ml-config", document, false);
@@ -223,7 +223,7 @@ public class MLAdapter implements SignalAdapter {
         // if we have ocr text content than we call the ml api endpoint
         if (!mlContent.isEmpty()) {
             // analyse text...
-            XMLAnalyseResult result = mlService.analyseTextByMLFramework(mlContent, mlAPIEndpoint, mlModelName);            
+            XMLAnalyseResult result = mlService.analyseTextByMLFramework(mlContent, mlAPIEndpoint, mlModelName);
             if (result == null) {
                 // interrupt current transaction
                 throw new ProcessingErrorException(MLAdapter.class.getSimpleName(), API_ERROR,
@@ -231,7 +231,7 @@ public class MLAdapter implements SignalAdapter {
             }
             // optional apply regex definitions if defined....
             // this is used to refine the result if ML did not find entities.
-            result=mlService.analyseTextByRegex(mlContent,  mlConfig , result);
+            result = mlService.analyseTextByRegex(mlContent, mlConfig, result);
 
             /*
              * We now have a list of XMLAnalyseEntity objects possible matching the same
@@ -405,7 +405,6 @@ public class MLAdapter implements SignalAdapter {
 
     }
 
-
     /**
      * This helper method parses the ml model name either provided by a model
      * definition or a imixs.property or an environment variable
@@ -502,8 +501,6 @@ public class MLAdapter implements SignalAdapter {
         return result;
     }
 
-    
-  
     /**
      * This method groups a List of XMLAnalyseEntity by the label name. The method
      * builds a Map with the key 'label' containing all entities found in given data
