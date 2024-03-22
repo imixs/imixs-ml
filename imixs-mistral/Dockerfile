@@ -1,9 +1,12 @@
 FROM python
 
 RUN pip install llama-cpp-python
+RUN pip install fastapi
+RUN pip install "uvicorn[standard]"
 
 COPY ./app /app
 COPY ./models/mistral*.gguf /app
 WORKDIR /app
 
-CMD ["python", "test.py"]         // equivalent to python rng.py
+#CMD ["python", "main.py"]        
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

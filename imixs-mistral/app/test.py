@@ -15,13 +15,36 @@ model = Llama(
 )
 
 # Prompt creation
-system_message = "Du bist ein Münchner Reiseführer. "
-user_message = "Was kann man an Ostern in München unternehmen?"
+# Format:
+# <s>[INST] Instruction [/INST] Model answer</s>[INST] Follow-up instruction [/INST]
+#
+# system_message = "Du bist ein Münchner Reiseführer. "
+# user_message = "Was kann man an Ostern in München unternehmen?"
 
-prompt = f"""<s>[INST] <<SYS>>
-{system_message}
-<</SYS>>
-{user_message} [/INST]"""
+# prompt = f"""<s>[INST] <<SYS>>
+# {system_message}
+# <</SYS>>
+# {user_message} [/INST]"""
+
+
+prompt = """<s>[INST] You are a helpful code assistant. Your task is to generate a valid JSON object based on the given information. So for instance the following:
+
+name: John
+lastname: Smith
+address: #1 Samuel St.
+
+would be converted to:[/INST]
+{
+"address": "#1 Samuel St.",
+"lastname": "Smith",
+"name": "John"
+}
+</s>
+[INST]
+name: Ted
+lastname: Pot
+address: #1 Bisson St.
+[/INST]"""
 
 # Model parameters
 max_tokens = 200
@@ -34,4 +57,4 @@ output = model(prompt, max_tokens=max_tokens, echo=True)
 print(output)
 
 
-print("----------FERTIG-------------------")
+print("----------finished-------------------")
