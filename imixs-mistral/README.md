@@ -53,11 +53,19 @@ Note that <s> and </s> are special tokens for beginning of string (BOS) and end 
 	  -p 8000:8000 \
 	  imixs-mistral-7b
 
-# OpenAPI
+# Fast API
 
 We are using [FastAPI](https://fastapi.tiangolo.com/) to provide a developer friendly Open-API Rest Interface. 
 
     http://127.0.0.1:8000/docs
+
+
+
+## Fast API XML
+
+https://pypi.org/project/fastapi-xml/
+
+https://github.com/cercide/fastapi-xml
 
 
 # Falcon
@@ -65,3 +73,4 @@ We are using [FastAPI](https://fastapi.tiangolo.com/) to provide a developer fri
 
 https://falconframework.org/
 https://github.com/falconry/falcon/issues/1718
+

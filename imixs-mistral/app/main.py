@@ -1,10 +1,18 @@
 from typing import Union
+from dataclasses import dataclass, field
 from fastapi import FastAPI
+from fastapi_xml import add_openapi_extension
+from fastapi_xml import XmlRoute
+from fastapi_xml import XmlAppResponse
+from fastapi_xml import XmlBody
 
 from llama_cpp import Llama
 import datamodel
 
-app = FastAPI()
+# app = FastAPI()
+app = FastAPI(title="FastAPI::XML", default_response_class=XmlAppResponse)
+app.router.route_class = XmlRoute
+add_openapi_extension(app)
 
 
 @app.get("/")
@@ -19,8 +27,8 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 
 # Simple Test
-# Du bist ein freundlicher und kundiger Reiseführer.
-# Wie heist die berühmteste Kirche in München?
+# Du bist ein hilfreicher Java Code Assistent.
+# Was ist die Imixs-Workflow engine?
 
 @app.post("/chat")
 def test_chat(system_message: str,user_message: str):
@@ -69,4 +77,13 @@ def test_prompt(promptdata: datamodel.PromptEntity):
 
 
 
+@dataclass
+class HelloWorld:
+    message: str = field(metadata={"example": "Foo","name": "Message", "type": "Element"})
 
+
+
+@app.post("/echo", response_model=HelloWorld, tags=["Example"])
+def echo(x: HelloWorld = XmlBody()) -> HelloWorld:
+    x.message += " For ever!"
+    return x
