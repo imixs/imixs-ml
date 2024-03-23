@@ -1,0 +1,12 @@
+version: "3.6"
+services:
+
+#######################
+# Imixs-mistral-7b
+#######################
+  app:
+    image: imixs-mistral-7b
+    environment:
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8000:8000"
